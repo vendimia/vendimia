@@ -1,6 +1,7 @@
 <?php
 namespace Vendimia\Database;
 
+use Vendimia\Database\ConnectorInterface;
 /**
  * Interface for objects which can convert itself to a database representation.
  */
@@ -11,5 +12,5 @@ interface ValueInterface
      * 
      * The value won't be automagically escaped.
      */
-    public function getDatabaseValue(\Vendimia\Database\ConnectorInterface $connector);
+    public function getDatabaseValue(ConnectorInterface $connector);
 }
