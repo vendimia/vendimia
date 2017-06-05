@@ -38,8 +38,7 @@ Cli\makeTree(bin::$project_path, [
         'controllers', 
         'models', 
         'forms',
-        'services',
-        'db',
+        'orm',
         'assets' => [
             'css',
             'js',

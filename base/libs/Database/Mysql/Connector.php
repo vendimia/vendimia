@@ -95,6 +95,12 @@ class Connector implements Database\ConnectorInterface
         return $this->escape($string, '`');
     }
 
+    public function fieldValue($field, $value) 
+    {
+        return $this->escapeIdentifier($field) . '=' . 
+            $this->escape($value);
+    }
+
     public function valueFromPHP($value)
     {
         if (is_null($value)) {

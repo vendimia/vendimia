@@ -116,25 +116,24 @@ EOF;
 }
 
 /**
- * Creates a Model
+ * Creates a ORM entity
  */
-function createModel ($base_path, $namespace, $classname)
+function createORM ($base_path, $namespace, $classname)
 {
     $file = <<<EOF
 <?php
-namespace $namespace\\models;
+namespace $namespace\\orm;
 
 use Vendimia as V;
-use Vendimia\\ActiveRecord\\Record;
-use $namespace\\services;
+use Vendimia\\ORM\\Entity;
+use Vendimia\\ORM\\Field;
 
-class $classname extends Record
+class $classname extends Entity
 {
-
 }
 EOF;
 
     fileSave($classname . '.php', $file, [
-        'base_path' => [$base_path, 'apps', $namespace,  'models'],
+        'base_path' => [$base_path, 'apps', $namespace,  'orm'],
     ]);
 }

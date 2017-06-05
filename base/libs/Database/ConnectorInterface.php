@@ -24,6 +24,11 @@ interface ConnectorInterface
     public function escapeIdentifier($string);
 
     /**
+     * Returns an escaped "field = value" string
+     */
+    public function fieldValue($field, $value);
+    
+    /**
      * Executes a SQL query. Returns a cursor
      */
     public function execute($query);
