@@ -74,18 +74,7 @@ trait Configure
         }
         static::configureStatic();
 
-        static::$field_data = (new Configure\Configure($this))->getFields();
-
-        // Si no existe el campo definido en static::$primary_key, 
-        // Lo creamos.
-        if (!key_exists(static::$primary_key, static::$field_data)) {
-            static::$field_data[static::$primary_key] = [
-                Field\Integer::class,
-                [
-                    'primary_key' => true,
-                ]
-            ];
-        }
+        static::$field_data = (new Parser\EntityParser($this))->getFields();
 
         $this->configured = true;
     }
@@ -93,16 +82,27 @@ trait Configure
     /**
      * Returns this class connector
      */
-    public function getDatabaseConnector()
+    public static function getDatabaseConnector()
     {
+        static::configureStatic();
         return static::$database_connector;
+    }
+
+    /**
+      * Returns this class database table name
+      */
+    public static function getDatabaseTable()
+    {
+        static::configureStatic();
+        return static::$database_table;
     }
 
     /**
      * Return the primary key field
      */
-    public function getPrimaryKeyField()
+    public static function getPrimaryKeyField()
     {
+        static::configureStatic();
         return static::$primary_key;
     }
 }
