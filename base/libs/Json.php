@@ -29,7 +29,7 @@ class Json
      */
     public function valueToPHP($data)
     {
-        if (!$data) {
+        if ($data === '') {
             return null;
         }
 
