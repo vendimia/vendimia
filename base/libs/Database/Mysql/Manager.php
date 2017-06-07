@@ -5,6 +5,9 @@ use Vendimia\Database;
 use Vendimia\Database\Field;
 use Vendimia\Database\Tabledef;
 
+use Vendimia\ORM\Entity;
+use Vendimia\ORM\Parser\EntityParser;
+
 /**
  * Class for modify the database structure
  */
@@ -240,7 +243,170 @@ class Manager //implements Database\ManagerInterface
         ];
     }
 
-    public function sync(Tabledef $tabledef)
+    /**
+     * Obtains table structure from an entity, and syncs with the
+     * database.
+     *
+     * @param string $entity_class Entity class
+     */
+    public function sync($entity_class)
+    {
+        $ec = (new EntityParser($entity_class))->getDatabaseInfo();
+
+        $table = $entity_class::getDatabaseTable();
+
+        // Obtenemos la definicion de la tabla de la db
+        $db_def = $this->getTableStructure($table);
+        
+        // Si no existe la tabla
+        if (is_null($db_def)) {
+            $this->createTable($table);
+            yield ['CREATE', 'ok', $table];
+        }
+
+        $db_fields = $db_def['fields'];
+        $ec_fields = $ec->fields;
+        $renamed_fields = $ec->renamed_fields;
+
+        // Asumimos que todos los campos son por defecto nuevos
+        $new = array_keys($ec->fields);
+        $rename = [];
+        $update = [];
+        $drop = [];
+
+        foreach($db_fields as $dbf_name => $dbf_def) {
+            if (key_exists($dbf_name, $ec->fields)) {
+                // El campo ya existe de la db. Lo sacamos de $new
+                foreach (array_keys($new, $dbf_name, true) as $k) {
+                    unset ($new[$k]);
+                }
+
+                // Verificamos si su definicio ha cambiado, por si
+                // tenemos que actualizar
+
+                $left_data = $ec->fields[$dbf_name];
+                $right_data = $dbf_def;
+
+                ksort($left_data);
+                ksort($right_data);
+
+                if ($left_data !== $right_data) {
+                    $update[] = $dbf_name;
+                    continue;
+                }                
+            } else {
+                // El campo no existe. Verificamos si lo hemos renombrado
+                if (key_exists($dbf_name, $ec->renamed_fields)) {
+                    $rename[$dbf_name] = $ec->renamed_fields[$dbf_name];
+
+                    // Lo sacamos de new
+                    foreach (array_keys($new, $dbf_name, true) as $k) {
+                        unset ($new[$k]);
+                    }
+                } else {
+                    // Lo borramos.
+                    $drop[] = $dbf_name;
+                }
+            }
+        }
+
+        // Ejecutamos acciones con todos los campos
+        foreach ($new as $field) {
+            $this->addColumn(
+                $table,
+                $field,
+                $ec->fields[$field]
+            );
+            yield ['ADD COLUMN', 'ok', $field];
+        }
+
+        foreach ($update as $field) {
+            $this->changeColumn(
+                $table,
+                $field,
+                $field, // Nuevo nombre, no renombramos
+                $ec->fields[$field]
+            );
+            yield ['UPDATE COLUMN', 'ok', $field];
+        }
+
+        foreach ($rename as $old => $field) {
+            $this->changeColumn(
+                $table,
+                $old,
+                $field, // Nuevo nombre, no renombramos
+                $ec->fields[$field]
+            );
+            yield ['RENAME', 'ok', $field];
+        }
+
+        // TODO: Necesitamos un --force para $delete
+        foreach ($drop as $field) {
+            $this->dropColumn(
+                $table,
+                $field
+            );
+            yield ['DROP', 'ok', $field];
+        }
+
+        // ** INDICES **/
+
+        $db_indexes = $db_def['indexes'];
+        $ec_indexes = $ec->indexes;
+
+        $new = array_keys($ec_indexes);
+        $update = [];
+        $drop = [];
+
+        foreach ($db_indexes as $dbi_name => $dbi_def) {
+            if (key_exists($dbi_name, $ec_indexes)) {
+                foreach (array_keys($new, $dbi_name, true) as $k) {
+                    unset ($new[$k]);
+                }
+
+                $left_data = $ec_indexes[$dbi_name];
+                $right_data = $dbi_def;
+
+                ksort ($left_data);
+                ksort ($right_data);
+
+                if ($left_data !== $right_data) {
+                    $update[] = $dbi_name;
+                    continue;
+                }
+            } else {
+                $drop[] = $dbi_name;
+            }
+        }
+
+        foreach ($new as $index) {
+            $this->createIndex(
+                $table,
+                $index,
+                $ec->indexes[$index]
+            );
+            yield ['ADD INDEX', 'ok', $index];
+        }
+
+        foreach ($update as $index) {
+            $this->updateIndex(
+                $table,
+                $index,
+                $ec->indexes[$index]
+            );
+            yield ['UPDATE INDEX', 'ok', $index];
+        }
+
+        foreach ($drop as $index) {
+            $this->dropIndex(
+                $table,
+                $index
+            );
+            yield ['DROP INDEX', 'ok', $index];
+        }
+    }
+
+    /*public function sync(Tabledef $tabledef)
     {
         // Información de la DB
         $dbdef = $this->getTableStructure($tabledef->getTableName());
@@ -410,5 +576,5 @@ class Manager //implements Database\ManagerInterface
             yield ['DROP INDEX', 'ok', $index];
 
         }
-    }
+    }*/
 }
