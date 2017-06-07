@@ -62,7 +62,7 @@ abstract class FieldBase implements ValueInterface
     }
 
     /**
-     * Sets the foreing key value, if neede
+     * Sets the foreing key value, if needed
      */
     public function setKeyValue($value)
     {
@@ -77,5 +77,24 @@ abstract class FieldBase implements ValueInterface
         return $this->is_database_field;
     }
 
+    /**
+     * Validates the properties for this Field
+     *
+     * @param array $properties Properties to analyze
+     * @return mixed Array of validated properties, or false on error
+     */
+    public static function validateProperties(array $properties)
+    {
+        return $properties;
+    }
+
+    /**
+     * Returns the Database\Field const value for this field
+     */
+    abstract public static function getDatabaseFieldType();
+
+    /**
+     * ValueInterface implementation
+     */
     abstract public function getDatabaseValue(ConnectorInterface $connector);
 }

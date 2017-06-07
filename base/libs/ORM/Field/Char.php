@@ -3,10 +3,11 @@ namespace Vendimia\ORM\Field;
 
 use Vendimia\ORM\Entity;
 use Vendimia\Database\ConnectorInterface;
+use Vendimia\Database\Field as DBField;
 
 class Char extends FieldBase
 {
-    public function __construct(Entity $entity, array $properties)
+    public static function validateProperties(array $properties)
     {
         // Char requiere la propiedad 0 o 'length'
         $length_in_index_0 = key_exists(0, $properties);
@@ -20,7 +21,12 @@ class Char extends FieldBase
             $properties['length'] = $properties[0];
         }
 
-        parent::__construct($entity, $properties);
+        return $properties;
+    }
+
+    public static function getDatabaseFieldType()
+    {
+        return DBField::Char;
     }
 
     public function getDatabaseValue(ConnectorInterface $connector)
