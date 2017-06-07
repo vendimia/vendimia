@@ -1,9 +1,9 @@
 <?php
-namespace Vendimia\ORM\Configure;
+namespace Vendimia\ORM\Parser;
 
 use Generator;
 
-class ParsePHPAliases
+class PHPAliasesParser
 {
 
     /**

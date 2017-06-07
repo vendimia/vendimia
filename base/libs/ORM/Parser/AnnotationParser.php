@@ -1,10 +1,10 @@
 <?php
-namespace Vendimia\ORM\Configure;
+namespace Vendimia\ORM\Parser;
 
 use Generator;
 use Vendimia\Json;
 
-class ParseAnnotation
+class AnnotationParser
 {
     private $summary = '';
     private $description = '';
@@ -39,7 +39,7 @@ class ParseAnnotation
 
         $properties = [];
         if ($is_class) {
-            if ($tagvalue) {
+            if ($tagvalue != '') {
                 $properties = (new Json($tagvalue))->decode();
             } else {
                 $properties = [];
