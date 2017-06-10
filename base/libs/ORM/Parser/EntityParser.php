@@ -12,40 +12,12 @@ use ReflectionProperty;
  */
 class EntityParser
 {
-    /** Target class namespace */
-    public $namespace;
 
-    /** Target class aliases */
-    public $aliases;
+    /** FQCN builder */
+    private $fqcn;
 
     /** Fields */
-    public $fields;
-
-    public function getFQCN($classname)
-    {
-        // Si empieza con un \, no hacemos nada
-        if ($classname{0} == '\\') {
-            return $classname;
-        }
-
-        $parts = explode('\\', $classname);
-
-        // La 1ra parte es clave
-        if (key_exists($parts[0], $this->aliases)) {
-            $alias = $this->aliases[$parts[0]];
-            $slice = array_slice($parts, 1);
-
-            $fqcn = $alias;
-
-            if ($slice) {
-                $fqcn .= '\\' . join('\\', $slice);
-            }
-        } else {
-            // Si no existe el alias, le añadimos el namespace
-            $fqcn = $this->namespace . '\\' . $classname;
-        }
-        return $fqcn;
-    }
+    private $fields;
 
     public function __construct($entity)
     {
@@ -60,8 +32,10 @@ class EntityParser
             $reflection->getStartLine() - 1
         );
 
-        $this->namespace = $reflection->getNamespaceName();
-        $this->aliases = $aliases->asArray();
+        $this->fqcn = new FQCNBuilder(
+            $reflection->getNamespaceName(), 
+            $aliases->asArray()
+        );
 
         // Ahora, obtenemos la información de los campos
 
@@ -77,6 +51,7 @@ class EntityParser
 
             // Si hay una longitud en campo 0 y 1, la colocamos en 
             // el campo length
+            /*
             if (key_exists(0, $data['properties'])) {
                 $length = $data['properties'][0];
 
@@ -85,9 +60,10 @@ class EntityParser
                 }
                 $data['properties']['length'] = $length;
             }
+            */
 
             // Obtenemos el FQDN de la clase
-            $fqcn = $this->getFQCN($data['class']);
+            $fqcn = $this->fqcn->get($data['class']);
 
             // Si hay un summary, lo colocamos en la propiedad 'caption',
             // si caption está vacío.
@@ -128,6 +104,10 @@ class EntityParser
         return $this->fields;
     }
 
+    public function getFQCNBuilder()
+    {
+        return $this->fqcn;
+    }
     /**
      * Small helper for emulating the ?? PHP7+ operator
      */
@@ -156,6 +136,13 @@ class EntityParser
         foreach ($this->fields as $fieldname => $parameters) {
             $class = $parameters[0];
             $properties = $parameters[1];
+
+            $properties = $class::validateProperties($fieldname, $properties);
+
+            // Si hay un database_field, lo usamos
+            if (isset($properties['database_field'])) {
+                $fieldname = $properties['database_field'];
+            }
 
             $data = [
                 'type' => $class::getDatabaseFieldType(),
