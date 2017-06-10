@@ -11,7 +11,7 @@ abstract class FieldBase implements ValueInterface
     protected $value = null;
 
     /** Field name */
-    protected $fieldName;
+    protected $field_name;
 
     /** Field properties */
     protected $properties;
@@ -22,7 +22,6 @@ abstract class FieldBase implements ValueInterface
     /** Does this field return a database value? */
     protected $is_database_field = true;
 
-
     /**
      * Default constructor
      * 
@@ -30,10 +29,10 @@ abstract class FieldBase implements ValueInterface
      * @param string $fieldName This field name
      * @param array $properties This field properties
      */
-    public function __construct(Entity $entity, $fieldName, array $properties)
+    public function __construct(Entity $entity, $field_name, array $properties)
     {
-        $this->fieldName = $fieldName;
-        $this->properties = $properties;
+        $this->field_name = $field_name;
+        $this->properties = static::validateProperties($field_name, $properties);
         $this->entity = $entity;
     }
 
@@ -54,19 +53,27 @@ abstract class FieldBase implements ValueInterface
     }
 
     /**
-     * Returns the database field where the foreign key is
+     * Returns a property
      */
-    public function getKeyField()
+    public function getProperty($property_name, $default_value = null)
     {
-        return null;
+        if (isset($this->properties[$property_name])) {
+            return $this->properties[$property_name];
+        } else {
+            return $default_value;
+        }
     }
 
     /**
-     * Sets the foreing key value, if needed
+     * Returns the database field name
      */
-    public function setKeyValue($value)
+    public function getDatabaseField()
     {
-        // Por defecto, no hace nada.
+        if (isset($this->properties['database_field'])) {
+            return $this->properties['database_field'];
+        } else {
+            return $this->field_name;
+        }
     }
 
     /**
@@ -80,21 +87,26 @@ abstract class FieldBase implements ValueInterface
     /**
      * Validates the properties for this Field
      *
+     * @param string $field_name Field name used by this class instance
      * @param array $properties Properties to analyze
      * @return mixed Array of validated properties, or false on error
      */
-    public static function validateProperties(array $properties)
+    public static function validateProperties($field_name, array $properties)
     {
         return $properties;
     }
 
     /**
+     * ValueInterface default implementation
+     */
+    public function getDatabaseValue(ConnectorInterface $connector)
+    {
+        return $connector->escape($this->value);
+    }
+
+
+    /**
      * Returns the Database\Field const value for this field
      */
     abstract public static function getDatabaseFieldType();
-
-    /**
-     * ValueInterface implementation
-     */
-    abstract public function getDatabaseValue(ConnectorInterface $connector);
 }

@@ -7,14 +7,14 @@ use Vendimia\Database\Field as DBField;
 
 class Char extends FieldBase
 {
-    public static function validateProperties(array $properties)
+    public static function validateProperties($field_name, array $properties)
     {
         // Char requiere la propiedad 0 o 'length'
         $length_in_index_0 = key_exists(0, $properties);
         $length_as_property = key_exists('length', $properties);
 
         if (!$length_in_index_0 && !$length_as_property) {
-            throw new \InvalidArgumentException("'" . static::class .  "' requires a 'length' (or first) argument" );
+            throw new \InvalidArgumentException("Class '" . static::class .  "' of field '" . $field_name . "' requires a 'length' (or first) argument" );
         }
 
         if (!$length_as_property) {
