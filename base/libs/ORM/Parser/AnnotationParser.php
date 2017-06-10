@@ -19,23 +19,23 @@ class AnnotationParser
      */
     private function parseTag($tag) 
     {
-        $tag = strtr(trim($tag), "\n", ' ');
+        $tag = trim($tag);
         
         // SOLO nos importa los tags que empiezan con '@V:'
         if (substr($tag, 0, 3) !== '@V:') {
             return false;
         }
-
         $tag = substr($tag, 3);
 
-        $re = '/([^ =]+)(?: *)(=?)(?: *)(.*)/';
-        $matches = [];
+        $parts = preg_split('/([ =\n]+)/', $tag, 2, PREG_SPLIT_DELIM_CAPTURE);
 
-        $c = preg_match($re, $tag, $matches);
-
-        $tagname = $matches[1];
-        $is_class = $matches[2] != "=";
-        $tagvalue = $matches[3];
+        $tagname = $parts[0];
+        $is_class = true;
+        $tagvalue = '';
+        if (isset($parts[1])) {
+            $is_class = trim($parts[1]) != '=';
+            $tagvalue = strtr($parts[2], "\n", ',');
+        } 
 
         $properties = [];
         if ($is_class) {
