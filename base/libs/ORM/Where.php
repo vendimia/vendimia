@@ -3,6 +3,7 @@ namespace Vendimia\ORM;
 
 use Vendimia\Database\ConnectorInterface;
 use Vendimia\Database\ValueInterface;
+
 /**
  * Builds WHERE structures
  */
@@ -43,6 +44,16 @@ class Where
         $this->connector = $entity->getDatabaseConnector();
         $this->pk_field = $this->connector->escapeIdentifier($entity->getPrimaryKeyField());
         return $this;
+    }
+
+    public function setConnector(ConnectorInterface $connector)
+    {
+        $this->connector = $connector;
+    }
+
+    public function setPrimaryKeyField($primary_key)
+    {
+        $this->pk_field = $this->connector->escapeIdentifier($primary_key);
     }
 
     /**
