@@ -6,12 +6,17 @@ namespace Vendimia;
  */
 class Exception extends \Exception 
 {
-    public $__EXPORTED_DATA = [];
+    private $__EXPORTED_DATA = [];
 
     public function __construct($message = "", $exported = []) {
         $this->__EXPORTED_DATA = $exported;
         parent::__construct($message, 0, null);
-    }    
+    }
+
+    public function getExportedData()
+    {
+        return $this->__EXPORTED_DATA;
+    }
 }
 
 // This is not PSR-ish, but using a separated file for each one seems a little
