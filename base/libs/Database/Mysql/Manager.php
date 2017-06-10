@@ -52,27 +52,25 @@ class Manager //implements Database\ManagerInterface
         return $fieldstr;
     }
 
-    public function createTable(Tabledef $tabledef)
+    public function createTable($table_name, $definition)
     {
-        $tablename = $tabledef->getTableName();
-        $sql = 'CREATE TABLE ' . $this->connection->escapeIdentifier($tablename) . " (\n";
+        $sql = 'CREATE TABLE ' . $this->connection->escapeIdentifier($table_name) . " (\n";
 
         $fields = [];
-        foreach ($tabledef -> getTableDef() as $name => $fielddef) {
+        foreach ($definition->fields as $name => $fielddef) {
             $fields[] = $this->fieldDefinition($name, $fielddef);
         }
 
         // Creamos los primary keys
         $fields[] = 'PRIMARY KEY (' . 
-            join(',', $this->connection->escape($tabledef->getPrimaryKeys())) .
+            join(',', $this->connection->escape($definition->primary_keys)) .
             ')';
 
         $sql .= join(",\n", $fields) . "\n)";
-
         $this->connection->execute($sql);
 
         // Ahora creamos los indexes
-        foreach ($tabledef->getIndexes() as $indexname => $indexdef) {
+        foreach ($definition->indexes as $indexname => $indexdef) {
             $this->createIndex($tablename, $indexname, $indexdef);
         }
     }
@@ -252,7 +250,6 @@ class Manager //implements Database\ManagerInterface
     public function sync($entity_class)
     {
         $ec = (new EntityParser($entity_class))->getDatabaseInfo();
-
         $table = $entity_class::getDatabaseTable();
 
         // Obtenemos la definicion de la tabla de la db
@@ -260,8 +257,9 @@ class Manager //implements Database\ManagerInterface
         
         // Si no existe la tabla
         if (is_null($db_def)) {
-            $this->createTable($table);
+            $this->createTable($table, $ec);
             yield ['CREATE', 'ok', $table];
+            return;
         }
 
         $db_fields = $db_def['fields'];
@@ -297,10 +295,10 @@ class Manager //implements Database\ManagerInterface
             } else {
                 // El campo no existe. Verificamos si lo hemos renombrado
                 if (key_exists($dbf_name, $ec->renamed_fields)) {
-                    $rename[$dbf_name] = $ec->renamed_fields[$dbf_name];
-
+                    $new_name = $ec->renamed_fields[$dbf_name];
+                    $rename[$dbf_name] = $new_name;
                     // Lo sacamos de new
-                    foreach (array_keys($new, $dbf_name, true) as $k) {
+                    foreach (array_keys($new, $new_name, true) as $k) {
                         unset ($new[$k]);
                     }
                 } else {
@@ -329,7 +327,7 @@ class Manager //implements Database\ManagerInterface
             );
             yield ['UPDATE COLUMN', 'ok', $field];
         }
-
+        
         foreach ($rename as $old => $field) {
             $this->changeColumn(
                 $table,
@@ -340,7 +338,7 @@ class Manager //implements Database\ManagerInterface
             yield ['RENAME', 'ok', $field];
         }
 
-        // TODO: Necesitamos un --force para $delete
+        // TODO: Necesitamos un --drop para $delete
         foreach ($drop as $field) {
             $this->dropColumn(
                 $table,
