@@ -13,38 +13,60 @@ abstract class Entity implements AsArrayInterface
     /** This entity fields */
     private $fields = [];
 
-    /** Optional foreign key fields*/
-    private $key_fields = [];
+    /** The database field names, mapped to $fields */
+    private $database_fields = [];
 
     /** Fields modified, used for save() method */
     private $modified_fields = [];
 
     /** True on newly created objects */
-    private $is_new = false;
+    private $is_new = true;
 
     /** True when a database query returns no result */
     private $is_empty = true;
 
+    /** This FQCN **/
+    private $base_class;
+
+    /** Database table, copied from static property */
+    private $db_table;
+
+    /** Database connector, copied from static property */
+    private $db_connector;
+
     /**
      * Sets up a new entity.
+     *
+     * @param array $fields Associative array with this entity fields
+     *      value
+     * @param boolean $not_new Used when fetching entities from a set
      */
-    public function __construct($fields = null)
+    public function __construct($fields = null, $not_new = false)
     {
         static::configure();
 
+        $this->base_class = static::class;
+        $this->db_table = static::$database_table;
+        $this->db_connector = static::$database_connector;
+
         // Construimos los objetos de esta entidad
-        foreach (static::$field_data as $field => $data) {
+
+        foreach (static::$field_data as $field_name => $data) {
             $class = $data[0];
             if (!class_exists($class)) {
-                throw new \InvalidArgumentException("Class '$class' for field '$field' doesn't exists.");
+                throw new \InvalidArgumentException("Class '$class' for field '$field_name' doesn't exists.");
             }
-            $this->fields[$field] = new $class ($this, $field, $data[1]);
-            if ($kf = $this->fields[$field]->getKeyField()) {
-                $this->key_fields[$kf] = $this->fields[$field];
-            }
+
+            $field = $this->fields[$field_name] = new $class($this, $field_name, $data[1]);
+
+            // Obtenemos el nombre de su campo de la base datos
+            $db_field = $field->getDatabaseField();
+            
+            $this->database_fields[$db_field] = $field;
+
         }
 
-        if ($field instanceof AsArrayInterface) {
+        if ($fields instanceof AsArrayInterface) {
             $fields = $fields->asArray();
         }
 
@@ -56,6 +78,19 @@ abstract class Entity implements AsArrayInterface
 
         $this->whereBuilder = new Where;
         $this->whereBuilder->setEntity($this);
+
+        if ($not_new) {
+            $this->is_new = false;
+            $this->record_retrieved = true;
+        }
+    }
+
+    /**
+     * Creates a new entity, and immedieately saves it.
+     */
+    public static function create($fields = [])
+    {
+        return (new static($fields))->save();
     }
 
     /**
@@ -104,16 +139,118 @@ abstract class Entity implements AsArrayInterface
     }
 
     /**
+     * Sets the fields value
+     */
+    public function setValues($data)
+    {
+        if ($data instanceof Vendimia\AsArrayInterface) {
+            $data = $data->asArray();
+        }
+        foreach ($data as $field => $value) {
+            $this->fields[$field]->setValue($value);
+        }
+    }
+
+    /**
+     * Saves this entity to the database
+     */
+    public function save()
+    {
+        // Ejecutamos un beforeSave();
+        if (method_exists($this, 'beforeSave')) {
+            $this->beforeSave();
+        }
+
+        // Solo grabamos los campos modificados, si existe
+        if ($this->modified_fields) {
+            $fields = array_keys($this->modified_fields);
+        } else {
+            $fields = array_keys($this->fields);
+        }
+
+        // Si no hay campos por guardar, salismos
+        if (!$fields) {
+            return $this;
+        }
+
+        // Obtenemos la información de todos los campos, formateados para la
+        // base de datos
+        $data = [];
+        foreach ($fields as $field_name) {
+            $field = $this->fields[$field_name];
+
+            $field_name = $field->getProperty('database_field', $field_name);
+
+            if (!$field->isDatabaseField()) {
+                continue;
+            }
+
+            // Cada objeto devolverá su versión escapada
+            $data[$field_name] = $field;
+        }
+
+
+        // Primero intentamos actualizar el registro. Si el registro no
+        // existe, insertamos
+        $id = $this->pk();
+        if (is_null($id)) {
+            $action = 'INSERT';
+        } else {
+            $action = 'UPDATE';
+        }
+
+        while (true) {
+            if ($action == 'INSERT') {
+                $id = static::$database_connector->insert(
+                    static::$database_table,
+                    $data
+                );
+                $this->pk($id);
+
+                break;
+            } else {
+                $where = static::$database_connector->fieldValue(static::$primary_key, $id);
+
+                $affected = static::$database_connector->update(
+                    static::$database_table,
+                    $data,
+                    $where
+                );
+
+                if ($affected) {
+                    // Hubo una actualización;
+                    break;
+                } else {
+                    // Insertamos
+                    $action = 'INSERT';
+                }
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Updates this record
+     */
+    public function update(array $values)
+    {
+        $this->setValues($values);
+        return $this->save();
+    }
+
+    /**
      * Sets a field value
      */
     public function setValue($field, $value)
     {
-        if (!key_exists($field, $this->fields)) {
+        if (isset($this->fields[$field])) {
+            $this->fields[$field]->setValue($value);
+            $this->modified_fields[$field] = true;
+        } elseif (isset($this->database_fields[$field])) {
+            $this->database_fields[$field]->setValue($value);
+        } else {
             throw new \InvalidArgumentException("Field '$field' unknow in this entity");
         }
-
-        $this->fields[$field]->setValue($value);
-        $this->modified_fields[$field] = true;
     }
 
     /**
@@ -123,7 +260,11 @@ abstract class Entity implements AsArrayInterface
     {
         $this->retrieveRecord();
 
-        if (!key_exists($field, $this->fields)) {
+        if (isset($this->fields[$field])) {
+            return $this->fields[$field]->getValue();
+        } elseif (isset($this->database_fields[$field])) {
+            return $this->database_fields[$field];
+        } else {
             throw new \InvalidArgumentException("Field '$field' unknow in this entity");
         }
 
@@ -156,6 +297,7 @@ abstract class Entity implements AsArrayInterface
         }
 
         if ($this->is_new) {
+
             return false;
         }
 
@@ -172,15 +314,18 @@ abstract class Entity implements AsArrayInterface
         }
 
         foreach ($data as $field => $val) {
-
-            // Nos fijamos si $field es una llava
-            if (key_exists($field, $this->key_fields)) {
-                // Okey
-            } else {
-                $this->setValue($field, $val);
-            }
+            $field = $this->database_fields[$field];
+            $field->setValue($val);
         }
     }    
+
+    /**
+     * Returns this entity base class
+     */
+    public function getClass()
+    {
+        return $this->base_class;
+    }
 
     /**
      * AsArrayInterface implementation
