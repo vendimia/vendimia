@@ -47,7 +47,22 @@ trait QueryManager
      */
     public static function find($where = null)
     {
+        static::configureStatic();
+        $object = new EntitySet(
+            static::class, 
+            static::$database_table, 
+            static::$database_connector
+        );
 
+        return $object;
+    }
+
+    /**
+     * Alias de find()
+     */
+    public static function all()
+    {
+        return static::find();
     }
 
     /**
@@ -117,7 +132,34 @@ trait QueryManager
     public function not() {
         $this->query_boolean_not ='NOT';
         return $this;
-    }    
+    }  
+
+    /**
+     * Sets the query order
+     */
+    public function order(...$params)
+    {
+        $this->query['order'] = array_merge($this->query['order'], $params);
+        return $this;
+    }
+
+    /**
+     * Adds a LIMIT clausule
+     */
+    public function limit($limit)
+    {
+        $this->query['limit'] = $limit;
+        return $this;
+    }
+
+    /**
+     * Adds an LIMIT offset portion
+     */
+    public function offset($offset)
+    {
+        $this->query['offset'] = $offset;
+        return $this;
+    }
 
     /**
      * Changes this entity into a query entity
@@ -131,79 +173,6 @@ trait QueryManager
     }
 
     /**
-     * Saves this entity to the database
-     */
-    public function save()
-    {
-        // Ejecutamos un beforeSave();
-        if (method_exists($this, 'beforeSave')) {
-            $this->beforeSave();
-        }
-
-        // Solo grabamos los campos modificados, si existe
-        if ($this->modified_fields) {
-            $fields = array_keys($this->modified_fields);
-        } else {
-            $fields = array_keys($this->fields);
-        }
-
-        // Si no hay campos por guardar, salismos
-        if (!$fields) {
-            return $this;
-        }
-
-        // Obtenemos la información de todos los campos, formateados para la
-        // base de datos
-        $data = [];
-        foreach ($fields as $field) {
-            if (!$this->fields[$field]->isDatabaseField()) {
-                continue;
-            }
-            // Cada objeto devolverá su versión escapada
-            $data[$field] = $this->fields[$field];
-        }
-
-
-        // Primero intentamos actualizar el registro. Si el registro no
-        // existe, insertamos
-        $id = $this->pk();
-        if (is_null($id)) {
-            $action = 'INSERT';
-        } else {
-            $action = 'UPDATE';
-        }
-
-        while (true) {
-            if ($action == 'INSERT') {
-                $id = static::$database_connector->insert(
-                    static::$database_table,
-                    $data
-                );
-                $this->pk($id);
-
-                break;
-            } else {
-                $where = static::$database_connector->fieldValue(static::$primary_key, $id);
-
-                $affected = static::$database_connector->update(
-                    static::$database_table,
-                    $data,
-                    $where
-                );
-
-                if ($affected) {
-                    // Hubo una actualización;
-                    break;
-                } else {
-                    // Insertamos
-                    $action = 'INSERT';
-                }
-            }
-        }
-        return $this;
-    }
-
-    /**
      * Executes the query in the query entities
      */
     private function executeQuery()
@@ -211,9 +180,10 @@ trait QueryManager
         static::configureStatic();
 
         if (!$this->query['table']) {
-            $this->query['table'] = static::$database_table;
+            $this->query['table'] = $this->db_table;
         }
 
-        return static::$database_connector->buildAndExecuteQuery($this->query);
+        return $this->db_connector->buildAndExecuteQuery($this->query);
     }
+    
 }
