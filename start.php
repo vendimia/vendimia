@@ -26,39 +26,40 @@ class_exists('Vendimia\Exception');
 // ubicarla, asi que la cargamos a mano.
 require_once VENDIMIA\BASE_PATH . '/base/libs/Vendimia.php';
 
+// Venimos del servidor de pruebas?
+if (PHP_SAPI == 'cli-server') {
+
+    // Si pedimos algo con static/, entonces lo enviamos directo
+    $request_uri = trim($_SERVER['REQUEST_URI'], '/');
+    if (substr($request_uri, 0, 7) == 'static/' &&
+        is_dir('static/')) {
+        return false;
+    }
+    
+    // Cambiamos el PATH de la sesion al directorio tmp
+    if (!is_dir ('tmp')) {
+        mkdir ('tmp');
+    }
+    session_save_path ('tmp');
+}
+
 // Inicializamos las variables de la aplicación
 Vendimia::init();
 
 // Registramos el atrapador de excepciones sueltas.
 Vendimia\ExceptionHandler::register();
 
-// Venimos del servidor de pruebas?
-if (PHP_SAPI == 'cli-server' ) {
-        // Si pedimos algo con static/, entonces lo enviamos directo
-        $request_uri = trim($_SERVER['REQUEST_URI'], '/');
-        if (substr($request_uri, 0, 7) == 'static/' &&
-            is_dir('static/')) {
-            return false;
-        }
-        
-        // Cambiamos el PATH de la sesion al directorio tmp
-        if (!file_exists ('tmp') || !is_dir ('tmp')) {
-            mkdir ('tmp');
-        }
-        session_save_path ('tmp');
-}
-
 // Cargamos las librerías en Vendimia::SETTINGS['autoload']
-if ( isset ( Vendimia::$settings['autoload']) ) {
-    foreach ( Vendimia::$settings['autoload'] as $pl ) {
-        load_lib ( $pl );
+if (isset(Vendimia::$settings['autoload'])) {
+    foreach (Vendimia::$settings['autoload'] as $pl) {
+        load_lib ($pl);
     }
 }
 
 // Registramos las aplicaciones solicitadas, ejecutando el fichero
 // app/register
-if ( isset ( Vendimia::$settings['register']) ) {
-    foreach ( Vendimia::$settings['register'] as $id => $app ) {
+if (isset(Vendimia::$settings['register'])) {
+    foreach (Vendimia::$settings['register'] as $id => $app) {
 
         // Si $id NO es numérico, entonces la app es $id, y $app son algunos
         // parámetros que le pasaremos. De lo contrario, sólo registramos $app
@@ -66,7 +67,7 @@ if ( isset ( Vendimia::$settings['register']) ) {
 
         $parameters = [];
 
-        if ( ! is_numeric ( $id ) ) {
+        if (!is_numeric($id)) {
             $parameters = $app;
             $app = $id ;
         }
