@@ -32,6 +32,9 @@ trait Configure
     /** Primary key field */
     protected static $primary_key = 'id';
 
+    /** FQCN Builder */
+    protected static $fqcn;
+
     /**
      * Sets default parameters for the class
      */
@@ -74,7 +77,9 @@ trait Configure
         }
         static::configureStatic();
 
-        static::$field_data = (new Parser\EntityParser($this))->getFields();
+        $ep = new Parser\EntityParser($this);
+        static::$field_data = $ep->getFields();
+        static::$fqcn = $ep->getFQCNBuilder();
 
         $this->configured = true;
     }
@@ -98,11 +103,19 @@ trait Configure
     }
 
     /**
-     * Return the primary key field
+     * Returns the primary key field
      */
     public static function getPrimaryKeyField()
     {
         static::configureStatic();
         return static::$primary_key;
+    }
+
+    /**
+     * Returns the FQCN builder 
+     */
+    public static function getFQCNBuilder()
+    {
+        return static::$fqcn;
     }
 }
