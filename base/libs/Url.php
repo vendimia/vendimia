@@ -60,7 +60,7 @@ class Url
 
             // Lo que queda debe ser partes de la URL
             if (is_object($data)) {
-                if ($data instanceof Vendimia\ActiveRecord\Record) {
+                if ($data instanceof Vendimia\ORM\Entity) {
                     $value = $data->pk();
                 } else {
                     $value = (string)$data;
