@@ -8,6 +8,8 @@ class Field
 {
     // Integers
     const Bool = 1;
+    const Boolean = 1;
+    
     const Byte = 2;
     const SmallInt = 3;
     const Integer = 4;
