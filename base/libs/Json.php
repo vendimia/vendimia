@@ -5,7 +5,7 @@ namespace Vendimia;
  * Relaxed JSON decoder
  *
  * This decoder always takes the JSON string as a object, and returns
- * an array. Unquoted strings are allowed
+ * an associative array. Unquoted strings are allowed.
  */
 class Json
 {
@@ -69,6 +69,9 @@ class Json
         $result = [];
         $escaped = false;
 
+        // True cuando un value empieza con @. Obtenemos su FQCN
+        $class_value = false;
+
         // True cuando hemos acabado de analizar un token (como , o :)
         // Los espacios siguientes serán ignorados hasta que aparezca
         // un caracter cualquiera
@@ -84,7 +87,14 @@ class Json
                 continue;
             }
 
-            if ($char == '\\') {
+            if ($char == '@' && $chunk == '') {
+                $chunk .= $char;
+                $this->pointer++;
+                $class_value = true;
+                continue;
+            }
+
+            if ($char == '\\' && !$class_value) {
                 $escaped = true;
                 $this->pointer++;
                 continue;
@@ -112,7 +122,6 @@ class Json
                     $in_string = true;
                     $string_quote = $char;
 
-                    //$this->pointer++;
                     continue;
                 } elseif ($char == ',' || ($end_char && $char == $end_char)) {
     
@@ -128,6 +137,8 @@ class Json
                     $associative = false;
                     $val = '';
                     $var = '';
+
+                    $class_value = false;
 
                     if ($char == $end_char) {
                         break;
@@ -148,7 +159,9 @@ class Json
                         $end_char = ']';
                     }
                     $this->pointer++;
+
                     $chunk = $this->decode($end_char);
+
                 } else {
                     $chunk .= $char;
                 }
