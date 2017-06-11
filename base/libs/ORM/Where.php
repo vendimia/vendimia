@@ -20,9 +20,9 @@ class Where
     public function from(...$base)
     {
         if (count($base) == 1) {
-            $this->base = $base[0];
+            $this->base_string = $base[0];
         } else {
-            $this->base = $base;
+            $this->base_string = $base;
         }
         return $this;
     }
@@ -72,7 +72,7 @@ class Where
         } else {
             // No. Es un array asociativo
             $where = [];
-            foreach ($this->base as $key => $value){
+            foreach ($this->base_string as $key => $value){
                 $w = $this->connector->escapeIdentifier($key);
 
                 if (is_array($value)) {
@@ -88,7 +88,7 @@ class Where
                     }
                 } else {
                     // Si no es un array, o un objeto, lo pasamos
-                    $w .= '=' . $this->connector->escape($value);
+                    $w .= '=' . $this->connector->valueFromPHP($value);
                 }
                 $where[] = ['AND', false, $w];
             }
@@ -114,20 +114,24 @@ class Where
     {
         $where = [];
 
-        if (is_array($this->base)) {
-            $where = $this->buildFromArray($this->base);
-        } elseif (is_numeric($this->base)) {
-            $w = $this->pk_field . '=' . intval($this->base);
+        if (is_array($this->base_string)) {
+            $where = $this->buildFromArray($this->base_string);
+        } elseif (is_numeric($this->base_string)) {
+            $w = $this->pk_field . '=' . intval($this->base_string);
             $where[] = ['AND', false, $w];
-        } elseif (is_object($this->base) && $this->base instanceof Database\ValueInterface) {
-            $where[] = ['AND', false, $this->base->getDatabaseValue()];
-        } elseif(is_string($this->base)) {
+        } elseif (is_object($this->base_string)) {
+            if (!$this->base_string instanceof ValueInterface) {
+                throw new \InvalidArgumentException("'" . get_class($this->base_string)  . "' must implements Vendimia\\Database\\ValueInterface to be used here.");
+            }
+
+            $where[] = ['AND', false, $this->base_string->getDatabaseValue($this->connector)];
+        } elseif(is_string($this->base_string)) {
             // Asumimos que los strings ya son segmentos de un WHERE
             // y están escpados.
-            $where[] = ['AND', false, $this->base];
+            $where[] = ['AND', false, $this->base_string];
         } else {
             // HMmm
-            throw new \Exception("BUG! " . gettype($this->value) . ' type is not expected here!');
+            throw new \Exception("BUG! " . gettype($this->base_string) . ' type is not expected here!');
         }
 
         return $where;
