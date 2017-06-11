@@ -54,6 +54,10 @@ trait QueryManager
             static::$database_connector
         );
 
+        if ($where) {
+            $object->where($where);
+        }
+
         return $object;
     }
 
