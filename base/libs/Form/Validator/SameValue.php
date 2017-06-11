@@ -9,7 +9,7 @@ class SameValue extends ValidatorAbstract
     protected $args = [
         'as' => null,
         'messages' => [
-            'different' => 'Values for %control% and %as% are not the same.'
+            'different' => "Values for '%control%' and '%as%' are not the same."
         ]
     ];
 

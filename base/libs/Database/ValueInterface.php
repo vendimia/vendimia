@@ -2,6 +2,7 @@
 namespace Vendimia\Database;
 
 use Vendimia\Database\ConnectorInterface;
+
 /**
  * Interface for objects which can convert itself to a database representation.
  */
