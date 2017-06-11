@@ -39,20 +39,13 @@ class ManyToOne extends FieldBase
       */
     public function setValue($value)
     {
-        $this->fk_value = $value;
-        $class = $this->fk_class;
-        $this->value = $class::get($value);
-    }
-
-    /**
-     * Returns the database field name
-     */
-    public function getDatabaseField()
-    {
-        if (isset($this->properties['database_field'])) {
-            return $this->properties['database_field'];
+        if ($value instanceof Entity) {
+            $this->value = $value;
+            $this->fk_value = $value->pk();
         } else {
-            return $this->field_name . '_id';
+            $this->fk_value = $value;
+            $class = $this->fk_class;
+            $this->value = $class::get($value);
         }
     }
 
@@ -75,7 +68,11 @@ class ManyToOne extends FieldBase
         if (!$as_property) {
             $properties['target_class'] = $properties[0];
         }
-        
+
+        if (!isset($properties['database_field'])) {
+            $properties['database_field'] = $field_name . '_id';
+        }        
+
         return $properties;
     }
 }
