@@ -2,11 +2,13 @@
 namespace Vendimia\ORM;
 
 use Vendimia\AsArrayInterface;
+use Vendimia\Database\ConnectorInterface;
+use Vendimia\Database\ValueInterface;
 
 /**
  * Relationship class with a database table
  */
-abstract class Entity implements AsArrayInterface
+abstract class Entity implements AsArrayInterface, ValueInterface
 {
     use Configure, QueryManager;
 
@@ -72,7 +74,7 @@ abstract class Entity implements AsArrayInterface
 
         if ($fields) {
             foreach($fields as $field => $value) {
-                $this->$field = $value;
+                $this->setValue($field, $value);
             }
         }
 
@@ -149,6 +151,7 @@ abstract class Entity implements AsArrayInterface
         foreach ($data as $field => $value) {
             $this->fields[$field]->setValue($value);
         }
+        $this->is_empty = false;
     }
 
     /**
@@ -239,6 +242,36 @@ abstract class Entity implements AsArrayInterface
     }
 
     /**
+     * Delete this record
+     */
+    public function delete()
+    {
+        if ($this->isEmpty()) {
+            return false;
+        }
+
+        if ($this->isNew()) {
+            return false;
+        }
+
+        // Ejecutamos el beforeDelete()
+        if (method_exists($this, 'beforeDelete')) {
+            $this->beforeDelete();
+        }
+
+        // TODO: Verificar los registros relacionados, en especial OneToMany
+
+        $where = static::$database_connector->fieldValue(
+            static::$primary_key, $this->pk()
+        );
+
+        return static::$database_connector->delete(
+            static::$database_table,
+            $where
+        );
+    }
+
+    /**
      * Sets a field value
      */
     public function setValue($field, $value)
@@ -246,8 +279,12 @@ abstract class Entity implements AsArrayInterface
         if (isset($this->fields[$field])) {
             $this->fields[$field]->setValue($value);
             $this->modified_fields[$field] = true;
+
+            $this->is_empty = false;
         } elseif (isset($this->database_fields[$field])) {
             $this->database_fields[$field]->setValue($value);
+
+            $this->is_empty = false;
         } else {
             throw new \InvalidArgumentException("Field '$field' unknow in this entity");
         }
@@ -265,7 +302,7 @@ abstract class Entity implements AsArrayInterface
         } elseif (isset($this->database_fields[$field])) {
             return $this->database_fields[$field];
         } else {
-            throw new \InvalidArgumentException("Field '$field' unknow in this entity");
+            throw new \InvalidArgumentException("Retrieving value of unknow field '$field' in this entity");
         }
 
         return $this->fields[$field]->getValue();
@@ -297,7 +334,6 @@ abstract class Entity implements AsArrayInterface
         }
 
         if ($this->is_new) {
-
             return false;
         }
 
@@ -309,14 +345,13 @@ abstract class Entity implements AsArrayInterface
         if (!$data) {
             $this->is_empty = true;
             return false;
-        } else {
-            $this->is_empty = false;
         }
 
         foreach ($data as $field => $val) {
             $field = $this->database_fields[$field];
             $field->setValue($val);
         }
+        $this->is_empty = false;
     }    
 
     /**
@@ -338,4 +373,13 @@ abstract class Entity implements AsArrayInterface
 
         }
     }
+
+    /**
+     * ValueInterface implementation
+     */
+    public function getDatabaseValue(ConnectorInterface $connector)
+    {
+        return $connector->escape($this->pk());
+    }
+
 }
