@@ -14,6 +14,8 @@ class OneToMany extends FieldBase
     private $target_class;
     private $entity_set;
 
+    protected $is_database_field = false;
+
     public function __construct(Entity $entity, $field_name, array $properties)
     {
         parent::__construct($entity, $field_name, $properties);
