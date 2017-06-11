@@ -7,89 +7,79 @@ namespace Vendimia;
 class S implements \ArrayAccess, \Iterator
 {
 
-	/**
-	 * La cadena literal
-	 * @var string
-	 */
-	private $cadena;
+	/** The actual string */
+	private $string;
 
-    /**
-     * La codificación de la cadena
-     */
+    /** String encoding */
     private $encoding;
 
-    /**
-     * La posición del iterador
-     */
-    private $pos_iter;
+    /** Iterator index */
+    private $iter_index;
 
-	/**
-	 * Mapeo de comandos de esta clase, con los comandos PHP
-	 * @var array
-	 */
-	private $funciones = [
+	/** Function mapping for simple PHP functions */
+	private $functions = [
 		'toUpper' => 'mb_strtoupper',
         'toLower' => 'mb_strtolower',
         'slice' => 'mb_substr',
         'length' => 'mb_strlen',
         'indexOf' => 'mb_strpos',
         'pad' => 'str_pad',
+        'find' => 'mb_strstr',
 	];
 
 	/**
 	 * Constructor from a string
      *
      * @param string $string String literal
-     * @param string $encoding Optional string encoding. Default autodetecs.
+     * @param string $encoding Optional string encoding. Default autodetects.
 	 */
 	function __construct($string = '', $encoding = false)
     {
-        $this->cadena = (string)$cadena;
+        $this->string = (string)$string;
 
-        if (!$codificación) {
-            $this->codificación = mb_detect_encoding($cadena);
+        if (!$encoding) {
+            $this->encoding = mb_detect_encoding($string);
         }
         else {
-            $this->codificación = $codificación;
+            $this->encoding = $encoding;
         }
 	}
 
-	function __call($funcion, $args = [])
+	function __call($function, $args = [])
     {
-        return $this->ejecuta_función($funcion, $args);
+        return $this->callFunction($function, $args);
 	}
 
     /**
-     * Ejecuta funciones PHP sobre la cadena. Usa la tabla de alias 
-     * $funciones.
+     * Call PHP functions over the string.
      *
-     * @return Vendimia\S Nuevo objeto S con el resultado
+     * @return S New object with function result
      */
-    private function ejecuta_función($funcion, $args = [])
+    private function callFunction($function, $args = [])
     {
         // Si existe un equivalente en $thid->_functions, lo
         // usamos.
-        if (array_key_exists ($funcion, $this->funciones)) {
-            $funcion_real = $this->funciones[$funcion];
+        if (isset($this->functions[$function])) {
+            $real_function = $this->functions[$function];
         } else {
-            $funcion_real = $funcion;
+            $real_function = $function;
         }
 
         // Existe la función?
-        if (!is_callable($funcion_real)) {
-            throw new \BadFunctionCallException("'$funcion' is not a valid method.");
+        if (!is_callable($real_function)) {
+            throw new \BadFunctionCallException("'$function' is not a valid method.");
         }
 
         // Colocamos la cadena como primer paráemtro
-        array_unshift($args, $this->cadena);
+        array_unshift($args, $this->string);
 
-        // Cambiamos la codificación interna de las funciones mb_
-        if (!mb_internal_encoding($this->codificación)) {
-            throw new \RuntimeException("Error colocando la codificación a {$this->codificación}");
+        // Cambiamos la $encoding interna de las funciones mb_
+        if (!mb_internal_encoding($this->encoding)) {
+            throw new \RuntimeException("Error colocando la $encoding a {$this->encoding}");
         }
 
         // Llamamos a la función
-        $res = call_user_func_array($funcion_real, $args);
+        $res = call_user_func_array($real_function, $args);
         
         // Si lo que devuelve es un string, lo reencodeamos
         if (is_string($res)) {
@@ -100,37 +90,39 @@ class S implements \ArrayAccess, \Iterator
     }
 
     /**
-     * Añade una cadena al final
+     * Appends a string
      *
-     * @param string $cadena cadena a añadir al final
+     * @param string $string String to append
      */
-    public function append($cadena)
+    public function append($string)
     {
-        $this->cadena .= (string)$cadena;
-        return $this;
+        return new self($this->string . (string)$string);
     }
 
     /**
-     * Añade una cadena al inicio
-     * @param string $cadena Cadena a añadir al principio
+     * Prepends a string
+     *
+     * @param string $string String to prepend
      */
-    public function prepend($cadena)
+    public function prepend($string)
     {
-        $this->cadena = (string)$cadena . $this->cadena;
-        return $this;
+        return new self((string)$string . $this->string);
     }
 
     /**
-     * Inserta una cadena en una posición
+     * Insert a string in a position
+     *
+     * @param integer $position Character where to insert
+     * @param string $string String to insert 
      */
-    public function insert($posicion, $cadena)
+    public function insert($position, $string)
     {
-        $this->cadena = (string)($this(0, $posicion) . $cadena . $this ($posicion));
-        return $this;
+        return new self((string)($this(0, $position) . $string . $this($position)));
     }
 
     /**
      * Shortcut for left-padding the string
+     *
      * @param int $length Padding lenght
      * @param string $fill Fill character
      */
@@ -140,100 +132,119 @@ class S implements \ArrayAccess, \Iterator
     }
 
     /**
-     * Reemplaza las ocurrencias de una cadena por otra
-     * @param string $de Cadena a buscar
-     * @param string $a Cadena a reemplazar
+     * Shortcut for right-padding the string
+     *
+     * @param int $length Padding lenght
+     * @param string $fill Fill character
      */
-    public function replace($de, $a) {
-        $de_len = mb_strlen($de);
-        $a_len = mb_strlen($a);
-        $cadena = $this->cadena;
-
-        $pos = mb_strpos($this->cadena, $de);
-
-        while($pos !== false) {
-            $cadena = mb_substr($cadena, 0, $pos) . $a .
-                mb_substr($cadena, $pos + $de_len);
-
-            $pos = mb_strpos($cadena, $de, $pos + $a_len);
-        }
-        return new self($cadena);
+    public function pad_right($length, $fill = " ")
+    {
+        return $this->pad($length, $fill, STR_PAD_RIGHT);
     }
 
     /**
-     * Añade variables {} al texto
+     * Shortcut for both-padding (centering) the string
+     *
+     * @param int $length Padding lenght
+     * @param string $fill Fill character
      */
-    public function format() {
-        $values = func_get_args();
-
-        // Si el 1er parámetro es una array, lo usamos de origen
-        if(is_array($values [0] ))
-            $values = $values [0];
-
-        // Obtenemos las variables
-        $data = [];
-        $count = preg_match_all('/{([a-zA-Z0-9:]*?)}/', $this->cadena, 
-            $data, PREG_OFFSET_CAPTURE);
-        var_dump($data);
+    public function pad_both($length, $fill = " ")
+    {
+        return $this->pad($length, $fill, STR_PAD_BOTH);
     }
 
     /**
-     * Ejecuta un substr si hay argumentos
+     * Replace a substring for another
+     *
+     * @param string $from Cadena a buscar
+     * @param string $to Cadena a reemplazar
      */
-    public function  __invoke () {
-        return $this->ejecuta_función('mb_substr', func_get_args());
+    public function replace($from, $to, $count = null)
+    {
+        return new self(str_replace($from, $to, $this->string, $count));
+    }
+
+    /**
+     * Applies a sprintf() function to the string
+     *
+     * @param mixed Variadic positional replace values
+     */
+    public function sprintf(...$args)
+    {
+        return new self(sprintf($this->string, ...$args));
+    }
+
+    /**
+     * Magic method to perform a substringargumentos
+     */
+    public function __invoke(...$args)
+    {
+        return $this->callFunction('mb_substr', $args);
     }
 
 	/**
-	 * Función mágina que retorna la misma cadena
+	 * Returns the string
+     *
 	 * @return string
 	 */
 	function __toString() {
-		return $this->cadena;
+		return $this->string;
 	}
 
     /***** IMPLEMENTACIÓN DEL ARRAYACCESS *****/
-    public function offsetExists($offset) {
-        return $offset >= 0 && $offset < mb_strlen($this->cadena);
+    public function offsetExists($offset)
+    {
+        return $offset >= 0 && $offset < mb_strlen($this->string);
     }
 
-    public function offsetGet($offset) {
-        return new self(mb_substr($this->cadena, $offset, 1 ));
+    public function offsetGet($offset)
+    {
+        return new self(mb_substr($this->string, $offset, 1 ));
     }
 
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value)
+    {
 
         // $value debe ser un string
         $value = (string)$value;
 
-        $this->cadena = 
-            mb_substr($this->cadena, 0, $offset ) .
+        $this->string = 
+            mb_substr($this->string, 0, $offset ) .
             $value .
-            mb_substr($this->cadena, $offset + 1);
-
+            mb_substr($this->string, $offset + 1);
     }
-    public function offsetUnset($offset) {
-        $this->cadena = 
-            mb_substr($this->cadena, 0, $offset ) .
-            mb_substr($this->cadena, $offset + 1);
+
+    public function offsetUnset($offset)
+    {
+        $this->string = 
+            mb_substr($this->string, 0, $offset ) .
+            mb_substr($this->string, $offset + 1);
         
     }
     
-    /***** IMPLEMENTACIÓN DEL ITERATOR *****/
-    public function current () {
-        return $this [ $this->_positer ];
-    }
-    public function key () {
-        return $this->_positer;
-    }
-    public function next () {
-        $this->_positer++;
-    }
-    public function rewind () {
-        $this->_positer = 0;
-    }
-    public function valid () {
-        return $this->offsetExists($this->_positer);
+
+    public function current()
+    {
+        return $this[$this->iter_index];
     }
 
+    public function key()
+    {
+        return $this->iter_index;
+    }
+
+    public function next()
+    {
+        $this->iter_index++;
+    }
+
+    public function rewind()
+    {
+        $this->iter_index = 0;
+    }
+
+    public function valid ()
+    {
+        return $this->offsetExists($this->iter_index);
+    }
 }
