@@ -50,7 +50,7 @@ $inception = $class == 'Vendimia\\Inception';
     <main>
     <h3>Stack trace:</h3>
 <?php
-        $trace = $E->getTrace();
+        $trace = array_reverse($E->getTrace());
         
         // En la traza, metemos el fichero original
         array_unshift ( $trace, [
