@@ -190,7 +190,6 @@ V = {
         return result ? result.pop() : ''
     },
 
-
     /**
      * Obtiene las coordenadas absolutas de un elemento, con respecto al documento
      */
@@ -202,5 +201,4 @@ V = {
 
         return [r['left'] + window.pageXOffset, r['top'] + window.pageYOffset]
     },
-
-};
+}
