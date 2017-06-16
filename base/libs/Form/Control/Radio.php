@@ -13,7 +13,8 @@ class Radio extends ControlAbstract
         'html_item' => []      // Tag que rodeará cada item
     ];
 
-    function draw() {
+    public function draw()
+    {
         $html = '';
         foreach ($this->list as $id => $value) {
 
@@ -31,7 +32,8 @@ class Radio extends ControlAbstract
                 'id' => $optid,
             ];
 
-            if ( !is_null ( $this->value ) && $id == $this->value ) {
+
+            if (!is_null($this->value) && $id == $this->value) {
                 $params['checked'] = 'true';
             }
 

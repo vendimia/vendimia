@@ -93,32 +93,31 @@ abstract class ControlAbstract implements ValueInterface
 	 * Al crear un nuevo objeto del campo, los parámetros del constructor
 	 * son las propiedades de este elemento.
 	 */
-	function __construct ($name, $properties, $form) {
+	function __construct ($name, $properties, $form)
+    {
 
         // Este control tiene propiedades por defecto?
-        if ( $this->extra_properties ) {
-            $this->properties = array_merge( $this->properties, $this->extra_properties );
+        if ($this->extra_properties) {
+            $this->properties = array_merge($this->properties, $this->extra_properties);
         }
-
 
         $this->name = $name;
         
         // Mezclamos las propiedades con las propiedades por defectos
-        $this->properties = array_merge( $this->properties, $properties );
+        $this->properties = array_merge($this->properties, $properties);
 
         // Si no tiene un caption, le creamos uno
         if (is_null($this->caption)) {
-            $this->caption = ucfirst (strtolower( strtr($name, '_', ' ')));
+            $this->caption = ucfirst(strtolower( strtr($name, '_', ' ')));
         }
 
         $this->form = $form;
-
 	}
 
     /**
      * Vendimia\Html\Tag wrapper for adding this control's 'html_extra' properties
      */
-    function htmlTag ($tagname, $vars = [], $content = null, $options = []) 
+    public function htmlTag($tagname, $vars = [], $content = null, $options = []) 
     {
         $vars = array_merge($this->html, $vars);
         
@@ -132,7 +131,7 @@ abstract class ControlAbstract implements ValueInterface
     /**
      * Draws the label block
      */
-    public function drawLabel ($add_sufix = true) 
+    public function drawLabel($add_sufix = true) 
     {
         if (!$this->draw_label) {
             return '';
@@ -370,35 +369,40 @@ abstract class ControlAbstract implements ValueInterface
     /**
      * Returns this control form
      */
-    public function getForm() {
+    public function getForm()
+    {
         return $this->form;
     }
 
 	/**
 	 * Shortcut to draw(), calling this control as a function.
  	 */
-	public function __invoke () {
+	public function __invoke ()
+    {
 		return $this->draw();
 	}
 
 	/**
 	 * Shortcut to getValue(), acessing this control as string.
 	 */
-	public function __toString() {
+	public function __toString()
+    {
         return (string)$this->getValue();
 	}
 
     /**
      * Properties setter.
      */
-    public function __set ($prop, $value) {
+    public function __set ($prop, $value)
+    {
     	$this->properties[$prop] = $value;
     }
 
     /**
      * Properties getter.
      */
-    public function __get ($prop) {
+    public function __get($prop)
+    {
         if (!array_key_exists($prop, $this->properties)) {
            throw new \RuntimeException  ("Unknow '$prop' property.");
         }
@@ -409,7 +413,8 @@ abstract class ControlAbstract implements ValueInterface
     /**
      * PHP isset() magic function.
      */
-    public function __isset ($prop) {
+    public function __isset($prop)
+    {
         return key_exists ($prop, $this->properties);
     }
 
