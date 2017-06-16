@@ -49,19 +49,6 @@ class EntityParser
                 throw new \InvalidArgumentException("Class for '{$property->getName()}' field is missing.");
             }
 
-            // Si hay una longitud en campo 0 y 1, la colocamos en 
-            // el campo length
-            /*
-            if (key_exists(0, $data['properties'])) {
-                $length = $data['properties'][0];
-
-                if (key_exists(1, $data['properties'])) {
-                    $length .= ', ' . $data['properties'][1];
-                }
-                $data['properties']['length'] = $length;
-            }
-            */
-
             // Obtenemos el FQDN de la clase
             $fqcn = $this->fqcn->get($data['class']);
 
@@ -137,7 +124,13 @@ class EntityParser
             $class = $parameters[0];
             $properties = $parameters[1];
 
-            $properties = $class::validateProperties($fieldname, $properties);
+            // Este clase tiene un campo en la db?
+            if (!$class::isDatabaseField()) {
+                continue;
+            }
+
+            // El 'null' es para la entidad. No la necesitamos en este punto.
+            $properties = $class::validateProperties(null, $fieldname, $properties);
 
             // Si hay un database_field, lo usamos
             if (isset($properties['database_field'])) {
@@ -161,7 +154,6 @@ class EntityParser
 
             if ($length = static::ifKey($properties, 'length')) {
                 $data['length'] = $length;
-
             }
 
             // Algunos campos _necesitan_ una longitud
