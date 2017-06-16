@@ -10,13 +10,18 @@ class ExceptionHandler
      */
     public static function handler($exception)
     {
+        // Logueamos el evento.
+        $line = get_class($exception);
 
-        // Loggin!
-        $logger = Vendimia::$services->get('Vendimia.Logger');
-        $logger->alert($exception, [
-            'exception' => $exception,
-            'request' => Vendimia::$request,
-        ]);
+        $message = $exception->getMessage();
+        if ($message) {
+            $line .= ': ' . $message;
+        }
+
+        $line .=  ' on ' . $exception->getFile() .
+            ':' . $exception->getLine();
+
+        Vendimia::$logger->alert($line);
 
 
         // El nombre del método es el tipo de ejecución
@@ -43,6 +48,7 @@ class ExceptionHandler
      */
     public static function handleWeb($exception)
     {
+
         // Borramos cualquier salida, solo mostramos la excepción
         if (ob_get_length()) { 
             ob_clean();

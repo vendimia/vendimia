@@ -41,6 +41,9 @@ class Vendimia
     /** CSRF object */
     static public $csrf;
 
+    /** Default Vendimia Logger */
+    static public $logger;
+
     /** Service container*/ 
     static public $services = null;
     
@@ -97,20 +100,15 @@ class Vendimia
         // Protección contra csrf
         self::$csrf = new Vendimia\Csrf;
 
-        // Service container
+        // ServiceLocator
         self::$services = new Vendimia\ServiceContainer;
 
 
-        // Creamos un logger por defecto
-        self::$services->bind('Vendimia.Logger', function() {
-            if (Vendimia::$debug) {
-                $level = Vendimia\Logger\Logger::DEBUG;
-            } else {
-                $level = Vendimia\Logger\Logger::ERROR;
-            }
-            return (new Vendimia\Logger\Logger)
-                ->addTarget($level, new Vendimia\Logger\Target\PhpErrorLog);
-        });
+        // El logger por default
+        self::$logger = new Vendimia\Logger\Logger;
+        $level = Vendimia::$settings['logger']['level'];
+        $target = Vendimia::$settings['logger']['target'];
+        self::$logger->addTarget($level, new $target);
 
         // Obtenemos la ruta web de este proyecto. Usamos
         // la ruta web de index.php para sacar la raiz.

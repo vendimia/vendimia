@@ -95,13 +95,12 @@ if(!$bare) {
         'base' => [
             'controllers',
             'models',
-            'services',
+            'orm',
             'libs',
             'views' => [
                 'layouts',
             ],
             'forms',
-            'db',
             'assets' => [
                 'css', 'js', 'imgs'
             ]
@@ -173,6 +172,12 @@ $webroot_config
 ],
 /**/
 
+// Default logger
+'logger' => [
+    'level' => Vendimia\Logger\Logger::ERROR,
+    'target' => Vendimia\Logger\Target\PhpErrorLog::class,
+],
+
 // Directory for static content. Can be an absolute path, o relative to this
 // project path.
 'static_dir' => 'static/',
@@ -193,8 +198,15 @@ if (!$bare) {
 // All the values here will replace the ones from config/settings.php.
 //
 // You can set the working environment in the 'index.php' from your project.
+
 return [
-    'debug_mode' => true,
+
+'debug_mode' => true,
+
+'logger' => [
+    'level' => Vendimia\Logger\Logger::DEBUG,
+],
+
 ];
 EOF;
 
