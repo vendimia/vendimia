@@ -149,7 +149,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
             $data = $data->asArray();
         }
         foreach ($data as $field => $value) {
-            $this->fields[$field]->setValue($value);
+            $this->setValue($field, $value);
         }
         $this->is_empty = false;
     }
@@ -235,7 +235,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
     /**
      * Updates this record
      */
-    public function update(array $values)
+    public function update($values)
     {
         $this->setValues($values);
         return $this->save();
@@ -302,7 +302,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
         } elseif (isset($this->database_fields[$field])) {
             return $this->database_fields[$field];
         } else {
-            throw new \InvalidArgumentException("Retrieving value of unknow field '$field' in this entity");
+            throw new \InvalidArgumentException("Trying to retrieve value from an unknow field '$field' in this entity");
         }
 
         return $this->fields[$field]->getValue();
@@ -347,8 +347,8 @@ abstract class Entity implements AsArrayInterface, ValueInterface
             return false;
         }
 
-        foreach ($data as $field => $val) {
-            $field = $this->database_fields[$field];
+        foreach ($data as $fieldname => $val) {
+            $field = $this->database_fields[$fieldname];
             $field->setValue($val);
         }
         $this->is_empty = false;
@@ -356,9 +356,17 @@ abstract class Entity implements AsArrayInterface, ValueInterface
 
     /**
      * Returns this entity base class
+     *
+     * @param bool $only_name returns the last part of the FQCN
      */
-    public function getClass()
+    public function getClass($only_name = false)
     {
+        if ($only_name) {
+            $class = '\\' . $this->base_class;
+            $slashpos = strrpos($class, '\\');
+            return substr($class, $slashpos + 1);
+        }
+
         return $this->base_class;
     }
 
@@ -367,11 +375,18 @@ abstract class Entity implements AsArrayInterface, ValueInterface
      */
     public function AsArray($fields = null)
     {
-        // $this->retrieveRecord();
-        if (is_null($fields))
-        {
+        $this->retrieveRecord();
+        $result = [];
 
+        if (is_null($fields)) {
+            $fields = array_keys($this->fields);
         }
+
+        foreach ($fields as $field) {
+            $result[$field] = $this->fields[$field]->getValue();
+        }
+
+        return $result;
     }
 
     /**
