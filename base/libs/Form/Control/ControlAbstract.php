@@ -8,7 +8,8 @@ use Vendimia\Form\Validator;
 use Vendimia\Database\ValueInterface;
 use Vendimia\Database\ConnectorInterface;
 
-abstract class ControlAbstract implements ValueInterface {
+abstract class ControlAbstract implements ValueInterface
+{
 
     /** Parent form object */
     protected $form = null;

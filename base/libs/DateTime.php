@@ -1,6 +1,9 @@
 <?php
 namespace Vendimia;
 
+/**
+ * DateTime class
+ */
 class DateTime implements Database\ValueInterface
 {
     private $parts = [
@@ -61,18 +64,19 @@ class DateTime implements Database\ValueInterface
     /**
      * Helper for rounding half down numbers
      */
-    public static function round($number)
+    private static function round($number)
     {
         //return $number > 0 ? floor ( $number ) : ceil ( $number );
         return round($number, 0, PHP_ROUND_HALF_DOWN);
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param string $str Date/time string 
+     */
     public function __construct ($str = null, $interval = false)
     {
-        // Ponemos todas las partes en cero
-        /*foreach ( $this->parts as $part ) {
-            $this->parts_data [ $part ] = 0;
-        }*/
         $this->parts_data = array_fill_keys($this->parts, 0);
 
         if (!is_null($str)) {
@@ -95,7 +99,7 @@ class DateTime implements Database\ValueInterface
         // Deconstruimos la fecha
 
         // Timestamp
-        if ( $this->timestamp ) {
+        if ($this->timestamp) {
             $p = getdate ( $this->timestamp );
 
             $this->year = $p['year'];
@@ -110,40 +114,54 @@ class DateTime implements Database\ValueInterface
             $this->yearday = $p['yday'];
 
             $this->is_now = false;
-        }
-        elseif ( $this->interval ) {
+        } elseif ( $this->interval ) {
             $this->second = $this->interval % 60;
             $this->minute = static::round($this->interval / 60) % 60;
             $this->hour = static::round($this->interval / 3600) % 24;
-            //$this->day = static::round( $this->interval / 86400 );
             $this->day = static::round($this->interval / 86400);
         }
     }
 
-    //
-    // Funciones estáticas de conveniencia
-    // 
-    static function tomorrow() {
+    /**
+     * Returns a new DateTime object with tomorrow date
+     */
+    static function tomorrow()
+    {
         return (new static)->add(static::day(1));
     }
-    static function yesterday() {
+
+    /**
+     * Returns a new DateTime object with yesterday date
+     */
+    static function yesterday()
+    {
         return (new static)->sub(static::day(1));
     }
-    static function now() {
+
+    /**
+     * Returns a new DateTime object with now date/time.
+     *
+     * Same result will be obtain just instanciating this class without
+     * parameters.
+     */
+    static function now()
+    {
         return new static;
     }
 
     /**
-     * Creates a new object 
+     * Syntax sugar for avoiding the PHP 'new' low precedence
      */
-    static function create($date_str = null) {
+    static function create($date_str = null)
+    {
         return new static($date_str);
     }
 
     /**
-     * Solo usa la parte de la fecha
+     * Sets the time part to 00:00:00 without altering the date part.
      */
-    function date() {
+    function date()
+    {
         $this->hour = 0;
         $this->minute = 0;
         $this->second = 0;
@@ -202,6 +220,12 @@ class DateTime implements Database\ValueInterface
         return $this->timestamp;
     }
 
+    /**
+     * Returns a formatted string representation.
+     *
+     * If a '%' sign is found, then the strftime() PHP function will be used,
+     * otherwise the date() function will be used.
+     */
     function format($format = null)
     {
 
