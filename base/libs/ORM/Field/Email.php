@@ -1,12 +1,14 @@
 <?php
 namespace Vendimia\ORM\Field;
 
+use Vendimia\ORM\Entity;
+
 /**
  * Email field. It's a char with default length of 254.
  */
 class Email extends Char
 {
-    public static function validateProperties($field_name, array $properties)
+    public static function validateProperties(Entity $entity = null, $field_name, array $properties)
     {
         $length_in_index_0 = key_exists(0, $properties);
         $length_as_property = key_exists('length', $properties);

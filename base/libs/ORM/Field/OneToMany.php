@@ -14,7 +14,7 @@ class OneToMany extends FieldBase
     private $target_class;
     private $entity_set;
 
-    protected $is_database_field = false;
+    protected static $is_database_field = false;
 
     public function __construct(Entity $entity, $field_name, array $properties)
     {
@@ -30,7 +30,7 @@ class OneToMany extends FieldBase
         return DBField::ForeignKey;
     }
 
-    public static function validateProperties($field_name, array $properties)
+    public static function validateProperties(Entity $entity = null, $field_name, array $properties)
     {
         $in_index_0 = isset($properties[0]);
         $as_property = isset($properties['target_class']);
@@ -43,8 +43,11 @@ class OneToMany extends FieldBase
             $properties['target_class'] = $properties[0];
         }
 
-        if (!isset($properties['foreing_key'])) {
-            $properties['foreing_key'] = $field_name . '_id';
+
+        if ($entity)  {
+            if (!isset($properties['foreing_key'])) {
+                $properties['foreing_key'] = $entity->getClass(true) . '_id';
+            }
         }
         
         return $properties;

@@ -7,7 +7,7 @@ use Vendimia\Database\Field as DBField;
 
 class Char extends FieldBase
 {
-    public static function validateProperties($field_name, array $properties)
+    public static function validateProperties(Entity $entity = null, $field_name, array $properties)
     {
         // Char requiere la propiedad 0 o 'length'
         $length_in_index_0 = key_exists(0, $properties);

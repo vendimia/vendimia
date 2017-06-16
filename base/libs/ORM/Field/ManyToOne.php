@@ -54,7 +54,7 @@ class ManyToOne extends FieldBase
         return DBField::ForeignKey;
     }
 
-    public static function validateProperties($field_name, array $properties)
+    public static function validateProperties(Entity $entity = null, $field_name, array $properties)
     {
 
         // Char requiere la propiedad 0 o 'length'
@@ -71,7 +71,7 @@ class ManyToOne extends FieldBase
 
         if (!isset($properties['database_field'])) {
             $properties['database_field'] = $field_name . '_id';
-        }        
+        }
 
         return $properties;
     }

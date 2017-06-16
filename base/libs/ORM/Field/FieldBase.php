@@ -20,7 +20,7 @@ abstract class FieldBase implements ValueInterface
     protected $entity;
 
     /** Does this field return a database value? */
-    protected $is_database_field = true;
+    protected static $is_database_field = true;
 
     /**
      * Default constructor
@@ -32,7 +32,7 @@ abstract class FieldBase implements ValueInterface
     public function __construct(Entity $entity, $field_name, array $properties)
     {
         $this->field_name = $field_name;
-        $this->properties = static::validateProperties($field_name, $properties);
+        $this->properties = static::validateProperties($entity, $field_name, $properties, $entity);
         $this->entity = $entity;
     }
 
@@ -79,9 +79,9 @@ abstract class FieldBase implements ValueInterface
     /**
      * Returns whether this field is mapped to a database field
      */
-    public function isDatabaseField()
+    public static function isDatabaseField()
     {
-        return $this->is_database_field;
+        return static::$is_database_field;
     }
 
     /**
@@ -89,9 +89,10 @@ abstract class FieldBase implements ValueInterface
      *
      * @param string $field_name Field name used by this class instance
      * @param array $properties Properties to analyze
+     * @param Entity $Entity Optional related entity
      * @return mixed Array of validated properties, or false on error
      */
-    public static function validateProperties($field_name, array $properties)
+    public static function validateProperties(Entity $entity = null, $field_name, array $properties)
     {
         return $properties;
     }
