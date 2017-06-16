@@ -1,6 +1,9 @@
 <?php
 namespace Vendimia;
 
+/**
+ * Object container for ServiceLocator pattern
+ */
 class ServiceContainer
 {
     /** Object builders */
@@ -10,7 +13,7 @@ class ServiceContainer
     private $objects = [];
 
     /**
-     * Stores a closure for creating an object.
+     * Stores a closure or an object
      */
     public function bind($name, $closure)
     {
@@ -32,16 +35,19 @@ class ServiceContainer
         if (isset($this->objects[$name])) {
             return $this->objects[$name];
         } else {
-            $object = $this->make($name, ...$args);
+            $object = $this->build($name, ...$args);
             $this->objects[$name] = $object;
             return $object;
         }
     }
 
     /**
-     * Instanciate a new object. Doesn't save it.
+     * Builds and returns an object.
+     *
+     * @param string $name Builder name
+     * @param array $args Variadic arguments for the builder constructor
      */
-    public function make($name, ...$args)
+    public function build($name, ...$args)
     {
         if (!key_exists($name, $this->builders)) {
             throw new \RuntimeException ("Service '$name' undefined.");
