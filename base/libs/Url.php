@@ -156,6 +156,22 @@ class Url
     }
 
     /**
+     * Returns a single-quoted URL
+     */
+    public static function q(...$params)
+    {
+        return "'" . new self(...$params) . "'";
+    }
+
+    /**
+     * Returns a double-quoted URL
+     */
+    public static function qq(...$params)
+    {
+        return '"' . new self(...$params) . '"';
+    }
+
+    /**
      * Magic method for conver to string
      */
     public function __toString()
