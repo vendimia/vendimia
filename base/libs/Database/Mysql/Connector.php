@@ -78,15 +78,12 @@ class Connector implements Database\ConnectorInterface
             }, $string);
 
             return $string;
-        } elseif (is_numeric($string)) {
-            // Si comillas
-            return $string;
-        } elseif (is_null($string)) {
-            return 'NULL';
-        } else {
+        } elseif (is_string($string)) {
             return $quotation . 
                 $this->connection->real_escape_string($string) .
-                $quotation;
+                $quotation;            
+        } else {
+            throw new \InvalidArgumentException('Tried to escape a non-string value (' . gettype($string) . ').');
         }
     }
 
@@ -98,7 +95,7 @@ class Connector implements Database\ConnectorInterface
     public function fieldValue($field, $value) 
     {
         return $this->escapeIdentifier($field) . '=' . 
-            $this->escape($value);
+            $this->valueFromPHP($value);
     }
 
     public function valueFromPHP($value)
@@ -114,7 +111,7 @@ class Connector implements Database\ConnectorInterface
                 return $value->getDatabaseValue($this);
              } else {
                 throw new \RuntimeException("Object of type '" . 
-                    get_class($value) . "' can't be directly converted to a database value.") ;
+                    get_class($value) . "' cannot be directly converted to a database value.") ;
              }
         } else {
             return $this->escape($value);
@@ -229,7 +226,6 @@ class Connector implements Database\ConnectorInterface
 
     public function execute($query)
     {
-        //var_dump($query);exit;
         $result = $this->connection->query($query);
         if ($result === false) {
             throw new Database\QueryException($this->connection->error, [
