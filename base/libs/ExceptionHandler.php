@@ -71,9 +71,31 @@ class ExceptionHandler
      */
     public static function handleAjax($exception)
     {
-        Ajax::send(Ajax::EXCEPTION, [
-            'name' => get_class($exception),
-            'message' => $exception->getMessage(), 
-        ]);
+        if (Vendimia::$debug) {
+            $trace = $exception->getTrace();
+
+            $ajax_trace = [];
+            foreach ($trace as $t) {
+                $line = '-';
+                if (isset($t['file'])) {
+                    $line = $t['file'];
+                }
+                if (isset($t['line'])) {
+                    $line .= ':' . $t['line'];
+                }
+
+                $ajax_trace[] = $line;
+            }
+
+            Ajax::send(Ajax::EXCEPTION, [
+                'name' => get_class($exception),
+                'message' => $exception->getMessage(), 
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'trace' => $ajax_trace,
+            ]);
+        } else {
+            Ajax::send(Ajax::EXCEPTION);
+        }
     }
 }
