@@ -260,6 +260,20 @@ abstract class Entity implements AsArrayInterface, ValueInterface
         }
 
         // TODO: Verificar los registros relacionados, en especial OneToMany
+        foreach ($this->fields as $field) {
+            if ($field->isDependant()) {
+                $ondelete = $field->getProperty('on_delete', 'cascade');
+
+                if ($ondelete == 'cascade') {
+                    // Borramos el registro
+                    $field->getValue()->delete();
+                } elseif ($ondelete == 'null') {
+                    $field->getValue()->update([
+                        $field->getProperty('foreing_key') => null
+                    ]);
+                }
+            }
+        }
 
         $where = static::$database_connector->fieldValue(
             static::$primary_key, $this->pk()
@@ -283,6 +297,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
             $this->is_empty = false;
         } elseif (isset($this->database_fields[$field])) {
             $this->database_fields[$field]->setValue($value);
+            $this->modified_fields[$this->database_fields[$field]->getFieldName()] = true;
 
             $this->is_empty = false;
         } else {
@@ -307,6 +322,15 @@ abstract class Entity implements AsArrayInterface, ValueInterface
 
         return $this->fields[$field]->getValue();
     }
+
+    /**
+     * Syntax sugar for getValue()
+     */
+    public function _($field)
+    {
+        return $this->getValue($field);
+    }
+
 
     /**
      * Magic setter
@@ -394,7 +418,14 @@ abstract class Entity implements AsArrayInterface, ValueInterface
      */
     public function getDatabaseValue(ConnectorInterface $connector)
     {
-        return $connector->escape($this->pk());
+        // Es posible que el primary key no sea un entero... 
+        // mejor lo pasamos por ValueFromPHP para que lo escape 
+        // correctamente.
+        return $connector->ValueFromPHP($this->pk());
     }
 
+    function __toString()
+    {
+        return '<Entity of ' . get_class($this) . '(' . $this->pk() . ')>';
+    }
 }
