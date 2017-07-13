@@ -66,7 +66,7 @@ class OneToMany extends FieldBase
                 throw new \RuntimeException("Class '$class' required for field '{$this->field_name}' doesn't exists.");
             }
 
-            $this->entity_set = $class::find([
+            $this->entity_set = $class::newConstrained([
                 $this->properties['foreing_key'] => $this->entity->pk()
             ]);        
         }
