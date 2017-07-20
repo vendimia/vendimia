@@ -30,7 +30,7 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
     /**
      * Returns a collection value
      */
-    public function get($element, $default_value = null)
+    public function &get($element, $default_value = null)
     {
         if ($this->has($element)) {
             return $this->array[$element];
@@ -101,7 +101,7 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
     /**
      * Magic function for accessing elements as object properties
      */
-    public function __get($element) {
+    public function &__get($element) {
         return $this->get($element);
     }
 
