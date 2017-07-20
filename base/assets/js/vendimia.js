@@ -1,49 +1,64 @@
 V = {
-    URLBASE: document.getElementsByTagName ('base')[0].href,
+    URLBASE: document.getElementsByTagName('base')[0].href,
 
     /**
-     * Obtiene el primer elemento que encaje con el selector
+     * Gets the first element who matches the selector.
      */
-    e: function (selector) {
-        return  document.querySelector (selector)
+    e: function (selector) 
+    {
+        return  document.querySelector(selector)
     },
 
     /**
-     * Obtiene todos los elementos que encajen con los selectores
+     * Gets all the elements matching the selector.
      */
-    es: function (selectors) {
-        return  document.querySelectorAll (selectors)
+    es: function (selector)
+    {
+        return  document.querySelectorAll(selector)
     },
 
     /**
-     * Obtiene el elemento con ID 'id'
+     * Gets an element by its id attribute.
      */
-    id: function (id) {
-        return document.getElementById (id)
+    id: function (id)
+    {
+        return document.getElementById(id)
     },
 
     /**
-     * Obtiene el primer elemento por su nombre
+     * Gets the first element by its name attribute.
      */
-    n: function (name) {
+    n: function (name)
+    {
         return document.getElementsByName(name)[0]
     },
 
-    /** Obtiene todos los elementos por su nombre
-     *
+    /**
+     * Gets all the elements by its name attribute.
      */
-    ns: function (name) {
+    ns: function (name)
+    {
         return document.getElementsByName(name)
     },
 
     /**
      * Gets the first nodes by tag name
      */
-    t: function(name) {
+    t: function(name)
+    {
         return document.getElementsByTagName(name)[0]
     },
+
     /**
-     * Crea un nuevo elemento
+     * Gets all the elements by its tag name
+     */
+    ts: function(name)
+    {
+        return document.getElementsByTagName(name)
+    },
+
+    /**
+     * Creates a new element.
      */
     c: function (element, attributes, content) {
         var el = document.createElement (element);
@@ -57,11 +72,11 @@ V = {
 
 
         if (attributes) for (a in attributes) {
-
-            if (typeof attributes[a] == "function") 
-                el[a] = attributes [ a ]
-            else
-                el.setAttribute (a, attributes [ a ])
+            if (typeof attributes[a] == "function") {
+                el[a] = attributes[a]
+            } else {
+                el.setAttribute(a, attributes[a])
+            }
         }
 
         if (content) {
@@ -72,17 +87,17 @@ V = {
     },
 
     /** 
-     * Crea una suceción de TDs dentro de un TR con cada elemento del array
+     * Creates a series of TDs inside a TR with each array element.
      */
-    tr: function (data, td_opts, tr_opts) {
+    tr: function (data, td_opts, tr_opts)
+    {
 
         tr = this.c ('tr', tr_opts)
         for (id in data) {
 
             if (td_opts && id in td_opts) {
                 opts = td_opts[id]
-            }
-            else {
+            } else {
                 opts = {}
             }
 
@@ -95,32 +110,42 @@ V = {
     },
 
     /**
-    * Redirige a otra URL, opcionalmente con variables. Si el 
-    * método es POST, crea un formulario.
-    */
+     * Redirects to another URL with optional method and payload.
+     */
     redirect: function (url, method, variables) {
         var method = typeof method !== 'undefined' ? method : 'get'
 
-        // Si no tiene un scheme, le añadimos la URL base
-        /*if (url.substr (0, 7) != 'http://')
-            url = URLBASE + url;*/
+        // Si url es un objeto, entonces son las variables, y la
+        // url es esta misma url
+        if (typeof url === 'object') {
+            variables = url
+            url = window.location
+        }
+
 
         // Si es GET, y no hay variables, super simple
         if (method == "get" && typeof variables == "undefined") {
             window.location.href = url
-        }
-        else {
+        } else {
+
             var form = this.c('form', {
                 method: method,
                 action: url
             })
 
-            if (variables) for (id in variables) {
+            // En POSTS, añadimos el token CSRF
+            if (method == 'post') {
+                if (typeof variables == 'undefined') {
+                    variables = {}
+                }
+                variables['__VENDIMIA_SECURITY_TOKEN'] = 
+                    V.e('meta[name=vendimia-security-token]').content
+            }
 
+            if (variables) for (id in variables) {
                 // Si el valor es un array, entonces tenemos
                 // que duplicar
                 if (Array.isArray ( variables[id]) ) {
-
                     for (element in variables[id]) {
                         value = variables[id][element]
 
@@ -131,8 +156,7 @@ V = {
                         })
                         form.appendChild (el)
                     }
-                }
-                else {
+                } else {
                     el = this.c('input', {
                         type: 'hidden',
                         name: id,
@@ -140,8 +164,8 @@ V = {
                     })
                     form.appendChild (el)
                 }
-
             }
+
 
             // Para Firefox: añadimos el formulario al body
             document.body.appendChild(form);
@@ -152,15 +176,9 @@ V = {
     /**
      * Realiza un post. Es azucar sintáctico de redirect()
      */
-    post: function (url, variables) {
-        // Si url es un objeto, entonces son las variables, y la
-        // url es esta misma url
-        if ( typeof url === 'object') {
-            variables = url
-            url = window.location
-        }
-
-        this.redirect (url, 'post', variables)
+    post: function (url, variables)
+    {
+        this.redirect(url, 'post', variables)
     },
 
     /**
@@ -185,7 +203,8 @@ V = {
     /** 
      * Obtiene la información de un cookie
      */
-    get_cookie: function (cookie) {
+    get_cookie: function (cookie) 
+    {
         result = document.cookie.match('(^|;)\\s*' + cookie + '\\s*=\\s*([^;]+)')
         return result ? result.pop() : ''
     },
@@ -193,9 +212,11 @@ V = {
     /**
      * Obtiene las coordenadas absolutas de un elemento, con respecto al documento
      */
-    xy: function (control) {
-        if ( typeof control == "string")
+    xy: function (control)
+    {
+        if (typeof control == "string") {
             control = this.id(control)
+        }
 
         var r = control.getBoundingClientRect()
 
