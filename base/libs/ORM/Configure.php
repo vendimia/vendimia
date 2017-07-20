@@ -8,7 +8,6 @@ use Vendimia\Database;
  */
 trait Configure
 {
-
     /** Is this class configured? */
     protected static $configuredStatic = false;
 

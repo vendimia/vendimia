@@ -22,7 +22,7 @@ class EntityParser
     public function __construct($entity)
     {
         if (!is_subclass_of($entity, Entity::class)) {
-            throw new \InvalidArgumentException('An ORM entity class or object is requiered.');
+            throw new \InvalidArgumentException("'$entity' is not an ORM Entity class or object.");
         }
         $reflection = new ReflectionClass($entity);
 
