@@ -62,6 +62,15 @@ trait QueryManager
     }
 
     /**
+     * Creates a constrained EntitySet, for relationship
+     */
+    public static function newConstrained($constrains)
+    {
+        return static::find($constrains)->setConstrains($constrains);
+    }
+
+
+    /**
      * Alias de find()
      */
     public static function all()
@@ -168,7 +177,7 @@ trait QueryManager
     /**
      * Changes this entity into a query entity
      */
-    protected function setQueryMode($where)
+    protected function setQueryMode($where = null)
     {
         $where = $this->whereBuilder->from($where)->build();
         $this->query['where'] = $where;
