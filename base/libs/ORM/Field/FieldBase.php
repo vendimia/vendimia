@@ -37,8 +37,8 @@ abstract class FieldBase implements ValueInterface
     }
 
     /**
-      *  Default setter
-      */
+     *  Default setter
+     */
     public function setValue($value)
     {
         $this->value = $value;
@@ -62,6 +62,14 @@ abstract class FieldBase implements ValueInterface
         } else {
             return $default_value;
         }
+    }
+
+    /**
+     * Returns this field name
+     */
+    public function getFieldName()
+    {
+        return $this->field_name;
     }
 
     /**
@@ -105,6 +113,17 @@ abstract class FieldBase implements ValueInterface
         return $connector->escape($this->value);
     }
 
+    /**
+     * Returns true when this field value depends on the owner.
+     *
+     * Used on deleting, to update the dependant Entities on this field value, 
+     * like on an OneToMany field.
+     *
+     */
+    public function isDependant()
+    {
+        return false;
+    }
 
     /**
      * Returns the Database\Field const value for this field

@@ -31,6 +31,6 @@ class Char extends FieldBase
 
     public function getDatabaseValue(ConnectorInterface $connector)
     {
-        return $connector->escape($this->value);
+        return $connector->escape((string)$this->value);
     }
 }

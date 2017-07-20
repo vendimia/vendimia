@@ -14,6 +14,6 @@ class Boolean extends FieldBase
 
     public function getDatabaseValue(ConnectorInterface $connector)
     {
-        return $connector->escape($this->value);
+        return $connector->valueFromPHP($this->value);
     }    
 }

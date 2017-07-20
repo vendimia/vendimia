@@ -9,17 +9,13 @@ use Vendimia\DateTime as DT;
 use Vendimia\Form\Control\ControlAbstract;
 
 /**
- * Date field.
+ * Integer field.
  */
 class Integer extends FieldBase
 {
     public function getDatabaseValue(ConnectorInterface $connector)
     {
-        if (is_object($this->value) && $this->value instanceof ConnectorInterface) {
-            return $this->value->getDatabaseValue($connector);
-        } else {
-            return intval($this->value);
-        }
+        return intval($this->value);
     }
 
     public function setValue($value)

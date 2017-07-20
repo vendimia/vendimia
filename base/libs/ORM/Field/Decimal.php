@@ -12,11 +12,6 @@ class Decimal extends FieldBase
         return DBField::Decimal;
     }
 
-    public function getDatabaseValue(ConnectorInterface $connector)
-    {
-        return $connector->escape($this->value);
-    }
-
     public static function validateProperties(Entity $entity = null, $field_name, array $properties)
     {
         // Char requiere la propiedad 0 o 'length'
@@ -39,4 +34,8 @@ class Decimal extends FieldBase
         return $properties;
     }
 
+    public function getDatabaseValue(ConnectorInterface $connector)
+    {
+        return floatval($this->value);
+    }
 }

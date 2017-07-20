@@ -57,6 +57,12 @@ class OneToMany extends FieldBase
         throw new \UnexpectedValueException("Can't assing a value to this field.");
     }
 
+    public function isDependant()
+    {
+        // Este campo depende del contenido del campo padre
+        return true;
+    }
+
     public function getValue()
     {
         if (is_null($this->entity_set)) {

@@ -75,4 +75,9 @@ class ManyToOne extends FieldBase
 
         return $properties;
     }
+
+    public function getDatabaseValue(ConnectorInterface $connector)
+    {
+        return $this->value->getDatabaseValue($connector);
+    }
 }
