@@ -9,7 +9,10 @@ use Vendimia\Database\ValueInterface;
  */
 class Where
 {
-    private $base_string;
+    /** Source 'WHERE' data */
+    private $source_data;
+
+    /** Arguments for variable replacemenet */
     private $args = [];
     private $connector;
     private $pk_field;
@@ -20,9 +23,9 @@ class Where
     public function from(...$base)
     {
         if (count($base) == 1) {
-            $this->base_string = $base[0];
+            $this->source_data = $base[0];
         } else {
-            $this->base_string = $base;
+            $this->source_data = $base;
         }
         return $this;
     }
@@ -72,7 +75,7 @@ class Where
         } else {
             // No. Es un array asociativo
             $where = [];
-            foreach ($this->base_string as $key => $value){
+            foreach ($this->source_data as $key => $value){
                 $w = $this->connector->escapeIdentifier($key);
 
                 if (is_array($value)) {
@@ -84,7 +87,7 @@ class Where
                     } elseif ($value instanceof ValueInterface) {
                         $w .= '=' . $value->getDatabaseValue($this->connector);
                     } else {
-                        throw new \RuntimeException("'$key' value object (".get_class($value) . ") must be an instance of Vendimia\\ActiveRecord\\Comparison or implements interface Vendimia\\Database\\ValueInterface.");
+                        throw new \RuntimeException("'$key' value object (".get_class($value) . ") must be an instance of Vendimia\\ORM\\Comparison or implements interface Vendimia\\Database\\ValueInterface.");
                     }
                 } else {
                     // Si no es un array, o un objeto, lo pasamos
@@ -105,7 +108,8 @@ class Where
      * - If it's an array, and only have numeric indexes, the primary key
      *   will be search with an IN.
      * - If it's an associative array, multiple WHERE will be created with
-     *   each key EQUALed to its value, joined with ANDs.
+     *   each key EQUALed by default to its value, joined with ANDs. The value
+     *   can be a Comparison object.
      * - 
      *
      * @return array Array of several [glue, not, where] arrays
@@ -114,24 +118,25 @@ class Where
     {
         $where = [];
 
-        if (is_array($this->base_string)) {
-            $where = $this->buildFromArray($this->base_string);
-        } elseif (is_numeric($this->base_string)) {
-            $w = $this->pk_field . '=' . intval($this->base_string);
+        if (is_array($this->source_data)) {
+            $where = $this->buildFromArray($this->source_data);
+        } elseif (is_numeric($this->source_data)) {
+            $w = $this->pk_field . '=' . intval($this->source_data);
             $where[] = ['AND', false, $w];
-        } elseif (is_object($this->base_string)) {
-            if (!$this->base_string instanceof ValueInterface) {
-                throw new \InvalidArgumentException("'" . get_class($this->base_string)  . "' must implements Vendimia\\Database\\ValueInterface to be used here.");
+        } elseif (is_object($this->source_data)) {
+            if (!$this->source_data instanceof ValueInterface) {
+                throw new \InvalidArgumentException("'" . get_class($this->source_data)  . "' must implements Vendimia\\Database\\ValueInterface to be used here.");
             }
 
-            $where[] = ['AND', false, $this->base_string->getDatabaseValue($this->connector)];
-        } elseif(is_string($this->base_string)) {
-            // Asumimos que los strings ya son segmentos de un WHERE
-            // y están escpados.
-            $where[] = ['AND', false, $this->base_string];
+            $where[] = ['AND', false, $this->source_data->getDatabaseValue($this->connector)];
+        } elseif(is_null($this->source_data)) {
+            // No hacemos nada...
+        } elseif(is_string($this->source_data)) {
+            // Los strings no están permitidos.
+            throw new \RuntimeException("Strings are not allowed here. Use Entity::rawWhere() instead.");
         } else {
-            // HMmm
-            throw new \Exception("BUG! " . gettype($this->base_string) . ' type is not expected here!');
+            // Esto no debería de suceder...
+            throw new \Exception("BUG! " . gettype($this->source_data) . ' type is not expected here!');
         }
 
         return $where;
@@ -142,7 +147,7 @@ class Where
      */
     public function buildRaw(array $args)
     {
-        $where = $this->base;
+        $where = $this->source_data;
 
         while (($pos = strpos($where, '{}')) !== false) {
             $value = current($args);
