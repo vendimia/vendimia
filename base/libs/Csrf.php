@@ -27,6 +27,19 @@ class Csrf implements CsrfInterface
         return $this->token;
     }
 
+    public function validate($source = null)
+    {
+        if (is_null($source)) {
+            $source = Vendimia::$request->post['__VENDIMIA_SECURITY_TOKEN'];
+        }
+
+        if ($source === $this->token) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function __construct() 
     {
         if (is_null(Vendimia::$session->security_token)) {

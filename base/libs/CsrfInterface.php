@@ -12,4 +12,9 @@ interface CsrfInterface
      * Obtains the generated token
      */
     public function getToken();
+
+    /**
+     * Validates a CSRF token agains the one stored.
+     */
+    public function validate($source = null);
 }
