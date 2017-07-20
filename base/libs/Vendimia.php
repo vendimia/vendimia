@@ -44,7 +44,7 @@ class Vendimia
     /** Default Vendimia Logger */
     static public $logger;
 
-    /** Service container*/ 
+    /** Service container */ 
     static public $services = null;
     
     /**
