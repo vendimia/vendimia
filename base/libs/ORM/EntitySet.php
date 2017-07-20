@@ -31,6 +31,9 @@ class EntitySet implements \Iterator
     /** Is this set already retrieved? */
     private $set_retrieved = false;
 
+    /** Constrains for new records */
+    private $constrains = [];
+
     /**
      * Dummy function. Is not neede here, but trait QueryManager needs it
      */
@@ -50,6 +53,15 @@ class EntitySet implements \Iterator
 
         $this->whereBuilder->setConnector($db_connector);
         $this->whereBuilder->setPrimaryKeyField($base_class::getPrimaryKeyField());
+    }
+
+    /**
+     * Sets the constrains to this EntitySet
+     */
+    public function setConstrains($constrains)
+    {
+        $this->constrains = $constrains;
+        return $this;
     }
 
     /**
@@ -88,6 +100,27 @@ class EntitySet implements \Iterator
     public function count()
     {
         return intval($this->executeSQLFunction('count', '*'));
+    }
+
+    /**
+     * Adds a Entity to this set, if this is a constrained set
+     */
+    public function add(Entity $entity)
+    {
+        if (!$this->constrains) {
+            throw new \InvalidArgumentException("Can't add elements to this non-constrained EntitySet");
+        }
+        $entity->update($this->constrains);
+    }
+
+    /**
+     * Deletes all the Entities in this recordset
+     */
+    public function delete()
+    {
+        $where = $this->whereBuilder->from($this->constrains)->build();
+
+        return $this->db_connector->delete($this->db_table, $where);
     }
 
     /**
@@ -156,4 +189,10 @@ class EntitySet implements \Iterator
         $this->iterator_index++;
         return true;
     }
+
+    function __toString()
+    {
+        return '<EntitySet of ' . $this->base_class . ')>';
+    }
+
 }
