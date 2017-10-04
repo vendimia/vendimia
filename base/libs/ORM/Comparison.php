@@ -31,7 +31,7 @@ class Comparison
         if ($this->not) {
             $sql .= 'NOT ';
         }
-        $sql .= 'LIKE ' . $this->connection->escape($params[0] . '%');
+        $sql .= 'LIKE ' . $this->connection->valueFromPHP($params[0] . '%');
 
         return $sql;
     }
@@ -44,7 +44,7 @@ class Comparison
         if ($this->not) {
             $sql .= 'NOT ';
         }
-        $sql .= 'LIKE ' . $this->connection->escape('%' . $params[0]);
+        $sql .= 'LIKE ' . $this->connection->valueFromPHP('%' . $params[0]);
 
         return $sql;
     }
@@ -57,7 +57,7 @@ class Comparison
         if ($this->not) {
             $sql .= 'NOT ';
         }
-        $sql .= 'LIKE ' . $this->connection->escape('%' . $params[0] . '%');
+        $sql .= 'LIKE ' . $this->connection->valueFromPHP('%' . $params[0] . '%');
 
         return $sql;
     }
@@ -72,7 +72,7 @@ class Comparison
         if ($this->not) {
             $sql .= 'NOT ';
         }
-        $sql .= $this->connection->escape($params[0]);
+        $sql .= $this->connection->valueFromPHP($params[0]);
 
         return $sql;
     }
@@ -87,7 +87,7 @@ class Comparison
             $sql .= 'NOT ';
         }
 
-        $sql .= 'IN (' . join(', ', $this->connection->escape($params)) . ')';
+        $sql .= 'IN (' . join(', ', $this->connection->valueFromPHP($params)) . ')';
 
         return $sql;
     }
@@ -102,8 +102,8 @@ class Comparison
             $sql = ' NOT';
         }
 
-        $sql .= ' BETWEEN ' . $this->connection->escape($params[0]);
-        $sql .= ' AND '. $this->connection->escape($params[1]);
+        $sql .= ' BETWEEN ' . $this->connection->valueFromPHP($params[0]);
+        $sql .= ' AND '. $this->connection->valueFromPHP($params[1]);
 
         return $sql;
     }
@@ -143,7 +143,7 @@ class Comparison
     {
         if (array_key_exists($this->function, $this->comparisons)) {
             return $this->comparisons[$this->function] . 
-                $this->connection->escape($this->params[0]);
+                $this->connection->valueFromPHP($this->params[0]);
         } else {
             $method = 'comparison' . $this->function;
             if(method_exists($this, $method)) {

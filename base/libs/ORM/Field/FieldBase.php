@@ -106,11 +106,19 @@ abstract class FieldBase implements ValueInterface
     }
 
     /**
-     * ValueInterface default implementation
+     * ValueInterface default implementation.
      */
     public function getDatabaseValue(ConnectorInterface $connector)
     {
-        return $connector->escape($this->value);
+        return $connector->valueFromPHP($this->value);
+    }
+
+    /**
+     * Sets this field value with data from the database.
+     */
+    public function setValueFromDatabase($value)
+    {
+        $this->setValue($value);
     }
 
     /**

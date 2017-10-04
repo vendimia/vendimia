@@ -373,7 +373,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
 
         foreach ($data as $fieldname => $val) {
             $field = $this->database_fields[$fieldname];
-            $field->setValue($val);
+            $field->setValueFromDatabase($val);
         }
         $this->is_empty = false;
     }    
