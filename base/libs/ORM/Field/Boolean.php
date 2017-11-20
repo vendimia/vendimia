@@ -10,10 +10,10 @@ class Boolean extends FieldBase
     public static function getDatabaseFieldType()
     {
         return DBField::Boolean;
-    }    
+    }
 
     public function getDatabaseValue(ConnectorInterface $connector)
     {
         return $connector->valueFromPHP($this->value);
-    }    
+    }
 }
