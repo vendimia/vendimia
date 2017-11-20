@@ -141,7 +141,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
     }
 
     /**
-     * Sets the fields value
+     * Sets the fields value from an array or an AsArrayInterface object
      */
     public function setValues($data)
     {
@@ -290,6 +290,8 @@ abstract class Entity implements AsArrayInterface, ValueInterface
      */
     public function setValue($field, $value)
     {
+        $this->retrieveRecord();
+        
         if (isset($this->fields[$field])) {
             $this->fields[$field]->setValue($value);
             $this->modified_fields[$field] = true;
