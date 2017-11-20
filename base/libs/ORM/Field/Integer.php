@@ -15,7 +15,7 @@ class Integer extends FieldBase
 {
     public function getDatabaseValue(ConnectorInterface $connector)
     {
-        return intval($this->value);
+        return is_null($this->value) ? null : intval($this->value);
     }
 
     public function setValue($value)
@@ -26,9 +26,11 @@ class Integer extends FieldBase
             } else {
                 throw new \InvalidArgumentException("Object of class '" . get_class($value) . "' cannot be implicitly converted to integer.");
             }
+        } elseif (is_null($value)) {
+            $this->value = null;
         } else {
             $this->value = intval($value);
-        }        
+        }
     }
 
     public static function getDatabaseFieldType()
