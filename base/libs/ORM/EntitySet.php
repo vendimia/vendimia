@@ -8,7 +8,7 @@ use Vendimia\AsArrayInterface;
  */
 class EntitySet implements \Iterator
 {
-    use QueryManager;
+    use QueryManager, AggregateFunctions;
 
     /** This FQCN **/
     private $base_class;
@@ -42,7 +42,7 @@ class EntitySet implements \Iterator
     }
 
     /**
-     * Sets up a new Query EntitySet 
+     * Sets up a new Query EntitySet
      */
     public function __construct($base_class, $db_table, $db_connector)
     {
@@ -79,7 +79,7 @@ class EntitySet implements \Iterator
     /**
      * Returns the next record in this set
      */
-    public function fetch() 
+    public function fetch()
     {
         $this->retrieveSet();
 
@@ -92,14 +92,6 @@ class EntitySet implements \Iterator
         $class = $this->base_class;
 
         return new $class($data, true); // $not_new = true
-    }
-
-    /**
-     * Returns the registry count
-     */
-    public function count()
-    {
-        return intval($this->executeSQLFunction('count', '*'));
     }
 
     /**
@@ -122,23 +114,6 @@ class EntitySet implements \Iterator
 
         return $this->db_connector->delete($this->db_table, $where);
     }
-
-    /**
-     * Executes a single SQL function on a field
-     */
-    private function executeSQLFunction($function, $field)
-    {
-        // Ejecutamos la función en un objeto distinto
-        $target = clone $this;
-        
-        $target->query['fields'] = ["{$function}({$field})" => "__vendimia_function_result"];
-        $c = $target->executeQuery();
-
-        $data = $this->db_connector->fetchOne($c);
-
-        return $data['__vendimia_function_result'];
-    }
-
 
     /**
      * {@inherit}
@@ -170,7 +145,7 @@ class EntitySet implements \Iterator
     public function rewind()
     {
         $this->retrieveSet(true);
-        $this->iterator_index = 0;        
+        $this->iterator_index = 0;
     }
 
     /**
