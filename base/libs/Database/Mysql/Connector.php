@@ -49,11 +49,11 @@ class Connector implements Database\ConnectorInterface
 
         @$connected = $this->connection->real_connect(
             'p:' . $host, // Conexión persistente por defecto.
-            $username, 
-            $password, 
-            $database, 
+            $username,
+            $password,
+            $database,
             null,
-            null, 
+            null,
             MYSQLI_CLIENT_FOUND_ROWS
         );
 
@@ -79,9 +79,9 @@ class Connector implements Database\ConnectorInterface
 
             return $string;
         } elseif (is_string($string)) {
-            return $quotation . 
+            return $quotation .
                 $this->connection->real_escape_string($string) .
-                $quotation;            
+                $quotation;
         } else {
             throw new \InvalidArgumentException('Tried to escape a non-string value (' . gettype($string) . ').');
         }
@@ -92,27 +92,40 @@ class Connector implements Database\ConnectorInterface
         return $this->escape($string, '`');
     }
 
-    public function fieldValue($field, $value) 
+    public function fieldValue($field, $value)
     {
-        return $this->escapeIdentifier($field) . '=' . 
+        return $this->escapeIdentifier($field) . '=' .
             $this->valueFromPHP($value);
     }
 
+    /**
+     * Converts a PHP value to a type of this database
+     * @param  mixed $value PHP value to converted
+     * @return mixed Database-valid value
+     */
     public function valueFromPHP($value)
     {
+        // Primero verificamos si $value es un objeto que implemnta
+        // ValueInterface, y su resultado lo convertimos a un valor
+        // de la base de datos. Esto es para aceptar algunas constantes
+        // como null o false como valor desde dicho objeto, para lyego
+        // convertirlos a un valor aceptado por esta base de datos.
+
+        if (is_object($value)) {
+            if ($value instanceof ValueInterface) {
+               $value = $value->getDatabaseValue($this);
+            } else {
+               throw new \RuntimeException("Object of type '" .
+                   get_class($value) . "' cannot be directly converted to a database value.") ;
+            }
+        }
+
         if (is_null($value)) {
             return 'NULL';
         } elseif (is_bool($value)) {
             return $value?1:0;
         } elseif (is_numeric($value)) {
             return $value;
-        } elseif (is_object($value)) {
-             if ($value instanceof ValueInterface) {
-                return $value->getDatabaseValue($this);
-             } else {
-                throw new \RuntimeException("Object of type '" . 
-                    get_class($value) . "' cannot be directly converted to a database value.") ;
-             }
         } else {
             return $this->escape($value);
         }
@@ -282,7 +295,7 @@ class Connector implements Database\ConnectorInterface
         return $this->connection->affected_rows;
     }
 
-    public function delete($table, $where) 
+    public function delete($table, $where)
     {
         $sql = "DELETE FROM " . $this->escapeIdentifier($table);
 
