@@ -63,7 +63,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
 
             // Obtenemos el nombre de su campo de la base datos
             $db_field = $field->getDatabaseField();
-            
+
             $this->database_fields[$db_field] = $field;
 
         }
@@ -102,11 +102,11 @@ abstract class Entity implements AsArrayInterface, ValueInterface
     {
         return $this->is_new;
     }
-    
+
     /**
      * Syntactic sugar for !isNew()
      */
-    public function notNew() 
+    public function notNew()
     {
         return !$this->is_new;
     }
@@ -171,7 +171,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
             $fields = array_keys($this->fields);
         }
 
-        // Si no hay campos por guardar, salismos
+        // Si no hay campos por guardar, salimos
         if (!$fields) {
             return $this;
         }
@@ -286,7 +286,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
     }
 
     /**
-     * Sets a field value
+     * Sets a field value. Most used inside the same Entity object.
      */
     public function setValue($field, $value)
     {
@@ -306,7 +306,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
     }
 
     /**
-     * Gets a field value
+    * Gets a field value. Most used inside the same Entity object.
      */
     public function getValue($field)
     {
@@ -324,11 +324,22 @@ abstract class Entity implements AsArrayInterface, ValueInterface
     }
 
     /**
-     * Syntax sugar for getValue()
+     * Sytactic sugar for setValue() and getValue().
+     *
+     * Most used inside same Entity methods.
+     *
+     * @param  string $field Field to retrieve or update
+     * @param  mixed $value If not null, value to assign to this field.
+     * @return mixed If $value is null, return $field value.
      */
-    public function _($field)
+    public function _($field, $value = null)
     {
-        return $this->getValue($field);
+        if (is_null($value))
+        {
+            return $this->getValue($field);
+        } else {
+            $this->setValue($field, $value);
+        }
     }
 
 
@@ -376,7 +387,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
             $field->setValueFromDatabase($val);
         }
         $this->is_empty = false;
-    }    
+    }
 
     /**
      * Returns this entity base class
@@ -418,8 +429,8 @@ abstract class Entity implements AsArrayInterface, ValueInterface
      */
     public function getDatabaseValue(ConnectorInterface $connector)
     {
-        // Es posible que el primary key no sea un entero... 
-        // mejor lo pasamos por ValueFromPHP para que lo escape 
+        // Es posible que el primary key no sea un entero...
+        // mejor lo pasamos por ValueFromPHP para que lo escape
         // correctamente.
         return $connector->ValueFromPHP($this->pk());
     }
