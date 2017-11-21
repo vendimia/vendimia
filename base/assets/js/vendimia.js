@@ -4,7 +4,7 @@ V = {
     /**
      * Gets the first element who matches the selector.
      */
-    e: function (selector) 
+    e: function (selector)
     {
         return  document.querySelector(selector)
     },
@@ -63,10 +63,10 @@ V = {
     c: function (element, attributes, content) {
         var el = document.createElement (element);
         var a = 0
-        
-        // Si llamamos sin atributos
-        if (typeof attributes == "string") {
-            content = attributes 
+
+        // Si attributes no es objeto, entonces es el contenido.
+        if (typeof attributes != "object") {
+            content = attributes
             attributes = false
         }
 
@@ -80,13 +80,13 @@ V = {
         }
 
         if (content) {
-            el.innerHTML = content 
+            el.innerHTML = content
         }
 
         return el
     },
 
-    /** 
+    /**
      * Creates a series of TDs inside a TR with each array element.
      */
     tr: function (data, td_opts, tr_opts)
@@ -138,7 +138,7 @@ V = {
                 if (typeof variables == 'undefined') {
                     variables = {}
                 }
-                variables['__VENDIMIA_SECURITY_TOKEN'] = 
+                variables['__VENDIMIA_SECURITY_TOKEN'] =
                     V.e('meta[name=vendimia-security-token]').content
             }
 
@@ -200,10 +200,10 @@ V = {
     },
 
 
-    /** 
+    /**
      * Obtiene la información de un cookie
      */
-    get_cookie: function (cookie) 
+    get_cookie: function (cookie)
     {
         result = document.cookie.match('(^|;)\\s*' + cookie + '\\s*=\\s*([^;]+)')
         return result ? result.pop() : ''
