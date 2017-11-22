@@ -105,27 +105,19 @@ class Connector implements Database\ConnectorInterface
      */
     public function valueFromPHP($value)
     {
-        // Primero verificamos si $value es un objeto que implemnta
-        // ValueInterface, y su resultado lo convertimos a un valor
-        // de la base de datos. Esto es para aceptar algunas constantes
-        // como null o false como valor desde dicho objeto, para lyego
-        // convertirlos a un valor aceptado por esta base de datos.
-
-        if (is_object($value)) {
-            if ($value instanceof ValueInterface) {
-               $value = $value->getDatabaseValue($this);
-            } else {
-               throw new \RuntimeException("Object of type '" .
-                   get_class($value) . "' cannot be directly converted to a database value.") ;
-            }
-        }
-
         if (is_null($value)) {
             return 'NULL';
         } elseif (is_bool($value)) {
             return $value?1:0;
         } elseif (is_numeric($value)) {
             return $value;
+        } elseif (is_object($value)) {
+            if ($value instanceof ValueInterface) {
+               return $value->getDatabaseValue($this);
+            } else {
+               throw new \RuntimeException("Object of type '" .
+                   get_class($value) . "' cannot be directly converted to a database value.") ;
+            }
         } else {
             return $this->escape($value);
         }
@@ -279,7 +271,6 @@ class Connector implements Database\ConnectorInterface
     {
         $values = [];
         foreach ($data as $field => $value) {
-
             $values[] = $this->escapeIdentifier($field) . '=' .
                 $this->valueFromPHP($value);
         }
@@ -326,5 +317,4 @@ class Connector implements Database\ConnectorInterface
     {
         $this->execute('ROLLBACK');
     }
-
 }
