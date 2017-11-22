@@ -15,7 +15,12 @@ class Integer extends FieldBase
 {
     public function getDatabaseValue(ConnectorInterface $connector)
     {
-        return is_null($this->value) ? null : intval($this->value);
+        // Aceptamos el valor null
+        if (is_null($this->value)) {
+            return $connector->valueFromPHP(null);
+        } else {
+            return intval($this->value);
+        }
     }
 
     public function setValue($value)
