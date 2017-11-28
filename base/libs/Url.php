@@ -14,42 +14,35 @@ class Url
     /** Each URL GET arguments */
     private $args = [];
 
-    /** Schema. false for relative urls */
-    private $schema = false;
+
+    private $relative = true;
 
     public function __construct(...$parts)
     {
-        // Buscamos la primera parte, para determinar si es relativo o
-        // absoluto
+        // Si el 1er elemento es un array, lo usamos
         if (is_array($parts[0])) {
-            $first_part = &$parts[0][0];
-        } else {
-            $first_part = &$parts[0];
+            $parts = $parts[0];
         }
 
         $matches = [];
+        $first_part = $parts[0];
         if (preg_match ('<^.+://|^//>', $first_part, $matches)) {
-            
-            // Removemos el último slash, por que será añadido
-            // al unir todas las partes
-            $this->schema = substr($matches[0], 0, strlen($matches[0]) - 1);
-            
-            $first_part = substr($first_part, strlen($matches[0]));
+            $this->parts[] = $first_part;
+            $this->relative = false;
+
+            // Y la sacamos del array de partes por procesar
+            array_shift($parts);
         }
 
-        $this->processParts(...$parts);
+        $this->processParts($parts);
     }
 
     /**
      * Analize each part, returns a simple array of string parts.
+     *
      */
-    public function processParts(...$parts)
+    private function processParts(array $parts)
     {
-        // Esto es necesario para poder pasar un array asociativo
-        if (count($parts) == 1 && is_array($parts[0])) {
-            $parts = $parts[0];
-        }
-
         foreach ($parts as $key => $data) {
             $value = null;
 
@@ -91,7 +84,7 @@ class Url
 
                         if ($colonpos !== false) {
                             $app = substr($part, 0, $colonpos);
-                            if (!$app) { 
+                            if (!$app) {
                                 $app = Vendimia::$application;
                             }
                             $value[] = $app;
@@ -100,7 +93,7 @@ class Url
                             if ($part == "") {
                                 continue;
                             }
-                        } 
+                        }
                         $value[] = urlencode($part);
                     }
                 }
@@ -130,14 +123,17 @@ class Url
      */
     public function get()
     {
-        if ($this->schema) {
+        /*if ($this->schema) {
             // Absoluto
             array_unshift($this->parts, $this->schema);
         } else {
             // Relativo
             array_unshift($this->parts, rtrim(Vendimia::$base_url, '/.'));
-        }
+        }*/
 
+        if ($this->relative) {
+            array_unshift($this->parts, rtrim(Vendimia::$base_url, '/.'));
+        }
 
         $url = join('/', $this->parts);
         if ($this->args) {
@@ -150,7 +146,7 @@ class Url
     /**
      * Static shortcut method
      */
-    public static function parse(...$params) 
+    public static function parse(...$params)
     {
         return (new self(...$params))->get();
     }
