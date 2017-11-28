@@ -4,7 +4,7 @@ namespace Vendimia;
 use Vendimia;
 
 /**
- * Class autoloader. 
+ * Class autoloader.
  */
 class Autoloader
 {
@@ -42,9 +42,9 @@ class Autoloader
             [Vendimia\BASE_PATH, 'vendor'],
         ]);
 
-        $file_path = strtr($class, '\\', '/') . '.php';
+        $file_path = strtr($class, '\\', DIRECTORY_SEPARATOR) . '.php';
         foreach ($search_paths as $base_path) {
-            $path = Vendimia\Path\join ($base_path, $file_path);
+            $path = Vendimia\Path::join($base_path, $file_path);
             // Existe?
             if (file_exists($path)) {
                 return $path;
@@ -56,14 +56,14 @@ class Autoloader
             $namelen = strlen($namespacename);
             if (substr($class, 0, $namelen) == $namespacename) {
                 $subnamespace = substr($class, $namelen);
-                $file_path = strtr($subnamespace, '\\', '/') . '.php';                
+                $file_path = strtr($subnamespace, '\\', DIRECTORY_SEPARATOR) . '.php';
                 // Good. Existe el fichero?
                 foreach ($paths as $path) {
-                    $target = Vendimia\Path\join($path, $file_path);
+                    $target = Vendimia\Path::join($path, $file_path);
                     if (file_exists($target)) {
                         return $target;
                     }
-                }    
+                }
             }
         }
 
@@ -80,13 +80,13 @@ class Autoloader
             require $path;
         }
     }
-    
+
     public static function register()
     {
         // No nos registramos en el CLI, por que eso sucede antes
         if (class_exists('Vendimia') && Vendimia::$execution_type == 'cli') {
             return;
-        }   
+        }
 
         spl_autoload_register('self::autoloader');
     }

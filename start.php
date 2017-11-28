@@ -35,7 +35,7 @@ if (PHP_SAPI == 'cli-server') {
         is_dir('static/')) {
         return false;
     }
-    
+
     // Cambiamos el PATH de la sesion al directorio tmp
     if (!is_dir ('tmp')) {
         mkdir ('tmp');
@@ -98,7 +98,7 @@ if (isset(Vendimia::$settings['databases'])) {
     //class_exists ('Vendimia\\ActiveRecord\\Exception');
 
     Vendimia\Database\Database::initialize(Vendimia::$settings['databases']);
-}    
+}
 
 // Si viene por la CLI, salimos.
 if ( Vendimia::$execution_type == 'cli') {
@@ -137,7 +137,7 @@ if ($route) {
 
     $application = null;
     $controller = null;
-    
+
     // El fichero o callable de la ruta fue encontrado?
     foreach (['target', 'alt_target'] as $pt) {
         if (!isset($route[$pt])){
@@ -216,12 +216,12 @@ if ($found) {
 
 // Antes de ejecutar el controlador, cargamos los ficheros 'initialize';
 $initialize_routes = [
-    'base/initialize.php', 
+    'base/initialize.php',
     "apps/" . Vendimia::$application . "/initialize.php"
 ];
 
 foreach ($initialize_routes as $init) {
-    $target = Vendimia\Path\join(Vendimia\PROJECT_PATH , $init);
+    $target = Vendimia\Path::join(Vendimia\PROJECT_PATH , $init);
     if (file_exists($target)) {
         require $target;
     }
@@ -234,7 +234,7 @@ if ($is_callable) {
     // Cargamos el controlador
     $response = require $cfile->get();
 
-    // Nombre de la aplicación/controlador, por si tenemos que mostrar un 
+    // Nombre de la aplicación/controlador, por si tenemos que mostrar un
     // mensaje de error
     $appcontroller = Vendimia::$application . '/' . Vendimia::$controller;
 
@@ -243,8 +243,8 @@ if ($is_callable) {
 // Si el controlador retorna algo, debe ser un Vendimia\Http\Response, o un array con
 // variables para la vista por defecto
 $invalid_response = false;
-$view = new Vendimia\View; 
-    
+$view = new Vendimia\View;
+
 if ($response) {
     if (is_array($response)) {
         $view->addVariables($response);
@@ -268,7 +268,7 @@ if ($invalid_response) {
     throw new Vendimia\Exception ("Controller '$appcontroller' must return an array, a Vendimia\\Http\\Response instance, or false. Returned " . gettype($response) . " instead." );
 }
 
-// Si en este punto no hay un response, es por que el controlador no 
+// Si en este punto no hay un response, es por que el controlador no
 // devolvió uno. Lo generamos de la vista por defecto
 if (!$response) {
 

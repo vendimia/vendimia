@@ -1,59 +1,46 @@
 <?php
-/**
- * Path utils
- */
-namespace Vendimia\Path;
-
-use Vendimia;
-
-/** Exception if the makeTree fails creating a directory */
-class MkdirFail extends \Exception {};
-
-class PathExists extends \Exception {};
-
+namespace Vendimia;
 
 /**
- * Join several paths
- *
- * @author Oliver Etchebarne
+ * Helper functions for path manipulation
  */
-function join()
+class Path
 {
-    $args = func_get_args();
-    $sep = DIRECTORY_SEPARATOR;
+    /**
+     * Join several string or array paths.
+     * @return string Joined path
+     */
+    public static function join(...$paths)
+    {
+        $sep = DIRECTORY_SEPARATOR;
+        $first_part = true;
+        $absolute = '';
 
-    // Si no hay elelemtnso, retornamos nada
-    if ( !$args ) {
-        return '';
-    }
-
-    $absolute = '';
-    $first = true;
-    $paths = [];
-
-    foreach ( $args as $path ) {
-        
-        // Si $path es un array, analizamos recursivamente
-        if (is_array($path)) {
-            $path = call_user_func_array(__FUNCTION__, $path);
-        }
-    
-        // Si el primer elemento empieza con un /, entonces
-        // toda la ruta es absoluta, debe de empezar con un /
-        if ( $first && $path && $path{0} == $sep ) {
-            $absolute = $sep;
+        // Si no hay argumentos, retornamos vacío.
+        if (!$paths) {
+            return '';
         }
 
-        // Usamos array_filter para que solo devuelva las partes
-        // de $path que no están vacías (como en "/home//oliver")
-        $first = false;
+        $return_parts = [];
+        foreach ($paths as $path) {
+            // Si $path es un array, nos llamamos recursivamente
+            if (is_array($path)) {
+                $path = call_user_func_array([__CLASS__, __METHOD__], $path);
+            }
 
-        $parts = array_filter ( explode ( $sep, $path ) );
-        $paths = array_merge ( $paths, $parts );
+            // Si el primer elemento empieza con $sep, entonces toda la ruta
+            // es absoluta, debe empezar con $sep
+            if ($first_part && $path && $path{0} == $sep) {
+                $absolute = $sep;
+            }
+            $first_part = false;
 
+            $return_parts = array_merge($return_parts, array_filter(explode($sep, $path)));
+        }
+
+
+        return $absolute . join($sep, $return_parts);
     }
-
-    return $absolute . \join ($sep, $paths);
 }
 
 
@@ -61,7 +48,7 @@ function join()
  * Create a directory.
  *
  * @param string $dirpath full path to create
- * @return string Status of the creation 
+ * @return string Status of the creation
  *
  */
 function makeDir ($dirpath)
