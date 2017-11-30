@@ -41,50 +41,49 @@ class Path
 
         return $absolute . join($sep, $return_parts);
     }
-}
 
-
-/**
- * Create a directory.
- *
- * @param string $dirpath full path to create
- * @return string Status of the creation
- *
- */
-function makeDir ($dirpath)
-{
-    if (file_exists($dirpath)) {
-        return 'omit';
-    } else {
-        $res = mkdir ($dirpath, 0775, true);
-        if ($res) {
-            return 'ok';
+    /**
+     * Create a directory.
+     *
+     * @param string $dirpath full path to create
+     * @return string Status of the creation
+     *
+     */
+    public static function makeDir ($dirpath)
+    {
+        if (file_exists($dirpath)) {
+            return 'omit';
         } else {
-            return 'error';
+            $res = mkdir ($dirpath, 0775, true);
+            if ($res) {
+                return 'ok';
+            } else {
+                return 'error';
+            }
         }
     }
-}
 
-/**
- * Makes a directory tree structure inside $base_path, yielding every directory
- *
- * @param string $base_path Base path for all the new directories.
- * @param array $tree New directory listing to create. If the value is an array,
- *      then it's created recursively.
- * @yield array Status of every directory it's being created, and its path.
- */
-function makeTree ($base_path, array $tree)
-{
-    foreach ($tree as $base => $path) {
-        if (is_array($path)) {
-            $new_base_path = join($base_path, $base);
-            foreach (makeTree ($new_base_path, $path) as $path) {
-                yield $path;
-            };
-        } else {
-            $path = join($base_path, $path);
-            $status = makeDir ($path);
-            yield [$status, $path];
-       }
+    /**
+     * Makes a directory tree structure inside $base_path, yielding every directory
+     *
+     * @param string $base_path Base path for all the new directories.
+     * @param array $tree New directory listing to create. If the value is an array,
+     *      then it's created recursively.
+     * @yield array Status of every directory it's being created, and its path.
+     */
+    public static function makeTree ($base_path, array $tree)
+    {
+        foreach ($tree as $base => $path) {
+            if (is_array($path)) {
+                $new_base_path = self::join($base_path, $base);
+                foreach (self::makeTree($new_base_path, $path) as $path) {
+                    yield $path;
+                };
+            } else {
+                $path = self::join($base_path, $path);
+                $status = self::makeDir($path);
+                yield [$status, $path];
+           }
+        }
     }
 }

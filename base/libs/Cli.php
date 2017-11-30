@@ -1,6 +1,6 @@
 <?php
 /**
- * 
+ *
  */
 namespace Vendimia\Cli;
 
@@ -12,7 +12,7 @@ use Vendimia\Console;
  */
 function makeTree ($base_path, array $tree)
 {
-    foreach (Path\MakeTree($base_path, $tree) as $status ) {
+    foreach (Path::MakeTree($base_path, $tree) as $status ) {
         $path = $status[1];
         Console::fromStatus('MKDIR', $status[0], $status[1]);
     }
@@ -34,16 +34,16 @@ function fileSave ($file, $data, $options = null)
 
     // Podemos sobreescribir?
     $overwrite = isset ($options['overwrite']);
-    
+
     if (isset($options['base_path'])) {
-        $file = Path\join($options['base_path'], $file);
+        $file = Path::join($options['base_path'], $file);
     }
 
     if (!file_exists($file)) {
-        
+
         // Creamos el directorio silenciosamente, si no existe
         $filepath = dirname($file);
-        Path\makeDir($filepath);
+        Path::makeDir($filepath);
 
         // Y grabamos el fichero
         file_put_contents ($file, $data);
@@ -63,7 +63,7 @@ function createView ($base_path, $app, $view, $content = false) {
     if ( $app != ":" ) {
         // El Namespace tiene el slash invertido
         $ns = strtr ( $app, '/', '\\' );
-        $data = "<?php namespace $ns; use Vendimia as V, "; 
+        $data = "<?php namespace $ns; use Vendimia as V, ";
     } else {
         $data = "<?php use ";
     }
@@ -81,7 +81,7 @@ function createView ($base_path, $app, $view, $content = false) {
     } else {
         fileSave ("apps/$app/views/$view.php", $data, $base_path);
     }
-    
+
 }
 
 /**

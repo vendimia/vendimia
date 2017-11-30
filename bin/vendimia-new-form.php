@@ -75,5 +75,5 @@ EOF;
 }
 $form .= '}';
 
-$file = Vendimia\Path\join('apps', bin::$module->app, 'forms', bin::$module->element .'.php');
+$file = Vendimia\Path::join('apps', bin::$module->app, 'forms', bin::$module->element .'.php');
 cli\fileSave ($file, $form);

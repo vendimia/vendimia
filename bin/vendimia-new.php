@@ -53,7 +53,7 @@ if ( $module == 'base' ) {
         bin::$module->app = $app;
 
         // Existe?
-        bin::$module->app_exists = is_dir(Vendimia\Path\join(bin::$project_path, "apps/$app"));
+        bin::$module->app_exists = is_dir(Vendimia\Path::join(bin::$project_path, "apps/$app"));
     }
 
 }

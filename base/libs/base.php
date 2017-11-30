@@ -62,7 +62,7 @@ function project_file ( $file ) {
         
     }
     foreach ( $search_paths as $base_path ) {
-        $path = Vendimia\Path\join ($base_path, $parts) . '.php' ;
+        $path = Vendimia\Path::join ($base_path, $parts) . '.php' ;
 
         // Existe?
         if (file_exists($path)) {

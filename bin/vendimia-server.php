@@ -39,7 +39,7 @@ if ($serverinfo) {
 // Primero probamos si la carpeta pública está en el proyecto.
 $root_path = bin::$project_path;
 $index = 'index.php';
-$full_path = Vendimia\Path\join($root_path, $index);
+$full_path = Vendimia\Path::join($root_path, $index);
 
 if (!file_exists($full_path)) {
     // No existe. La raiz debe estar en otro lado

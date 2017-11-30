@@ -11,7 +11,7 @@ if ( !isset ( Vendimia::$args[0] ) || trim( Vendimia::$args[0] ) == "" ) {
 }
 
 // Buscamos la imágen
-$path = Path\join (Vendimia::$args->get());
+$path = Path::join (Vendimia::$args->get());
 
 // Hay una app por defecto?
 $colon = strpos ($path, ':' );

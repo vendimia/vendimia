@@ -35,5 +35,5 @@ trait $traitname
 }
 EOF;
 
-$file = Vendimia\Path\join('apps', bin::$module->app, 'services', bin::$module->element .'.php');
+$file = Vendimia\Path::join('apps', bin::$module->app, 'services', bin::$module->element .'.php');
 cli\fileSave ($file, $service);

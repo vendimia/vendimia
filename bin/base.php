@@ -40,7 +40,7 @@ class bin {
     // Nombre del script que vamos a llamar.
     static $script_name = '';
 
-    // Ruta del proyecto, donde existe o donde se creará 
+    // Ruta del proyecto, donde existe o donde se creará
     static $project_path = '';
 
     // Hay un proyecto en esa ruta?
@@ -55,11 +55,11 @@ class bin {
     /**
      * Determina si hay un proyecto Vendimia en la carpeta dada
      */
-    static function is_Vendimiaproject ($path) 
+    static function is_Vendimiaproject ($path)
     {
-        $target = Vendimia\Path\join($path,'config/settings.php');
+        $target = Vendimia\Path::join($path,'config/settings.php');
         if (file_exists($target)) {
-            // Ok. 
+            // Ok.
             return true;
         }
         return false;
@@ -91,7 +91,7 @@ class bin {
 
                 // Tiene un valor?
                 $equal = strpos ( $long_arg, '=' );
-                
+
                 if ( $equal !== false ) {
                     $value = substr ( $long_arg, $equal + 1 );
                     $long_arg = substr ( $long_arg, 0, $equal);
@@ -103,7 +103,7 @@ class bin {
             }
         }
 
-        // Ignoramos el primer elemento. 
+        // Ignoramos el primer elemento.
         array_shift ( $argv );
         self::$script_name = strtolower(array_shift($argv));
 
@@ -116,17 +116,17 @@ class bin {
         }
 
         // Si no hay ruta, usamos el CMD probamos desde el CWD hacia arriba
-        if (!self::$project_path) { 
+        if (!self::$project_path) {
 
             // Empezamos a buscar.
             $path = getcwd();
-            
+
             // Dividimos la ruta en sus partes. Y vamos explorando
             $parts = array_filter ( explode ( '/', $path ) );
             while ( $parts ) {
 
                 // Empezamos por la raiz siempre
-                $test_path = '/' . Vendimia\Path\join( $parts );
+                $test_path = '/' . Vendimia\Path::join( $parts );
 
                 if ( self::is_Vendimiaproject ( $test_path ) ) {
                     // Perfecto
@@ -147,13 +147,13 @@ class bin {
         // Si existe un proyecto, lo cargamos.
         if (self::$project_exists) {
             self::$project_name = basename ( self::$project_path );
-            
+
             // Colocamos la ruta completa del proyecto
             self::$project_path = realpath ( self::$project_path  );
 
             // Cargamos el index del proyecto
             chdir ( self::$project_path );
-            
+
             //require Vendimia\BASE_PATH . '/start.php';
             $project_loaded = false;
             if (file_exists('index.php')) {
@@ -161,7 +161,7 @@ class bin {
             } else {
                 if (file_exists('index_path')) {
                     $path = trim(file_get_contents('index_path'));
-                    $index_path = Vendimia\Path\join($path, 'index.php');
+                    $index_path = Vendimia\Path::join($path, 'index.php');
 
                     if (file_exists($index_path)) {
                         require $index_path;
@@ -230,7 +230,7 @@ class bin {
             echo $line;
         }
 
-    }    
+    }
 
 
     /**
@@ -250,11 +250,11 @@ EOF
     /**
      * Shows this help if --help parameter is found.
      */
-    static function help($description, $cmdline, array $parameters, 
-        $force = false) 
+    static function help($description, $cmdline, array $parameters,
+        $force = false)
     {
         if (isset(bin::$args['help']) || $force) {
-            
+
             $name = self::$script_name;
             if (isset(self::$module->name)) {
                 $name .= ' ' . self::$module->name;
@@ -266,7 +266,7 @@ EOF
 
             self::writeFancyDefinitions($parameters);
             echo PHP_EOL;
-            
+
             exit;
         }
     }
