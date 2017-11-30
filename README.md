@@ -66,7 +66,7 @@ Please visit http://docs.vendimia.in/. It's work-in-progress, too. You can also 
 
 My name is [Oliver Etchebarne](http://drmad.org), from [Ica](https://en.wikipedia.org/wiki/Ica,_Peru), [Perú](https://en.wikipedia.org/wiki/Peru). I started (indirectly) coding this framework in the year 2000, building several libraries for access the database, html forms render and validating, etc.
 
-*Circa* year 2012 I begun to find another language for creating web apps, disappointed about the *status quo* of PHP in that time. I tried Django and Rails, but neither really convinced me. Next year, I "discovered" that PHP was *[less ugly](https://drmad.org/blog/10-cosas-que-probablemente-no-sabias-de-php.html)*, so I gave it a new try, updating and integrating all my libraries (and creating new ones inspired on Django y Rails :grin:) in this framework base.
+*Circa* year 2012 I begun to find another language for creating web apps, disappointed about the *status quo* of PHP at that time. I tried Django and Rails, but neither really convinced me. Next year, I "discovered" that PHP was *[less ugly](https://drmad.org/blog/10-cosas-que-probablemente-no-sabias-de-php.html)*, so I gave it a new try, updating and integrating all my libraries (and creating new ones inspired on Django y Rails :grin:) in this framework base.
 
 Two years ago (2014), I decided to polish all the libraries for publishing the framework as an Open Source project, and begun to close the gaps in the integration of all, and gave its name "Vendimia". This year (2016) I gave it the last *overhauling* using the [PHP-FIG](http://www.php-fig.org/) guidelines, and updating the objects and classes for more loose-coupling between then, and implementing some other new coding paradigm.
 
