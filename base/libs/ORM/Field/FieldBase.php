@@ -24,7 +24,7 @@ abstract class FieldBase implements ValueInterface
 
     /**
      * Default constructor
-     * 
+     *
      * @param Entity $entity Parent entity
      * @param string $fieldName This field name
      * @param array $properties This field properties
@@ -124,7 +124,7 @@ abstract class FieldBase implements ValueInterface
     /**
      * Returns true when this field value depends on the owner.
      *
-     * Used on deleting, to update the dependant Entities on this field value, 
+     * Used on deleting, to update the dependant Entities on this field value,
      * like on an OneToMany field.
      *
      */
