@@ -112,7 +112,7 @@ V = {
     /**
      * Redirects to another URL with optional method and payload.
      */
-    redirect: function (url, method, variables) {
+    redirect: function (url, method, variables, target = false) {
         var method = typeof method !== 'undefined' ? method : 'get'
 
         // Si url es un objeto, entonces son las variables, y la
@@ -132,6 +132,10 @@ V = {
                 method: method,
                 action: url
             })
+
+            if (target) {
+                form.setAttribute('target', target)
+            }
 
             // En POSTS, añadimos el token CSRF
             if (method == 'post') {
