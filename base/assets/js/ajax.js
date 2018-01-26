@@ -35,7 +35,7 @@ V.Ajax = function(payload = {}) {
 
             XHR.open(this.method, target)
             XHR.setRequestHeader('X-Vendimia-Requested-With', 'XmlHttpRequest');
-            XHR.setRequestHeader('X-Vendimia-Security-Token', 
+            XHR.setRequestHeader('X-Vendimia-Security-Token',
                 V.e("meta[name=vendimia-security-token]").content);
             XHR.setRequestHeader('Content-Type', this.contentType);
 
@@ -62,18 +62,28 @@ V.Ajax = function(payload = {}) {
     /**
      * Creates a payload from a form
      */
-    this.fromForm = function(formName) 
+    this.fromForm = function(formName)
     {
         elements = V.id(formName).elements
         for (i = 0; i < elements.length; i++) {
             element = elements[i]
-            this.payload[element.name] = element.value
+
+            // Usamos .checked de los checkboxes
+            if (element.type.toLowerCase() == 'checkbox') {
+                value = element.checked ? "1" : ""
+            } else {
+                value = element.value
+            }
+
+            this.payload[element.name] = value
+
+
         }
 
         return this
     }
 
-    this.post = function(target) 
+    this.post = function(target)
     {
         this.target = target
         return this.execute('POST')
