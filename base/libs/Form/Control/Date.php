@@ -8,7 +8,7 @@ use Vendimia;
  */
 class Date extends Text
 {
-    public function draw() 
+    public function draw($extra_props = []) 
     {
         return parent::draw([
             'type' => 'date',

@@ -6,11 +6,11 @@ namespace Vendimia\Form\Control;
  */
 class Password extends Text
 {
-    public function draw()
+    public function draw($extra_props = [])
     {
         return parent::draw([
             'type' => 'password',
             'value' => '',
         ]);
-    }    
+    }
 }
