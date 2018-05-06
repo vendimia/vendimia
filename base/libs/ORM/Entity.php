@@ -145,7 +145,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
      */
     public function setValues($data)
     {
-        if ($data instanceof Vendimia\AsArrayInterface) {
+        if ($data instanceof AsArrayInterface) {
             $data = $data->asArray();
         }
         foreach ($data as $field => $value) {
@@ -414,11 +414,10 @@ abstract class Entity implements AsArrayInterface, ValueInterface
     {
         $this->retrieveRecord();
         $result = [];
-
+        
         if (is_null($fields)) {
             $fields = array_keys($this->fields);
         }
-
         foreach ($fields as $field) {
             $result[$field] = $this->fields[$field]->getValue();
         }
