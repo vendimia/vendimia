@@ -7,7 +7,7 @@ namespace Vendimia\Html;
 class Helpers
 {
     /**
-     * Returns a set of <OPTION> tags 
+     * Returns a set of <OPTION> tags
      */
     public static function options(array $options, $enable = [])
     {
@@ -24,11 +24,10 @@ class Helpers
 
                 // Creamos un grupo
                 $html .= tag::optgroup (
-                    options ($value, $enable),
-                    ['label' => $id]) -> no_escape_content() // Sin entidades
+                    self::options ($value, $enable),
+                    ['label' => $id])->noEscapeContent() // Sin entidades
                     . PHP_EOL;
-            }
-            else {
+            }  else {
                 $vars = [
                     'value' => $id,
                 ];
@@ -40,7 +39,7 @@ class Helpers
                         $vars ['selected'] = 'true';
                     }
                 }
-                $html .= tag::option ($value, $vars) -> noEscapeContent() . PHP_EOL;
+                $html .= tag::option ($value, $vars)->noEscapeContent() . PHP_EOL;
             }
          }
          return $html;
