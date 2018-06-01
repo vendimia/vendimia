@@ -4,15 +4,15 @@ namespace Vendimia\Form\Control;
 use Vendimia;
 
 /**
- * Control 
+ * Combines several controls into one block.
  */
 class Combined extends ControlAbstract
 {
 
 	protected $extra_properties = [
-		'join' => ' ',		// Caracter(es) entre cada control
-		'controls' => []	// Nombre de los controles combinados.
-	];
+		'join' => ' ',              // Caracter(es) entre cada control
+		'controls' => [],           // Nombre de los controles combinados.
+    ];
 
 	public function __construct( $name, $properties, $form ) {
 		parent::__construct( $name, $properties, $form );
@@ -26,7 +26,7 @@ class Combined extends ControlAbstract
 		}
 	}
 
-	public function draw() 
+	public function draw()
 	{
 		$res = [];
 		foreach ( $this->controls as $ctrl ) {
@@ -36,7 +36,7 @@ class Combined extends ControlAbstract
 		return join ( $this->join, $res);
 	}
 
-	public function drawMessages() 
+	public function drawMessages()
 	{
 
 		// Añadimos todos los mensajes de sus controles
@@ -54,14 +54,13 @@ class Combined extends ControlAbstract
 		// combinados. De lo contrario, fallará.
 
 		$valid = true;
-		foreach ( $this->controls as $ctrl ) {
+		foreach ($this->controls as $ctrl) {
 			// Si no está validado, sonamos
-			if ( ! $this->form->$ctrl->validated )
-				throw new DefinitionError ( $this->name . ': This Este control debe estar después de todos sus controles combinados.');
+			if (!$this->form->$ctrl->validated )
+				throw new DefinitionError ($this->name . ': Combined control must be after all its related controls.');
 
-			if ( ! $this->form->$ctrl->valid )
+			if (!$this->form->$ctrl->valid)
 				$valid = false;
-
 		}
 
 		return $valid;
