@@ -28,6 +28,8 @@ class Connector implements Database\ConnectorInterface
         Field::Time => 'time',
         Field::DateTime => 'datetime',
 
+        Field::JSON => 'text',
+
         Field::ForeignKey => 'int',
 
     ];
@@ -111,6 +113,8 @@ class Connector implements Database\ConnectorInterface
             return $value?1:0;
         } elseif (is_numeric($value)) {
             return $value;
+        } elseif (is_array($value)) {
+            return $this->escape(json_encode($value));
         } elseif (is_object($value)) {
             if ($value instanceof ValueInterface) {
                return $value->getDatabaseValue($this);
