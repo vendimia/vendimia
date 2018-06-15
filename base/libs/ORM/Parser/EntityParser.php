@@ -45,8 +45,9 @@ class EntityParser
 
             $data = (new AnnotationParser($property->getDocComment()))->asArray();
 
+            // Si una propiedad no tiene clase, la ignoramos silenciosamente.
             if (!$data['class']) {
-                throw new \InvalidArgumentException("Class for '{$property->getName()}' field is missing.");
+                continue;
             }
 
             // Obtenemos el FQDN de la clase
