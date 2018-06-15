@@ -71,7 +71,7 @@ class Manager //implements Database\ManagerInterface
 
         // Ahora creamos los indexes
         foreach ($definition->indexes as $indexname => $indexdef) {
-            $this->createIndex($tablename, $indexname, $indexdef);
+            $this->createIndex($table_name, $indexname, $indexdef);
         }
     }
 
