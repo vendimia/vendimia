@@ -1,6 +1,9 @@
 <?php
 namespace Vendimia\Logger\Target;
 
+/**
+ * Writes the log to a PHP Stream, like a file or stdout.
+ */
 class Stream extends TargetBase implements TargetInterface
 {
     private $stream;
