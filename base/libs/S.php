@@ -126,7 +126,7 @@ class S implements \ArrayAccess, \Iterator
      * @param int $length Padding lenght
      * @param string $fill Fill character
      */
-    public function pad_left($length, $fill = " ")
+    public function padLeft($length, $fill = " ")
     {
         return $this->pad($length, $fill, STR_PAD_LEFT);
     }
@@ -137,7 +137,7 @@ class S implements \ArrayAccess, \Iterator
      * @param int $length Padding lenght
      * @param string $fill Fill character
      */
-    public function pad_right($length, $fill = " ")
+    public function padRight($length, $fill = " ")
     {
         return $this->pad($length, $fill, STR_PAD_RIGHT);
     }
@@ -148,7 +148,7 @@ class S implements \ArrayAccess, \Iterator
      * @param int $length Padding lenght
      * @param string $fill Fill character
      */
-    public function pad_both($length, $fill = " ")
+    public function padBoth($length, $fill = " ")
     {
         return $this->pad($length, $fill, STR_PAD_BOTH);
     }
@@ -172,6 +172,14 @@ class S implements \ArrayAccess, \Iterator
     public function sprintf(...$args)
     {
         return new self(sprintf($this->string, ...$args));
+    }
+
+    /**
+     * Sets the first letter as uppercase
+     */
+    public function firstToUpper()
+    {
+        return new self($this(0, 1)->toUpper() . $this(1));
     }
 
     /**
