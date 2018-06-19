@@ -19,7 +19,7 @@ abstract class TargetBase
     /**
      * Sets a formatter
      */
-    public function setFormatter(Logger\FormatterInterface $formatter)
+    public function setFormatter(Logger\Formatter\FormatterInterface $formatter)
     {
         $this->formatter = $formatter;
     }
