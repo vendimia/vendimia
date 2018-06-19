@@ -6,7 +6,7 @@ use Vendimia;
 /**
  * Nodo CSS
  *
- * Cada nodo tiene un nombre y un valor. También guarda la relación con sus 
+ * Cada nodo tiene un nombre y un valor. También guarda la relación con sus
  * hermanos, y sus hijos.
  *
  * @author Oliver Etchebarne
@@ -32,7 +32,7 @@ class Node implements \Iterator, \Countable
     // Cada elemento del nombre
     private $name_segments = [];
 
-    // Los namespaces. Esto se añade antes de cada elemento del nombre, 
+    // Los namespaces. Esto se añade antes de cada elemento del nombre,
     // separado por un espacio
     private $namespaces = [];
 
@@ -119,7 +119,7 @@ class Node implements \Iterator, \Countable
         $names = [];
         foreach ( $this->name_segments as $e )  {
             if ( $this->namespaces ) foreach ( $this->namespaces as $n ) {
-                if ( strpos ( $e, '&') !== false ) 
+                if ( strpos ( $e, '&') !== false )
                     $names[] = str_replace ( '&', $n, $e );
                 else
                     $names[] = $n . ' ' . $e;
@@ -138,7 +138,7 @@ class Node implements \Iterator, \Countable
     public function getName ($namespaced = true, $pretty_space = ' ')
     {
         if ( $namespaced && $this->namespaces ) {
-            // Si existe un caracter '&' en el nombre, lo reemplazamos por el 
+            // Si existe un caracter '&' en el nombre, lo reemplazamos por el
             // namespace
             $names = $this->getNamespacedSegments();
         }
@@ -192,7 +192,7 @@ class Node implements \Iterator, \Countable
             $this->last = $node;
 
         }
- 
+
         $this->count++;
 
         return $this;
@@ -207,12 +207,12 @@ class Node implements \Iterator, \Countable
         if ( $node->parent !== $this ) {
             throw new \RuntimeException ( "\$node is not a child of this node.i");
         }
-    
+
         $node->dettach ();
 
         // Adios
         unset ( $node );
-        
+
         return $node;
     }
 
@@ -235,7 +235,7 @@ class Node implements \Iterator, \Countable
             $this->next = $target->next;
             $target->next->prev = $this;
         }
-        
+
         // Nos anclamos al lado de target
         $this->prev = $target;
         $target->next = $this;
@@ -261,9 +261,9 @@ class Node implements \Iterator, \Countable
             // Si no hay, cambiamos el first del padre
             $this->parent->first = $node;
         }
-        
+
         $node->prev = $orig_prev;
-        
+
         // Repasamos los nodos que siguen, hasta el final
 
         if ( $node->next ) {
@@ -291,8 +291,8 @@ class Node implements \Iterator, \Countable
         $last->next = $orig_next;
         $orig_next->prev = $last;
 
-        // Nos borramos
-        unset ($this);
+        // Nos borramos -- YA NO ES POSIBLE ESTO EN PHP 7.1+
+        //unset ($this);
     }
 
     /**
@@ -362,7 +362,7 @@ class Node implements \Iterator, \Countable
         $css = $str_tab;
 
         // Si es un contenedor, y NO tiene hijos, no dibujamos esto
-        if ( !$this->is_container || 
+        if ( !$this->is_container ||
             ( $this->is_container && $this->hasChildren() ))  {
 
 
@@ -371,7 +371,7 @@ class Node implements \Iterator, \Countable
             // los comandos @ no usan : para el valor
             if ( $this->name {0} == '@') {
 
-                
+
 
                 if ( $this->value ) {
                     $css .= ' ' . $this->value;
