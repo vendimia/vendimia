@@ -99,6 +99,31 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
+     * Joins all this collection elements with a glue.
+     *
+     * @param string $glue Joining glue.
+     * @return string The joined collection.
+     */
+    public function join($glue = '')
+    {
+        return implode($glue, $this->array);
+    }
+
+
+    public function asArray()
+    {
+        return $this->array;
+    }
+
+    /**
+     * Creates a Collection from variadic arguments
+     */ 
+    public static function fromArgs(...$args)
+    {
+        return new static($args);
+    }
+
+    /**
      * Magic function for accessing elements as object properties
      */
     public function &__get($element) {
