@@ -91,7 +91,7 @@ class Autoloader
         spl_autoload_register('self::autoloader');
 
         // Añadimos soporte por defecto para composer
-        $composer_autoloader = 'vendor/autoload.php';
+        $composer_autoloader = Vendimia\PROJECT_PATH . '/vendor/autoload.php';
 
         if (file_exists($composer_autoloader)) {
             require_once $composer_autoloader;
