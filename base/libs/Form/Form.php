@@ -453,12 +453,11 @@ class Form implements AsArrayInterface
     /**
      * Draws a <BUTTON type 'submit'
      */
-    public function drawSubmit($content = 'Submit form')
+    public function drawSubmit($content = 'Submit form', $extra = [])
     {
-        return Html\tag::button([
-            'type' => 'submit'
-            ], $content)
-        ->get();
+
+        $extra['type'] = 'submit';
+        return Html\tag::button($extra, $content)->get();
     }
 
     /**

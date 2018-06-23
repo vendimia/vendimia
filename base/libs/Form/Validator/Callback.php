@@ -10,7 +10,7 @@ class Callback extends ValidatorAbstract
         'callback' => null,
         'messages' => [
             'error' => "Error executing callback for '%control%'.",
-            'fail' => "Callback for '%control%' failed.",
+            'fail' => "Callback for '%control%' failed: %rawmessage%",
         ]
     ];
 
@@ -34,7 +34,8 @@ class Callback extends ValidatorAbstract
             if ($return === true) {
                 return true;
             } else {
-                $this->addMessage($return);
+                $this->args['rawmessage'] = $return;
+                $this->addMessage('fail');
                 return false;
             }
         }

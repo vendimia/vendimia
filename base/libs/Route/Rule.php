@@ -220,9 +220,10 @@ class Rule
      */
     public function matchUrl($url)
     {
-        // Dividimos la ruta y la URL por sus slashes
-        $route_parts = explode('/', $this->data);
-        $url_parts = explode('/', $url);
+        // Dividimos la ruta y la URL por sus slashes. Eliminamos las partes
+        // vacías
+        $route_parts = array_filter(explode('/', $this->data));
+        $url_parts = array_filter(explode('/', $url));
 
         $variables = [];
         $route_valid = false;

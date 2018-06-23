@@ -8,13 +8,13 @@ use Vendimia;
  */
 class Color extends Text
 {
-    public function draw() 
+    public function draw($extra_props = []) 
     {
         return parent::draw([
             'type' => 'color',
         ]);
     }
-    
+
     public function getValue()
     {
         // Removemos el # inicial

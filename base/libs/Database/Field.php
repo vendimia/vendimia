@@ -2,19 +2,19 @@
 namespace Vendimia\Database;
 
 /**
- * Vendimia database field types representation 
+ * Vendimia database field types representation
  */
 class Field
 {
     // Integers
     const Bool = 1;
     const Boolean = 1;
-    
+
     const Byte = 2;
     const SmallInt = 3;
     const Integer = 4;
     const BigInt = 5;
-    
+
     // Decimals
     const Float = 6;
     const Double = 7;
@@ -33,6 +33,9 @@ class Field
 
     // ForeignKey
     const ForeignKey = 16;
+
+    // JSON
+    const JSON = 17;
 
     const NEED_LENGTH = [
         self::Char, self::FixChar, self::Decimal

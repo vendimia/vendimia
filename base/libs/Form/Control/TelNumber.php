@@ -1,11 +1,11 @@
 <?php
 namespace Vendimia\Form\Control;
 
-class Number extends Text
+class TelNumber extends Text
 {
     function draw($extra_props = []) {
         return parent::draw([
-            'type' => 'number',
+            'type' => 'tel',
             'value' => $this->value,
         ]);
     }

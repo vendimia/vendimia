@@ -14,7 +14,7 @@ abstract class ValidatorAbstract
     /** 'Valid' state */ 
     protected $is_valid = false;
 
-    /** Error messages if this control is invalid */ 
+    /** Error messages if the control doesn't pass the validation */ 
     protected $messages = [];
 
     /**
@@ -28,7 +28,10 @@ abstract class ValidatorAbstract
     }
 
     /**
-     * Parse and adds a message to the message list
+     * Parse and adds a message from $this->args['messages'] to the message 
+     * list.
+     *
+     * @arg string $code Message index from $this->args['messages']
      */
     protected function addMessage($code)
     {

@@ -2,23 +2,25 @@
 namespace Vendimia;
 
 /**
- * DateTime class
+ * Class for operate dates.
  */
 class DateTime implements Database\ValueInterface
 {
+    /** Date parts, used in shortcut functions */
     private $parts = [
         'year',
         'month',
         'day',
 
         'hour',
-        'minute', 
+        'minute',
         'second',
 
         'week', // Esto solo se usa en intervalos. Equivale a 7 días
     ];
     private $parts_data = [];
 
+    /** Timestamp of this date */
     private $timestamp = null;
 
     // Esto se calcula de las partes
@@ -35,10 +37,10 @@ class DateTime implements Database\ValueInterface
 
     private function buildTimestamp()
     {
-        if ( $this->is_interval ) {
+        if ($this->is_interval) {
             // En intervalos, sólo obtiene segundos, minutos, horas, y días.
-            $this->interval = $this->day * 86400 + 
-                $this->hour * 360 + 
+            $this->interval = $this->day * 86400 +
+                $this->hour * 360 +
                 $this->minute * 60 +
                 $this->second;
         }
@@ -48,15 +50,7 @@ class DateTime implements Database\ValueInterface
             if ($this->is_now) {
                 $this->timestamp = time();
             } else {
-                $this->timestamp = mktime (
-                    $this->hour,
-                    $this->minute,
-                    $this->second,
-
-                    $this->month,
-                    $this->day,
-                    $this->year 
-                );
+                $this->updateTimestampFromParts();
             }
         }
     }
@@ -71,9 +65,41 @@ class DateTime implements Database\ValueInterface
     }
 
     /**
+     * Update parts from timestamp
+     */
+    private function updatePartsFromTimestamp()
+    {
+        $p = getdate($this->timestamp);
+
+        $this->year = $p['year'];
+        $this->month = $p['mon'];
+        $this->day = $p['mday'];
+
+        $this->hour = $p['hours'];
+        $this->minute = $p['minutes'];
+        $this->second = $p['seconds'];
+
+        $this->weekday = $p['wday'];
+        $this->yearday = $p['yday'];
+    }
+
+    private function updateTimestampFromParts()
+    {
+        $this->timestamp = mktime (
+            $this->hour,
+            $this->minute,
+            $this->second,
+
+            $this->month,
+            $this->day,
+            $this->year
+        );
+    }
+
+    /**
      * Constructor.
-     * 
-     * @param string $str Date/time string 
+     *
+     * @param string $str Date/time string
      */
     public function __construct ($str = null, $interval = false)
     {
@@ -100,18 +126,7 @@ class DateTime implements Database\ValueInterface
 
         // Timestamp
         if ($this->timestamp) {
-            $p = getdate ( $this->timestamp );
-
-            $this->year = $p['year'];
-            $this->month = $p['mon'];
-            $this->day = $p['mday'];
-
-            $this->hour = $p['hours'];
-            $this->minute = $p['minutes'];
-            $this->second = $p['seconds'];
-
-            $this->weekday = $p['wday'];
-            $this->yearday = $p['yday'];
+            $this->updatePartsFromTimestamp();
 
             $this->is_now = false;
         } elseif ( $this->interval ) {
@@ -160,27 +175,44 @@ class DateTime implements Database\ValueInterface
     /**
      * Sets the time part to 00:00:00 without altering the date part.
      */
-    function date()
+    function onlyDate()
     {
         $this->hour = 0;
         $this->minute = 0;
         $this->second = 0;
 
+        $this->updateTimestampFromParts();
+
         return $this;
     }
 
-    // 
-    // Setters
-    function __call ( $var, $val ) {
+    /**
+     * Sets the date part to 0/0/0 without altering the time part.
+     */
+    function onlyTime()
+    {
+        $this->day = 0;
+        $this->month = 0;
+        $this->year = 0;
+
+        $this->updateTimestampFromParts();
+
+        return $this;
+    }
+
+    /**
+     * Magic function for update any date/time part
+     */
+    function __call($var, $val) {
         // Removemos el plural
         if (substr ( $var, -1 ) == "s" ) {
-            $var = substr ( $var, 0, -1 );   
+            $var = substr ( $var, 0, -1 );
         }
 
         // Solo permitimos algunos
-        if ( in_array ( $var,  $this->parts ) ) {
-            if ( isset ( $val[0] ) ) {
-                // setter 
+        if (in_array($var,$this->parts)) {
+            if (isset($val[0])) {
+                // setter
 
                 $value = $val[0];
                 // Funciones especiales
@@ -189,10 +221,9 @@ class DateTime implements Database\ValueInterface
                     $value *= 7;
                 }
 
-
                 // Ahora tiene un valor
                 $this->is_now = false;
-                $this->parts_data[ $var ] = floatval($value);
+                $this->parts_data[$var] = floatval($value);
                 return $this;
             }
             else {
@@ -201,14 +232,17 @@ class DateTime implements Database\ValueInterface
             }
         }
         else {
-            return null;
+            // Fallamos
+            throw new \BadMethodCallException("'$var' is not a DateTime part.");
         }
     }
 
-    // Static setters. Crea intervalos
+    /**
+     * Magic function to create intervals using the part name as static method.
+     */
     static function __callStatic($var, $val)
     {
-        return ( new static ( false, true ) )->$var ( $val[0] );
+        return (new static(false, true))->$var($val[0]);
     }
 
     /**
@@ -258,7 +292,7 @@ class DateTime implements Database\ValueInterface
             // Reemplazamos
             return strtr($format, $repl);
         }
-        else { 
+        else {
             $this->buildTimestamp();
 
             if ( is_null($format) ) {
@@ -283,19 +317,15 @@ class DateTime implements Database\ValueInterface
     function add(DateTime $interval, $substract = false)
     {
         // Esta funcion también resta
-        $sign = 1;
-        if ( $substract ) {
-            $sign = -1;
-        }
+        $sign = $substract ? -1 : 1;
 
         // Añadimos todos los valores
-        foreach ($this->parts as $part ) {
+        foreach ($this->parts as $part) {
             $this->$part += $interval->$part * $sign;
         }
 
         // Reconstruimos
         $this->buildTimestamp();
-
 
         return $this;
     }
@@ -329,7 +359,7 @@ class DateTime implements Database\ValueInterface
     }
 
     /**
-     * Devuelve el intervalo entre $this - $date 
+     * Devuelve el intervalo entre $this - $date
      */
     function diff(DateTime $target)
     {
@@ -353,11 +383,19 @@ class DateTime implements Database\ValueInterface
         return $this->format($format);
     }
 
+    /**
+     * Returns the time part.
+     */
+    public function getTime($format = 'H:i:s')
+    {
+        return $this->format($format);
+    }
+
     function __get ($var)
     {
         // Removemos el plural
         if (substr ( $var, -1 ) == "s" ) {
-            $var = substr ( $var, 0, -1 );   
+            $var = substr ( $var, 0, -1 );
         }
 
         if ( in_array ( $var,  $this->parts ) ) {
@@ -367,7 +405,7 @@ class DateTime implements Database\ValueInterface
 
     function __set ( $var, $val ) {
         if (substr ( $var, -1 ) == "s" ) {
-            $var = substr ( $var, 0, -1 );   
+            $var = substr ( $var, 0, -1 );
         }
 
         if ( in_array ( $var,  $this->parts ) ) {

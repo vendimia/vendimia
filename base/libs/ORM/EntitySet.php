@@ -35,7 +35,7 @@ class EntitySet implements \Iterator
     private $constrains = [];
 
     /**
-     * Dummy function. Is not neede here, but trait QueryManager needs it
+     * Dummy function. It's not needed here, but trait QueryManager does.
      */
     private static function configureStatic()
     {
@@ -113,6 +113,38 @@ class EntitySet implements \Iterator
         $where = $this->whereBuilder->from($this->constrains)->build();
 
         return $this->db_connector->delete($this->db_table, $where);
+    }
+
+    /**
+     * Returns this EntitySet as an array.
+     *
+     * This method declaration is not compatible with "AsArrayInterface" 
+     * interface.
+     *
+     * @var string $key_field Field whose value will be used as the array
+     *  index. Default is the natural PHP array index.
+     * @var string $value_field Field whose value will be use as the array
+     *  value. Default is the entire entity as an array.
+     * @return array Array representation of this EntitySet
+     */
+    public function AsArray($key_field = null, $value_field = null)
+    {
+        $result = [];
+        foreach ($this as $entity) {
+            if ($value_field) {
+                $value = $entity->$value_field;
+            } else {
+                $value = $entity->asArray();
+            }
+
+            if ($key_field) {
+                $result[$entity->$key_field] = $value;
+            } else {
+                $result[] = $value;
+            }
+        }
+
+        return $result;
     }
 
     /**

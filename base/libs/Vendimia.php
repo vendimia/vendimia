@@ -28,7 +28,7 @@ class Vendimia
 
     /** Arguments passed to the controller */
     static public $args;
-    
+
     /** Settings array, from config/settings.php */
     static public $settings;
 
@@ -44,9 +44,9 @@ class Vendimia
     /** Default Vendimia Logger */
     static public $logger;
 
-    /** Service container */ 
+    /** Service container */
     static public $services = null;
-    
+
     /**
      * Initialize the application
      */
@@ -103,12 +103,11 @@ class Vendimia
         // ServiceLocator
         self::$services = new Vendimia\ServiceContainer;
 
-
         // El logger por default
         self::$logger = new Vendimia\Logger\Logger;
         $level = Vendimia::$settings['logger']['level'];
         $target = Vendimia::$settings['logger']['target'];
-        self::$logger->addTarget($level, new $target);
+        self::$logger->addTarget(new $target, $level);
 
         // Obtenemos la ruta web de este proyecto. Usamos
         // la ruta web de index.php para sacar la raiz.

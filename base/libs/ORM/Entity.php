@@ -41,9 +41,10 @@ abstract class Entity implements AsArrayInterface, ValueInterface
      *
      * @param array $fields Associative array with this entity fields
      *      value
-     * @param boolean $not_new Used when fetching entities from a set
+     * @param boolean $from_entityset Used when fetching entities from an
+     *      EntitySet.
      */
-    public function __construct($fields = null, $not_new = false)
+    public function __construct($fields = null, $from_entityset = false)
     {
         static::configure();
 
@@ -72,16 +73,18 @@ abstract class Entity implements AsArrayInterface, ValueInterface
             $fields = $fields->asArray();
         }
 
+        // si $from_entityset es true, entonces el valor viene de la base
+        // de datos. Lo usamos como flag de setValue()
         if ($fields) {
             foreach($fields as $field => $value) {
-                $this->setValue($field, $value);
+                $this->setValue($field, $value, $from_entityset);
             }
         }
 
         $this->whereBuilder = new Where;
         $this->whereBuilder->setEntity($this);
 
-        if ($not_new) {
+        if ($from_entityset) {
             $this->is_new = false;
             $this->record_retrieved = true;
         }
@@ -145,7 +148,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
      */
     public function setValues($data)
     {
-        if ($data instanceof Vendimia\AsArrayInterface) {
+        if ($data instanceof AsArrayInterface) {
             $data = $data->asArray();
         }
         foreach ($data as $field => $value) {
@@ -287,18 +290,29 @@ abstract class Entity implements AsArrayInterface, ValueInterface
 
     /**
      * Sets a field value. Most used inside the same Entity object.
+     *
+     * @var string $field Field name.
+     * @var mixed $value Value for this field.
+     * @var boolean $from_database When true, the method Field::setValueFromDatabase()
+     *      fromis used instead Field::setValue()
      */
-    public function setValue($field, $value)
+    public function setValue($field, $value, $from_database = false)
     {
         $this->retrieveRecord();
 
+        if ($from_database) {
+            $setValueMethod = 'setValueFromDatabase';
+        } else {
+            $setValueMethod = 'setValue';
+        }
+
         if (isset($this->fields[$field])) {
-            $this->fields[$field]->setValue($value);
+            $this->fields[$field]->$setValueMethod($value);
             $this->modified_fields[$field] = true;
 
             $this->is_empty = false;
         } elseif (isset($this->database_fields[$field])) {
-            $this->database_fields[$field]->setValue($value);
+            $this->database_fields[$field]->$setValueMethod($value);
             $this->modified_fields[$this->database_fields[$field]->getFieldName()] = true;
 
             $this->is_empty = false;
@@ -418,7 +432,6 @@ abstract class Entity implements AsArrayInterface, ValueInterface
         if (is_null($fields)) {
             $fields = array_keys($this->fields);
         }
-
         foreach ($fields as $field) {
             $result[$field] = $this->fields[$field]->getValue();
         }

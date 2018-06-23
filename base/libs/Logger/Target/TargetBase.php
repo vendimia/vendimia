@@ -9,7 +9,7 @@ abstract class TargetBase
     protected $formatter = null;
 
     /**
-     * Sets the default formatter OneLiner
+     * Sets the default formatter to OneLiner
      */
     public function __construct() 
     {
@@ -19,7 +19,7 @@ abstract class TargetBase
     /**
      * Sets a formatter
      */
-    public function setFormatter(Vendimia\Logger\FormatterInterface $formatter)
+    public function setFormatter(Logger\Formatter\FormatterInterface $formatter)
     {
         $this->formatter = $formatter;
     }
