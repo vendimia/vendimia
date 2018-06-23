@@ -59,7 +59,7 @@ class Compiler
             return false;
         }
 
-        Path\makeDir($this->fileinfo->path);
+        Path::makeDir($this->fileinfo->path);
         touch ($this->fileinfo->fullref);
     }
 
