@@ -4,20 +4,20 @@ namespace Vendimia\ORM\Field;
 use Vendimia\ORM\Entity;
 use Vendimia\Database\ConnectorInterface;
 use Vendimia\Database\Field as DBField;
-use Vendimia\DateTime\Date as D;
+use Vendimia\DateTime;
 
 /**
- * Date field.
+ * Time field.
  */
-class Date extends DateTime
+class Time extends DateTime
 {
     public function setValue($value)
     {
-        $this->value = new D($value);
+        $this->value = new DateTime\Time($value);
     }
 
     public static function getDatabaseFieldType()
     {
-        return DBField::Date;
+        return DBField::Time;
     }
 }
