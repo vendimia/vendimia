@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use Vendimia\DateTime\DateTime;
+use Vendimia\DateTime\Date;
 use Vendimia\DateTime\Interval;
 
 final class DateTimeTest extends TestCase
@@ -57,12 +58,26 @@ final class DateTimeTest extends TestCase
         $this->assertEquals('1980-12-27', $dt->format('Y-m-d'));
     }
 
-    public function testDiff()
+    public function testDiffWithMonths()
     {
-        $dt = new DateTime('1981-02-28 10:38:00');
-        $diff = $dt->diff(new DateTime('1981-01-29 10:39:30'));
-var_dump($diff);
-        $this->assertEquals(-1, $diff->getMonth());
+        $dt = new DateTime('1981-02-28');
+        $diff = $dt->diff(new DateTime('1981-05-28'));
+
+        $this->assertEquals(3, $diff->getMonth());
+    }
+
+    public function testBefore()
+    {
+        $dt = new DateTime('1981-02-28');
+
+        $this->assertEquals(true, $dt->isBefore(new DateTime('1981-02-29')));
+    }
+
+    public function testAfter()
+    {
+        $dt = new DateTime('1981-02-28');
+
+        $this->assertEquals(true, $dt->isAfter(new DateTime('1981-01-29')));
     }
 
 }

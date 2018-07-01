@@ -1,7 +1,7 @@
 <?php
 namespace Vendimia\DateTime;
 
-class Interval extends DateTimeAbstract
+class Interval extends DatePartsAbstract
 {
     /**
      *
@@ -22,17 +22,19 @@ class Interval extends DateTimeAbstract
     }
 
     /**
-     * Returns an Interval built from seconds.
+     * Returns an Interval built from DateTime::diff().
      *
      * Useful for processing Timestamp arithmetics
      */
-     public static function fromSeconds($seconds)
+     public static function fromDiff($seconds, $months)
      {
          $parts = [
              'second' => $seconds % 60,
              'minute' => floor($seconds / 60) % 60,
              'hour' => floor($seconds / 3600) % 24,
              'day' => floor($seconds / 86400),
+             'month' => $months % 12,
+             'year' => floor($months / 12),
          ];
          return new static($parts);
      }
@@ -40,12 +42,12 @@ class Interval extends DateTimeAbstract
      /**
       * Returns the Timestamp-like value for this Interval
       */
-      public function asSeconds()
+      public function getTimestamp()
       {
-          return $this->days * 86400
-            + $this->hours * 3600
-            + $this->minutes * 60
-            + $this->seconds;
+          return $this->day * 86400
+            + $this->hour * 3600
+            + $this->minute * 60
+            + $this->second;
       }
 
 
@@ -95,11 +97,11 @@ class Interval extends DateTimeAbstract
      */
     public static function days($day)
     {
-        return static::days($day);
+        return static::day($day);
     }
 
     /**
-     * Creates a Hour interval
+     * Creates an Hour interval
      */
     public static function hour($hour)
     {
@@ -107,7 +109,7 @@ class Interval extends DateTimeAbstract
     }
 
     /**
-     * Alias of static::day()
+     * Alias of static::hour()
      */
     public static function hours($hour)
     {

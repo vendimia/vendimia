@@ -7,7 +7,7 @@ use Vendimia\Database\ConnectorInterface;
 /**
  * Date/time manupulation class.
  */
-class DateTime extends DateTimeAbstract implements ValueInterface
+class DateTime extends DatePartsAbstract implements ValueInterface
 {
     /**
      * Constructor.
@@ -47,7 +47,6 @@ class DateTime extends DateTimeAbstract implements ValueInterface
      */
     public function add(Interval $interval, $sign = 1)
     {
-
         foreach (static::PARTS as $part) {
             $this->$part += $interval->$part * $sign;
         }
@@ -72,14 +71,40 @@ class DateTime extends DateTimeAbstract implements ValueInterface
      * If $target is after $this, interval will be positive, otherwise
      * it will return a negative interval.
      *
+     * Due the varying nature of the month's days number, the resulting inteval
+     * will have the days and months "disconnected", that is, days can be
+     * greater than 31. E.g. two dates with 3 month different will result
+     * in a interval with days = 90 and months = 3;
+     *
      * @return Interval Interval between the two DateTime;
      */
     public function diff(DateTime $target)
     {
-        $interval  = $target->getTimestamp() - $this->getTimestamp();
+        // Usamos 2 elementos: Primero, los segundos de diferencia
+        $seconds = $target->getTimestamp() - $this->getTimestamp();
 
-        return Interval::fromSeconds($interval);
+        // Y los meses de diferencia
+        $months = ($target->getYears() * 12 + $target->getMonths()) -
+                ($this->getYears() * 12 + $this->getMonths());
+
+        return Interval::fromDiff($seconds, $months);
     }
+
+    /**
+     * Returns true if $this is before $target
+     */
+     public function isBefore(DateTime $target)
+     {
+         return $this->diff($target)->getTimestamp() > 0;
+     }
+
+     /**
+      * Returns true if $this is after $target
+      */
+      public function isAfter(DateTime $target)
+      {
+          return $this->diff($target)->getTimestamp() < 0;
+      }
 
     /**
      * Returns the timestamp
@@ -121,4 +146,16 @@ class DateTime extends DateTimeAbstract implements ValueInterface
       {
           return new static(time());
       }
+
+      /**
+       * Converts this object to a sting
+       */
+       public function __toString()
+       {
+           if (is_null($this->timestamp)) {
+               return '';
+           } else {
+               return $this->format();
+           }
+       }
 }

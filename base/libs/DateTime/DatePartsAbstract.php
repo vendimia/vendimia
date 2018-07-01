@@ -1,7 +1,7 @@
 <?php
 namespace Vendimia\DateTime;
 
-abstract class DateTimeAbstract
+abstract class DatePartsAbstract
 {
     const PARTS = ['year', 'month', 'day', 'hour', 'minute', 'second'];
 
@@ -89,6 +89,8 @@ abstract class DateTimeAbstract
 
     /**
      * Alias of getYear()
+     *
+     * @see self::getYear()
      */
      public function getYears()
      {
@@ -104,6 +106,7 @@ abstract class DateTimeAbstract
         return $this;
 
     }
+
     /**
      * Returns the month part
      */
@@ -114,6 +117,8 @@ abstract class DateTimeAbstract
 
     /**
      * Alias of getMonth()
+     *
+     * @see self::getMonth()
      */
      public function getMonths()
      {
@@ -140,6 +145,8 @@ abstract class DateTimeAbstract
 
     /**
      * Alias of getDay()
+     *
+     * @see self::getDay()
      */
      public function getDays()
      {
@@ -165,6 +172,8 @@ abstract class DateTimeAbstract
 
     /**
      * Alias of getHour()
+     *
+     * @see self::getHour()
      */
      public function getHours()
      {
@@ -191,6 +200,8 @@ abstract class DateTimeAbstract
 
     /**
      * Alias of getMinute()
+     *
+     * @see self::getMinute()
      */
      public function getMinutes()
      {
@@ -216,6 +227,8 @@ abstract class DateTimeAbstract
 
     /**
      * Alias of getSecond()
+     *
+     * @see self::getSecond()
      */
     public function getSeconds()
     {
@@ -230,16 +243,4 @@ abstract class DateTimeAbstract
         $this->setPart('second', $second);
         return $this;
     }
-
-    /**
-     * Converts this object to a sting
-     */
-     public function __toString()
-     {
-         if (is_null($this->timestamp)) {
-             return '';
-         } else {
-             return $this->format();
-         }
-     }
 }
