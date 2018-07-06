@@ -1,10 +1,12 @@
 <?php
 namespace Vendimia\Logger\Target;
 
+use PHPMailer\PHPMailer\PHPMailer as PM;
+
 /**
- * Sends an email to the administrators, or a list of addresses.
+ * Sends an email using PHPMailer
  */
-class Email extends TargetBase implements TargetInterface
+class PHPMailer extends TargetBase implements TargetInterface
 {
     private $addresses;
     private $mailer;
@@ -12,7 +14,7 @@ class Email extends TargetBase implements TargetInterface
     /**
      * @param object $mailer A PHPMailer preconfigured instance.
      */
-    public function __construct($mailer)
+    public function __construct(PM $mailer)
     {
         $this->mailer = $mailer;
 
