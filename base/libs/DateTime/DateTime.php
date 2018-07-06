@@ -24,7 +24,6 @@ class DateTime extends DatePartsAbstract implements ValueInterface
         } elseif ($source instanceof DateTime || $source instanceof \DateTime) {
             $this->timestamp = $source->getTimestamp();
         }
-
         if (!is_null($this->timestamp)) {
             $this->setPartsFromTimestamp($this->timestamp);
         }

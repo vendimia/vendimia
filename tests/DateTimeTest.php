@@ -66,6 +66,13 @@ final class DateTimeTest extends TestCase
         $this->assertEquals(3, $diff->getMonth());
     }
 
+    public function testDiffWithDates()
+    {
+        $dt = Date::now();
+        $target = new Date("2018-07-01");
+        var_dump($dt->diff($target)->getParts());
+    }
+
     public function testBefore()
     {
         $dt = new DateTime('1981-02-28');

@@ -14,6 +14,8 @@ class Time extends DateTime
         $this->year = 0;
         $this->month = 0;
         $this->day = 0;
+
+        $this->buildTimestampFromParts();
     }
 
     public function format($format = 'H:i:s')

@@ -14,10 +14,20 @@ class Date extends DateTime
         $this->hour = 0;
         $this->minute = 0;
         $this->second = 0;
+
+        $this->buildTimestampFromParts();
     }
 
     public function format($format = 'Y-m-d')
     {
         return parent::format($format);
+    }
+
+    /**
+     * Returns the year day part
+     */
+    public function getYearDay()
+    {
+        return $this->yearday;
     }
 }

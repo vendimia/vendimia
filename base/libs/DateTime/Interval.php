@@ -42,15 +42,13 @@ class Interval extends DatePartsAbstract
      /**
       * Returns the Timestamp-like value for this Interval
       */
-      public function getTimestamp()
-      {
-          return $this->day * 86400
+    public function getTimestamp()
+    {
+        return $this->day * 86400
             + $this->hour * 3600
             + $this->minute * 60
             + $this->second;
-      }
-
-
+    }
 
     /**
      * Creates a Year interval
@@ -79,9 +77,9 @@ class Interval extends DatePartsAbstract
     /**
      * Alias of static::month()
      */
-    public static function months($year)
+    public static function months($month)
     {
-        return static::month($year);
+        return static::month($month);
     }
 
     /**
