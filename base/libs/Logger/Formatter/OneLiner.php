@@ -2,50 +2,43 @@
 namespace Vendimia\Logger\Formatter;
 
 /**
- * Writes
+ * Writes the message and the context in one line, with optional date/time and channel.
  */
 class OneLiner implements FormatterInterface
 {
-    private $prepend = '';
-    private $append = '';
+    private $date_format = 'Y-m-d H:i:s';
 
     /**
-     * Replaces {variables} with values in $context
+     * Sets or disables the date format in the log line
      */
-    private function interpolate($message, array $context = [])
+    public function setDateFormat($date_format)
     {
-        $replace = [];
-        foreach ($context as $key => $val)  {
-          if (!is_array($val) && (!is_object($val) || method_exists($val, '__toString'))) {
-              $replace['{' . $key . '}'] = $val;
-            }
-        }
-
-        return strtr($message, $replace);
+        $this->date_format = $date_format;
     }
-
-    /**
-     * Prepends a text at the beginning of the message
-     */
-    public function setPrepend($prepend)
-    {
-        $this->prepend = $prepend;
-    }
-
-    /**
-     * Appends a text at the endi of the message
-     */
-    public function setAppend($append)
-    {
-        $this->append = $append;
-    }
-
 
     public function format($message, array $context = [])
     {
-        return $this->prepend . 
-            $this->interpolate($message, $context) .
-            $this->append;
-    }
+        $logname = $context['_logger_name'];
 
+        if (is_null($logname)) {
+            $logname = strtoupper($context['_level']);
+        } else {
+            $logname .= '.' . strtoupper($context['_level']);
+        }
+
+        $parts = [];
+
+        if ($this->date_format) {
+            $parts[] = date($this->date_format);
+        }
+
+        $parts[] = $logname;
+        $parts[] = $message;
+
+
+        // Si hay un null, lo removemso
+        $parts = array_filter($parts);
+
+        return join (' ', $parts);
+    }
 }

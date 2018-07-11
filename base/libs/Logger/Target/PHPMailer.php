@@ -1,6 +1,8 @@
 <?php
 namespace Vendimia\Logger\Target;
 
+use Vendimia\Logger;
+use Vendimia\Logger\Formatter;
 use PHPMailer\PHPMailer\PHPMailer as PM;
 
 /**
@@ -17,17 +19,19 @@ class PHPMailer extends TargetBase implements TargetInterface
     public function __construct(PM $mailer)
     {
         $this->mailer = $mailer;
-
-        parent::__construct();
+        $this->formatter = new Formatter\Html;
     }
 
     public function write($message, array $context)
     {
-        $message = $this->formatter->format($message, $context);
 
-        $this->mailer->Body = $message;
-        $this->mailer->AltBody = strip_tags($message);
-        $this->mailer->send();
+        $body = $this->formatter->format($message, $context);
+
+        // $message debe ser un string, siempre.
+        $this->mailer->Subject = (string)$message;
+        $this->mailer->Body = $body;
+        $this->mailer->AltBody = strip_tags($body);
+        var_dump($this->mailer->send());
 
     }
 }

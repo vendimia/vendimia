@@ -9,14 +9,6 @@ abstract class TargetBase
     protected $formatter = null;
 
     /**
-     * Sets the default formatter to OneLiner
-     */
-    public function __construct() 
-    {
-        $this->formatter = new Logger\Formatter\OneLiner;
-    }
-
-    /**
      * Sets a formatter
      */
     public function setFormatter(Logger\Formatter\FormatterInterface $formatter)
