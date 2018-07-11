@@ -20,7 +20,7 @@ class Html implements FormatterInterface
             $newdata = [];
             foreach ($data as $key=>$value)
             {
-                $newdata[$key] = self::normalize($value, $depth + 1);
+                $newdata[$key] = $this->normalize($value, $depth + 1);
             }
             return $newdata;
         }
@@ -32,13 +32,18 @@ class Html implements FormatterInterface
      */
     public function formatContext($context)
     {
-        $html = "<table>";
+        $html = '<table style="border-collapse: collapse">';
         $context = $this->normalize($context);
 
         foreach ($context as $key=>$value) {
             $html .= '<tr>';
-            $html .= '<th>' . $key . '</th>';
-            $html .= '<td>' . $value . '</td>';
+            $html .= '<th style="padding: 5px; border-bottom: 1px solid #eee; vertical-align: top; text-align: left">' . $key . '</th>';
+
+            if (is_array($value)) {
+                $value = $this->formatContext($value);
+            }
+
+            $html .= '<td style="padding: 5px; border-bottom: 1px solid #eee">' . $value . '</td>';
             $html .= '</tr>';
         }
         $html .= "</table>";

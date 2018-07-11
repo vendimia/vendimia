@@ -27,11 +27,18 @@ class PHPMailer extends TargetBase implements TargetInterface
 
         $body = $this->formatter->format($message, $context);
 
+        $subject = '';
+        if (key_exists('_logger_name', $context)) {
+            $subject = "[{$context['_logger_name']}] ";
+            unset ($context['_logger_name']);
+        }
+
+        $subject .= strtoupper($context['_level']) . ': ' . (string)$message;
+
         // $message debe ser un string, siempre.
-        $this->mailer->Subject = (string)$message;
+        $this->mailer->Subject = $subject;
         $this->mailer->Body = $body;
         $this->mailer->AltBody = strip_tags($body);
-        var_dump($this->mailer->send());
-
+        $this->mailer->send();
     }
 }
