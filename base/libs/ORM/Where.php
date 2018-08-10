@@ -68,7 +68,7 @@ class Where
         // Determinamos si es asociativo o no
         if ($base === array_values($base)) {
             // Si. Buscamos el primary key
-            $w = $this->pk_field . ' IN (' . 
+            $w = $this->pk_field . ' IN (' .
                 join(', ', $this->connector->escape($base)) . ')';
 
             $where[] = ['AND', false, $w];
@@ -79,7 +79,7 @@ class Where
                 $w = $this->connector->escapeIdentifier($key);
 
                 if (is_array($value)) {
-                    $w .= ' IN (' . join(', ', 
+                    $w .= ' IN (' . join(', ',
                         $this->connector->escape($value)) . ')';
                 } elseif (is_object($value)) {
                     if ($value instanceof Comparison) {
@@ -110,7 +110,7 @@ class Where
      * - If it's an associative array, multiple WHERE will be created with
      *   each key EQUALed by default to its value, joined with ANDs. The value
      *   can be a Comparison object.
-     * - 
+     * -
      *
      * @return array Array of several [glue, not, where] arrays
      */
@@ -155,9 +155,9 @@ class Where
             if ($value === false) {
                 throw new \RuntimeException('Not enough parameters for raw WHERE.');
             }
-            $value = $this->connector->escape($value);
+            $value = $this->connector->valueFromPHP($value);
 
-            $where = substr($where, 0, $pos) . $value . 
+            $where = substr($where, 0, $pos) . $value .
                 substr($where, $pos + 2);
 
             next($args);
@@ -174,7 +174,7 @@ class Where
         $where = $this->base;
         $parsed_args = [];
         foreach ($args as $key => $arg) {
-            $parsed_args['{' . $this->connector->escape($key, '') . '}'] = 
+            $parsed_args['{' . $this->connector->valueFromPHP($key, '') . '}'] =
                 $this->connector->escape($arg);
         }
 
