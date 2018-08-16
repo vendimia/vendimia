@@ -23,7 +23,7 @@ class Helpers
             if (is_array ($value)) {
 
                 // Creamos un grupo
-                $html .= tag::optgroup (
+                $html .= Tag::optgroup (
                     self::options ($value, $enable),
                     ['label' => $id])->noEscapeContent() // Sin entidades
                     . PHP_EOL;
@@ -39,7 +39,7 @@ class Helpers
                         $vars ['selected'] = 'true';
                     }
                 }
-                $html .= tag::option ($value, $vars)->noEscapeContent() . PHP_EOL;
+                $html .= Tag::option ($value, $vars)->noEscapeContent() . PHP_EOL;
             }
          }
          return $html;
