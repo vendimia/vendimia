@@ -2,13 +2,14 @@
 namespace Vendimia\Form\Control;
 
 use Vendimia;
+use Vendimia\DateTime;
 
 /**
  * Campo de Fecha. Dibuja un tag INPUT con type="date".
  */
 class Date extends Text
 {
-    public function draw($extra_props = []) 
+    public function draw($extra_props = [])
     {
         return parent::draw([
             'type' => 'date',
@@ -22,7 +23,7 @@ class Date extends Text
     {
         $value = parent::getValue();
         if ($value) {
-            return new Vendimia\DateTime($value);
+            return new DateTime\Date($value);
         } else {
             return null;
         }
