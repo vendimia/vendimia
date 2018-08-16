@@ -1,13 +1,13 @@
 <?php
 // Funciones de ayuda de todo tipo
 
-/** 
+/**
  *  Returns a value if $varible exists. Otherwise, return $default
  */
 function ifset ( &$variable, $default = null ) {
     if ( isset ( $variable ) )
         return $variable;
-        
+
     return $default;
 }
 
@@ -39,23 +39,6 @@ function vardump ( $object ) {
     echo "<pre>";
     echo htmlentities ($vd);
     echo "</pre>";
-}
-
-
-/**
- * Crea un objeto Vendimia\S
- */
-function _S($text = null)
-{
-    return new Vendimia\S ( $text );
-}
-
-/**
- * Crea un objeto Vendimia\DateTime
- */
-function _DT($date = null)
-{
-    return new Vendimia\DateTime($date);
 }
 
 /**

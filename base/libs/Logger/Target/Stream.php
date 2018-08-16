@@ -1,6 +1,8 @@
 <?php
 namespace Vendimia\Logger\Target;
 
+use Vendimia\Logger;
+
 /**
  * Writes the log to a PHP Stream, like a file or stdout.
  */
@@ -11,10 +13,10 @@ class Stream extends TargetBase implements TargetInterface
 
     public function __construct($stream, $mode = 'a')
     {
+        $this->formatter = new Logger\Formatter\OneLiner;
+
         $this->stream = $stream;
         $this->mode = $mode;
-
-        parent::__construct();
     }
 
     public function write($message, array $context) {

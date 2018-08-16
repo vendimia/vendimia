@@ -2,7 +2,7 @@
 namespace Vendimia;
 
 /**
- * Class for operate dates.
+ * Class for date operations.
  */
 class DateTime implements Database\ValueInterface
 {
@@ -65,7 +65,7 @@ class DateTime implements Database\ValueInterface
     }
 
     /**
-     * Update parts from timestamp
+     * Updates parts from timestamp
      */
     private function updatePartsFromTimestamp()
     {
@@ -83,6 +83,9 @@ class DateTime implements Database\ValueInterface
         $this->yearday = $p['yday'];
     }
 
+    /**
+     * Updates timestamp from parts
+     */
     private function updateTimestampFromParts()
     {
         $this->timestamp = mktime (
@@ -100,9 +103,11 @@ class DateTime implements Database\ValueInterface
      * Constructor.
      *
      * @param string $str Date/time string
+     * @param bool $interval True if this instance is an interval
      */
     public function __construct ($str = null, $interval = false)
     {
+        throw new \Exception('Deprecated');
         $this->parts_data = array_fill_keys($this->parts, 0);
 
         if (!is_null($str)) {
@@ -129,7 +134,7 @@ class DateTime implements Database\ValueInterface
             $this->updatePartsFromTimestamp();
 
             $this->is_now = false;
-        } elseif ( $this->interval ) {
+        } elseif ($this->interval) {
             $this->second = $this->interval % 60;
             $this->minute = static::round($this->interval / 60) % 60;
             $this->hour = static::round($this->interval / 3600) % 24;
@@ -248,7 +253,7 @@ class DateTime implements Database\ValueInterface
     /**
      * Returns the UNIX timestamp
      */
-    function timestamp()
+    function getTimestamp()
     {
         $this->buildTimestamp();
         return $this->timestamp;
@@ -335,7 +340,7 @@ class DateTime implements Database\ValueInterface
      *
      * @return object This DateTime object.
      */
-    function sub (DateTime $interval)
+    function sub(DateTime $interval)
     {
         return $this->add($interval, true);
     }
@@ -343,7 +348,7 @@ class DateTime implements Database\ValueInterface
     /**
      * Similar to add(), but returns a new object.
      */
-    function plus (DateTime $interval)
+    function plus(DateTime $interval)
     {
         $target = clone $this;
         return $target->add($interval);
@@ -359,20 +364,38 @@ class DateTime implements Database\ValueInterface
     }
 
     /**
-     * Devuelve el intervalo entre $this - $date
+     * Returns an interval, substracting $this from $target
+     *
+     * If $target is after $this, interval will be positive, otherwise
+     * it will return a negative interval.
      */
     function diff(DateTime $target)
     {
-
-        // $target debe ser un intervalo
-        if ( $target->is_interval ) {
-            throw new Exception ('diff() only works between two dates,');
+        // $target no debe ser un intervalo
+        if ($target->isInterval()) {
+            throw new Exception ('diff() only works between two dates.');
         }
 
         // El intervalo
-        $interval  = $this->timestamp() - $target->timestamp();
+        $interval  = $target->getTimestamp() - $this->getTimestamp();
 
         return new static($interval, true);
+    }
+
+    /**
+     * Returns whether $this is before $target
+     */
+    public function isBefore(DateTime $target)
+    {
+        return $this->diff($target) < 0;
+    }
+
+    /**
+     * Returns whether this instance is an interval, or not.
+     */
+    public function isInterval()
+    {
+        return $this->is_interval;
     }
 
     /**

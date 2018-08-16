@@ -131,19 +131,38 @@ trait QueryManager
     }
 
     /**
+     * Syntax sugar for where 
+     *
+     * @see static::where()
+     */ 
+    public function and($where = null)
+    {
+        if ($where) {
+            return $this->where($where);
+        }
+        return $this;
+    }
+
+    /**
      * Joins the next where() with an OR
      */
-    public function or()
+    public function or($where = null)
     {
         $this->query_boolean_join ='OR';
+        if ($where) { 
+            return $this->where($where);
+        }
         return $this;
     }
 
     /**
      * Negates the next where()
      */
-    public function not() {
+    public function not($where = null) {
         $this->query_boolean_not ='NOT';
+        if ($where) {
+            return $this->where($where);
+        }
         return $this;
     }  
 

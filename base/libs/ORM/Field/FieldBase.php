@@ -37,6 +37,15 @@ abstract class FieldBase implements ValueInterface
     }
 
     /**
+     *  Default value parser.
+     */
+    public function parseValue($value)
+    {
+        // Does nothing
+        return $value;
+    }
+
+    /**
      *  Default setter
      */
     public function setValue($value)

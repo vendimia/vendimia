@@ -45,7 +45,7 @@ class Vendimia
     static public $logger;
 
     /** Service container */
-    static public $services = null;
+    static public $service = null;
 
     /**
      * Initialize the application
@@ -101,7 +101,7 @@ class Vendimia
         self::$csrf = new Vendimia\Csrf;
 
         // ServiceLocator
-        self::$services = new Vendimia\ServiceContainer;
+        self::$service = new Vendimia\ServiceContainer;
 
         // El logger por default
         self::$logger = new Vendimia\Logger\Logger;

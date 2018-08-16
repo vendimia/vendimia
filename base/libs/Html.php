@@ -76,14 +76,14 @@ class Html {
     public function addExternalScript(...$scripts)
     {
         $this->external_scripts = array_merge(
-            $this->external_scripts, $scripts);    
+            $this->external_scripts, $scripts);
     }
 
     /**
-     * Add a LINK tag 
+     * Add a LINK tag
      *
-     * @param string|array $rel 'rel' attribute. If it's an array, 
-     *      it'll be used as attribute origin. 
+     * @param string|array $rel 'rel' attribute. If it's an array,
+     *      it'll be used as attribute origin.
      * @param string $href 'href' attribute.
      * @param array $extra_attr extra html attributes to the link tag
      */
@@ -103,7 +103,7 @@ class Html {
     /**
      * Add a META tag.
      *
-     * @param string|array $type META tag type. If it's an array, then the type 
+     * @param string|array $type META tag type. If it's an array, then the type
      *      is 'name', and this will be used as $attr
      * @param string!array $attr Associative array with name => value, or string
      *      if 'name' is 'charset'
@@ -114,8 +114,8 @@ class Html {
             $attr = $type;
             $type = 'name';
         }
-        
-        // Tratamos distinto a 'charset' 
+
+        // Tratamos distinto a 'charset'
         if ($type == 'charset') {
             if (!is_string($attr)) {
                 throw new \RuntimeException("\$attr must be a String when \$type is 'charset'.");
@@ -152,7 +152,7 @@ class Html {
             $this->addCss($viewname);
         }
         if ($js->found()) {
-            $this->addJs($viewname);
+            $this->addScript($viewname);
         }
     }
 
@@ -160,7 +160,7 @@ class Html {
     /**
      * Generates a header LINK tags.
      */
-    public function drawLink() 
+    public function drawLink()
     {
         $html = [];
 
