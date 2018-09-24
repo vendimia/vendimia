@@ -424,7 +424,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
     /**
      * AsArrayInterface implementation
      */
-    public function AsArray($fields = null)
+    public function asArray($fields = null)
     {
         $this->retrieveRecord();
         $result = [];
