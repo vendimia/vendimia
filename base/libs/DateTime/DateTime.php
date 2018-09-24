@@ -92,19 +92,34 @@ class DateTime extends DatePartsAbstract implements ValueInterface
     /**
      * Returns true if $this is before $target
      */
-     public function isBefore(DateTime $target)
-     {
-         return $this->diff($target)->getTimestamp() > 0;
-     }
+    public function isBefore(DateTime $target)
+    {
+        return $this->diff($target)->getTimestamp() > 0;
+    }
+
+     /**
+      * Returns true if $this is before or equals to $target
+      */
+    public function isBeforeOrEqualsTo(DateTime $target)
+    {
+        return $this->diff($target)->getTimestamp() >= 0;
+    }
 
      /**
       * Returns true if $this is after $target
       */
-      public function isAfter(DateTime $target)
-      {
-          return $this->diff($target)->getTimestamp() < 0;
-      }
+     public function isAfter(DateTime $target)
+     {
+         return $this->diff($target)->getTimestamp() < 0;
+     }
 
+    /**
+     * Returns true if $this is after or equals to $target
+     */
+    public function isAfterOrEqualsTo(DateTime $target)
+    {
+        return $this->diff($target)->getTimestamp() <= 0;
+    }
     /**
      * Returns the timestamp
      */
