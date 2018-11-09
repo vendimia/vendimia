@@ -67,7 +67,15 @@ V.Ajax = function(payload = {}) {
         elements = V.id(formName).elements
         for (i = 0; i < elements.length; i++) {
             element = elements[i]
-            this.payload[element.name] = element.value
+
+            // Los checkboxes usan el valor checked, no value
+            if (element.type.toLowerCase() == 'checkbox') {
+                value = element.checked ? "1" : ""
+            } else {
+                value = element.value
+            }
+
+            this.payload[element.name] = value
         }
 
         return this
