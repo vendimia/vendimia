@@ -30,4 +30,13 @@ class Date extends DateTime
     {
         return $this->yearday;
     }
+
+    /**
+     * Creates a Date object with today
+     */
+    public static function today()
+    {
+        return new static(time());
+    }
+
 }
