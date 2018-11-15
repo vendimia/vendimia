@@ -38,4 +38,21 @@ class Decimal extends FieldBase
     {
         return floatval($this->value);
     }
+
+    public function setValue($value)
+    {
+        // Todos los valores son Floats
+        if (is_object($value)) {
+            if ($value instanceof ControlAbstract) {
+                $this->value = floatval($value->getValue());
+            } else {
+                throw new \InvalidArgumentException("Object of class '" . get_class($value) . "' cannot be implicitly converted to decimal.");
+            }
+        } elseif (is_null($value)) {
+            $this->value = null;
+        } else {
+            $this->value = floatval($value);
+        }
+    }
+
 }
