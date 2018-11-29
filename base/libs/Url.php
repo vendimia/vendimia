@@ -14,8 +14,12 @@ class Url
     /** Each URL GET arguments */
     private $args = [];
 
-
+    /** True if we need to prepend this project web base path */
     private $relative = true;
+
+    /** The final URL */
+    private $url;
+
 
     public function __construct(...$parts)
     {
@@ -116,6 +120,16 @@ class Url
                 }
             }
         }
+
+        if ($this->relative) {
+            array_unshift($this->parts, rtrim(Vendimia::$base_url, '/.'));
+        }
+
+        $url = join('/', $this->parts);
+        if ($this->args) {
+            $url .= '?' . http_build_query($this->args);
+        }
+        $this->url = $url;
     }
 
     /**
@@ -131,16 +145,8 @@ class Url
             array_unshift($this->parts, rtrim(Vendimia::$base_url, '/.'));
         }*/
 
-        if ($this->relative) {
-            array_unshift($this->parts, rtrim(Vendimia::$base_url, '/.'));
-        }
 
-        $url = join('/', $this->parts);
-        if ($this->args) {
-            $url .= '?' . http_build_query($this->args);
-        }
-
-        return $url;
+        return $this->url;
     }
 
     /**
