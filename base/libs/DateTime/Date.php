@@ -1,6 +1,8 @@
 <?php
 namespace Vendimia\DateTime;
 
+use Vendimia\Database\ConnectorInterface;
+
 /**
  * Date manupulation class.
  */
@@ -39,4 +41,11 @@ class Date extends DateTime
         return new static(time());
     }
 
+    /**
+     * Returns the most common date-time value for databases
+     */
+     public function getDatabaseValue(ConnectorInterface $connector)
+     {
+         return $connector->escape($this->format('Y-m-d'));
+     }
 }
