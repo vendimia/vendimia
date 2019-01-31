@@ -18,7 +18,7 @@ class Url
     private $relative = true;
 
     /** The final URL */
-    private $url;
+    private $url = null;
 
 
     public function __construct(...$parts)
@@ -120,7 +120,19 @@ class Url
                 }
             }
         }
+    }
 
+    /**
+     * Returns the built URL
+     */
+    public function get()
+    {
+        // Si ya está construida, la devolvemos.
+        if ($this->url) {
+            return $this->url;
+        }
+
+        // Construimos la URL uniendo las partes.
         if ($this->relative) {
             array_unshift($this->parts, rtrim(Vendimia::$base_url, '/.'));
         }
@@ -130,21 +142,6 @@ class Url
             $url .= '?' . http_build_query($this->args);
         }
         $this->url = $url;
-    }
-
-    /**
-     * Builds the path using $this->parts[] and $this->args[]
-     */
-    public function get()
-    {
-        /*if ($this->schema) {
-            // Absoluto
-            array_unshift($this->parts, $this->schema);
-        } else {
-            // Relativo
-            array_unshift($this->parts, rtrim(Vendimia::$base_url, '/.'));
-        }*/
-
 
         return $this->url;
     }
