@@ -1,6 +1,6 @@
-V.Ajax = function(payload = {}) {
-    this.payload = payload
-    this.target = window.location.href
+V.Ajax = function(target) {
+    this.payload = {}
+    this.target = target || window.location.href
     this.method = 'POST'
     this.contentType = 'application/x-www-form-urlencoded'
 
@@ -35,7 +35,7 @@ V.Ajax = function(payload = {}) {
 
             XHR.open(this.method, target)
             XHR.setRequestHeader('X-Vendimia-Requested-With', 'XmlHttpRequest');
-            XHR.setRequestHeader('X-Vendimia-Security-Token', 
+            XHR.setRequestHeader('X-Vendimia-Security-Token',
                 V.e("meta[name=vendimia-security-token]").content);
             XHR.setRequestHeader('Content-Type', this.contentType);
 
@@ -62,7 +62,7 @@ V.Ajax = function(payload = {}) {
     /**
      * Creates a payload from a form
      */
-    this.fromForm = function(formName) 
+    this.fromForm = function(formName)
     {
         elements = V.id(formName).elements
         for (i = 0; i < elements.length; i++) {
@@ -81,9 +81,9 @@ V.Ajax = function(payload = {}) {
         return this
     }
 
-    this.post = function(target) 
+    this.post = function(payload)
     {
-        this.target = target
+        this.payload = payload
         return this.execute('POST')
     }
 }
