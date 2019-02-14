@@ -174,8 +174,8 @@ $webroot_config
 
 // Default logger
 'logger' => [
-    'level' => Vendimia\Logger\Logger::ERROR,
-    'target' => Vendimia\Logger\Target\PhpErrorLog::class,
+    'level' => Vendimia\Logger\LogLevel::ERROR,
+    'target' => Vendimia\Logger\Target\ErrorLog::class,
 ],
 
 // Directory for static content. Can be an absolute path, o relative to this
@@ -204,7 +204,7 @@ return [
 'debug_mode' => true,
 
 'logger' => [
-    'level' => Vendimia\Logger\Logger::DEBUG,
+    'level' => Vendimia\Logger\LogLevel::DEBUG,
 ],
 
 ];
