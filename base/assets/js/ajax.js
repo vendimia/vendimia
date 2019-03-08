@@ -7,19 +7,24 @@ V.Ajax = function(target) {
     this.execute = function(method) {
         var XHR = new XMLHttpRequest()
 
-        // Convertimos el payload en un string
-        res = [];
-        for (v in this.payload) {
-            // Los arrays lo tratamos distinto
-            if (this.payload[v] instanceof Array) {
-                for (d in this.payload[v]) {
-                    res.push(v + '[]=' + encodeURIComponent(this.payload[v][d]));
+        // Si payload no es un FormData, lo convertimos. Asumiermos que es un
+        // objecto
+        payload = this.payload
+        if (!payload instanceof FormData && this.method != 'GET') {
+            // Convertimos el payload en un string
+            var res = new FormData()
+            for (var v in this.payload) {
+                // Los arrays lo tratamos distinto
+                if (this.payload[v] instanceof Array) {
+                    for (d in this.payload[v]) {
+                        res.append(v + '[]', this.payload[v][d]);
+                    }
+                } else {
+                    res.append(v, this.payload[v]);
                 }
-            } else {
-                res.push (v + '=' + encodeURIComponent(this.payload[v]));
             }
+            var payload = res
         }
-        var payload = res.join ('&')
 
         var target = this.target
         if (this.method == 'GET') {
@@ -37,7 +42,7 @@ V.Ajax = function(target) {
             XHR.setRequestHeader('X-Vendimia-Requested-With', 'XmlHttpRequest');
             XHR.setRequestHeader('X-Vendimia-Security-Token',
                 V.e("meta[name=vendimia-security-token]").content);
-            XHR.setRequestHeader('Content-Type', this.contentType);
+            //XHR.setRequestHeader('Content-Type', this.contentType);
 
             XHR.onreadystatechange = () => {
                 if (XHR.readyState === XMLHttpRequest.DONE) {
@@ -55,7 +60,7 @@ V.Ajax = function(target) {
                     resolve(payback)
                 }
             }
-            XHR.send(payload)
+            XHR.send(this.payload)
         })
     }
 
@@ -64,7 +69,7 @@ V.Ajax = function(target) {
      */
     this.fromForm = function(formName)
     {
-        elements = V.id(formName).elements
+        /*elements = V.id(formName).elements
         for (i = 0; i < elements.length; i++) {
             element = elements[i]
 
@@ -76,7 +81,8 @@ V.Ajax = function(target) {
             }
 
             this.payload[element.name] = value
-        }
+        }*/
+        this.payload = new FormData(V.id(formName))
 
         return this
     }
