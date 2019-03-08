@@ -237,12 +237,17 @@ $index = <<<EOF
 <?php
 $define_project_path
 /*
-Each 'environment' loads an extra settings.{ENVIRONMENT}.php file (where 
-{ENVIRONMENT} is the value of  VENDIMIA\\ENVIRONMENT constant), overwriting 
-the main settings. By default, the file 'config/settings.development.php' 
-only enables the debug mode.
+The 'VENDIMIA\\ENVIRONMENT' constant value is used to load an extra 
+'config/settings.{ENVIRONMENT}.php' file, if found, for updating the main
+settings. 
 
-Change this conditions as you see fit for changing the working environment.
+By default, there is a 'config/settings.development.php' file, which only
+enables the debug mode. The following condition sets the VENDIMIA\\ENVIRONMENT 
+constant to 'development' (thus loading the aforementioned config file) when 
+this project is accessed via localhost.
+
+You can have as many environments as you want, just set the right value
+of the constant here:
 */
 
 if (isset(\$_SERVER['SERVER_ADDR'])) {
@@ -252,12 +257,14 @@ if (isset(\$_SERVER['SERVER_ADDR'])) {
     }
 }
 
+/* End environment setting. Please don't modify the rest of lines. */
+
 \$base_path = 'vendimia/';
 if (getenv('VENDIMIA_BASE_PATH')) {
     \$base_path = getenv('VENDIMIA_BASE_PATH') . '/';
 }
 
-// Let's the magic begin :-)
+// Let's the magic begins :-)
 return require \$base_path . 'start.php';
 EOF;
 
@@ -282,11 +289,11 @@ $default_layout = <<<EOF
 <?php use Vendimia\\View;
 /*
 --------------------------------------------------------------------------------
-Basic default view layout. When you modify this layout, or create a new one, 
-remember to add at least this "\$this->content()" instruction on it.
+Basic default view layout. Remember, there must be always at least one 
+"\$this->content()" method call with no arguments in the layout.
 
-The files 'vendimia_default_header' and 'vendimia_default_footer' are located in
-the 'base/views' directory inside the Vendimia installation path.
+The files 'vendimia_default_header' and 'vendimia_default_footer' are located
+in the 'base/views' directory on the Vendimia installation path.
 --------------------------------------------------------------------------------
 */
 
@@ -295,7 +302,7 @@ the 'base/views' directory inside the Vendimia installation path.
 \$this->insert('vendimia_default_header');
 
 // The 'vendimia_message' view file contains the message <div> tag for the 
-// Vendimia\\Message functions, like message() o warning().
+// Vendimia\\Message methods, like message() o warning().
 \$this->insert('vendimia_messages');
 
 // This draws the actual view. If you create your own layout, 
