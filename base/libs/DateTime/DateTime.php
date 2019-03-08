@@ -21,9 +21,15 @@ class DateTime extends DatePartsAbstract implements ValueInterface
             $this->timestamp = $source;
         } elseif (is_string($source)) {
             $this->timestamp = strtotime($source);
+
+            // Si no puede interpretar $source, entonces lo convertimos a null
+            if ($this->timestamp === false) {
+                $this->timestamp = null;
+            }
         } elseif ($source instanceof DateTime || $source instanceof \DateTime) {
             $this->timestamp = $source->getTimestamp();
         }
+
         if (!is_null($this->timestamp)) {
             $this->setPartsFromTimestamp($this->timestamp);
         }
@@ -92,19 +98,34 @@ class DateTime extends DatePartsAbstract implements ValueInterface
     /**
      * Returns true if $this is before $target
      */
-     public function isBefore(DateTime $target)
-     {
-         return $this->diff($target)->getTimestamp() > 0;
-     }
+    public function isBefore(DateTime $target)
+    {
+        return $this->diff($target)->getTimestamp() > 0;
+    }
+
+     /**
+      * Returns true if $this is before or equals to $target
+      */
+    public function isBeforeOrEqualsTo(DateTime $target)
+    {
+        return $this->diff($target)->getTimestamp() >= 0;
+    }
 
      /**
       * Returns true if $this is after $target
       */
-      public function isAfter(DateTime $target)
-      {
-          return $this->diff($target)->getTimestamp() < 0;
-      }
+     public function isAfter(DateTime $target)
+     {
+         return $this->diff($target)->getTimestamp() < 0;
+     }
 
+    /**
+     * Returns true if $this is after or equals to $target
+     */
+    public function isAfterOrEqualsTo(DateTime $target)
+    {
+        return $this->diff($target)->getTimestamp() <= 0;
+    }
     /**
      * Returns the timestamp
      */
@@ -123,11 +144,19 @@ class DateTime extends DatePartsAbstract implements ValueInterface
      */
     public function format($format = 'Y-m-d H:i:s')
     {
+        // Si no hay información de la fecha/hora, retornamos una cadena vacía
+        if (is_null($this->timestamp)) {
+            return '';
+        }
+
+        // Si hay un %, usamos strftime()
         if (strpos($format, '%') !== false) {
             return strftime($format, $this->timestamp);
-        } else {
-            return date($format, $this->timestamp);
         }
+
+        // De lo contrario, usamos date()
+        return date($format, $this->timestamp);
+
     }
 
     /**
@@ -147,14 +176,10 @@ class DateTime extends DatePartsAbstract implements ValueInterface
       }
 
       /**
-       * Converts this object to a sting
+       * Converts this object to a string
        */
        public function __toString()
        {
-           if (is_null($this->timestamp)) {
-               return '';
-           } else {
-               return $this->format();
-           }
+           return $this->format();
        }
 }

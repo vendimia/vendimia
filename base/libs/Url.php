@@ -14,8 +14,12 @@ class Url
     /** Each URL GET arguments */
     private $args = [];
 
-
+    /** True if we need to prepend this project web base path */
     private $relative = true;
+
+    /** The final URL */
+    private $url = null;
+
 
     public function __construct(...$parts)
     {
@@ -119,18 +123,16 @@ class Url
     }
 
     /**
-     * Builds the path using $this->parts[] and $this->args[]
+     * Returns the built URL
      */
     public function get()
     {
-        /*if ($this->schema) {
-            // Absoluto
-            array_unshift($this->parts, $this->schema);
-        } else {
-            // Relativo
-            array_unshift($this->parts, rtrim(Vendimia::$base_url, '/.'));
-        }*/
+        // Si ya está construida, la devolvemos.
+        if ($this->url) {
+            return $this->url;
+        }
 
+        // Construimos la URL uniendo las partes.
         if ($this->relative) {
             array_unshift($this->parts, rtrim(Vendimia::$base_url, '/.'));
         }
@@ -139,8 +141,9 @@ class Url
         if ($this->args) {
             $url .= '?' . http_build_query($this->args);
         }
+        $this->url = $url;
 
-        return $url;
+        return $this->url;
     }
 
     /**

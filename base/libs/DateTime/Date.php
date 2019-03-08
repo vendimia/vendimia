@@ -1,6 +1,8 @@
 <?php
 namespace Vendimia\DateTime;
 
+use Vendimia\Database\ConnectorInterface;
+
 /**
  * Date manupulation class.
  */
@@ -30,4 +32,20 @@ class Date extends DateTime
     {
         return $this->yearday;
     }
+
+    /**
+     * Creates a Date object with today
+     */
+    public static function today()
+    {
+        return new static(time());
+    }
+
+    /**
+     * Returns the most common date-time value for databases
+     */
+     public function getDatabaseValue(ConnectorInterface $connector)
+     {
+         return $connector->escape($this->format('Y-m-d'));
+     }
 }

@@ -1,6 +1,9 @@
 <?php
 namespace Vendimia\DateTime;
 
+use Vendimia\Database\ConnectorInterface;
+
+
 /**
  * Date manupulation class.
  */
@@ -22,4 +25,12 @@ class Time extends DateTime
     {
         return parent::format($format);
     }
+
+    /**
+     * Returns the most common time value for databases
+     */
+     public function getDatabaseValue(ConnectorInterface $connector)
+     {
+         return $connector->escape($this->format('H:i:s'));
+     }
 }

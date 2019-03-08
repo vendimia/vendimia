@@ -1,6 +1,6 @@
 <?php
 $titulo_pequeño = "$class exception";
-$titulo = "Unhandled <strong>$class</strong> exception on <tt>" .$E->getFile() . ':' . 
+$titulo = "Unhandled <strong>$class</strong> exception on <tt>" .$E->getFile() . ':' .
     $E->getLine() . '</tt>';
 
 // Non, rien de rien...
@@ -8,7 +8,7 @@ $inception = $class == 'Vendimia\\Inception';
 ?>
 <!DOCTYPE html>
 <html>
-<head>  
+<head>
     <style>
         body {font-family:sans-serif; font-size:13px; margin: 0px;}
         header {background: #006c8c;border-top: 5px solid #004d64; font-size: 18px; padding: 20px; color: white;}
@@ -30,12 +30,12 @@ $inception = $class == 'Vendimia\\Inception';
     </style>
     <title><?=$titulo_pequeño?></title>
     <meta charset="utf-8" />
-</head>    
+</head>
 <body>
     <script type="text/javascript">
     function cambiar ( id ) {
         e = document.getElementById( id )
-        if ( e.style.display != 'block') 
+        if ( e.style.display != 'block')
             e.style.display = 'block'
         else
             e.style.display = 'none'
@@ -44,20 +44,20 @@ $inception = $class == 'Vendimia\\Inception';
 
     <header>
     <div class="titulo"><?=$titulo?></div>
-    <div class="mensaje"><?=$E->getmessage();?></div>
+    <div class="mensaje"><?=htmlentities($E->getmessage());?></div>
     </header>
-    
+
     <main>
     <h3>Stack trace:</h3>
 <?php
         $trace = $E->getTrace();
-        
+
         // En la traza, metemos el fichero original
         array_unshift ( $trace, [
             'file' => $E->getFile(),
             'line' => $E->getLine(),
         ]);
-        
+
         // Non, je ne regrette rien...
         $inception && array_push ($trace, [
                 'file' => Vendimia\BASE_PATH . '/Easter.egg',
@@ -77,23 +77,23 @@ vXJKl3XNbGxUYGmHxWICJrk6y3EM1riX/lWqqNbEv6JnKuS1n2ZWXSUmqdU7sBwp71rIEjHBDQyG
 
             // leemos algunas líneas del fichero.
             echo '<li class="traza" onclick="cambiar(\'tl_' . $id . '\')">';
-            if (isset($t['file'])) { 
+            if (isset($t['file'])) {
                 $lines = false;
                 if (file_exists($t['file'])) {
-                    
+
                     // Obtenemos 3 líneas antes, 3 líneas después
                     $lines = file ($t['file']);
                     $de = $t['line'] - 4;
                     $al = $t['line'] + 2;
-                    
-                    // Usamos la cantidad de dígitos del 'al' para un 
+
+                    // Usamos la cantidad de dígitos del 'al' para un
                     // padding
                     $padding = strlen ($al);
 
                     if ( $de < 0 ) {
                         $de = 0;
                     }
-                        
+
                     if ($al >= count($lines)) {
                         $al = count($lines) - 1;
                     }
@@ -106,13 +106,13 @@ vXJKl3XNbGxUYGmHxWICJrk6y3EM1riX/lWqqNbEv6JnKuS1n2ZWXSUmqdU7sBwp71rIEjHBDQyG
                     $lines = explode("\n", $t['data']);
                     $line_number = 1;
                 }
-            
+
                 echo '<div class="traza_fichero">' . $t['file'] . ':' . $t['line'] . '</div>';
             }
-            
+
             // Si no hay una función, no imprimimos
             if ( isset ($t['function'] ) ) {
-            
+
                 // Revisamos los argumentos, por si hay uno que no sea string
                 $args = [];
                 if ( isset ( $t['args'] ) ) foreach ( $t['args'] as $arg ) {
@@ -134,7 +134,7 @@ vXJKl3XNbGxUYGmHxWICJrk6y3EM1riX/lWqqNbEv6JnKuS1n2ZWXSUmqdU7sBwp71rIEjHBDQyG
                 }
 
                 $args = join (', ', $args);
-            
+
                 echo '<div class="traza_funcion">' . $t['function'] . ' (' . $args . ')</div>';
             }
             echo "\n";
@@ -142,17 +142,17 @@ vXJKl3XNbGxUYGmHxWICJrk6y3EM1riX/lWqqNbEv6JnKuS1n2ZWXSUmqdU7sBwp71rIEjHBDQyG
             if (isset($t['file'])) {
                 echo '<pre class="traza_lineas" id="tl_' . $id . '"><ol style="counter-reset: line-number ' .
                 ($line_number - 1) . '">';
-                foreach ($lines as $line): 
+                foreach ($lines as $line):
 
                     // Ni le bien, qu'on m'a fait
                     !($inception && substr($t['line'], -4) == "\xF0\x9F\x98\x89") && $line = htmlentities($line);
-                    
+
                     $line = trim($line, "\n");
 
                     if ($line == '') {
                         $line = '&nbsp;';
                     }
-                    
+
                     if ($line_number == $t['line']) {
                         $class = 'class="traza_resaltada"';
                     } else {
@@ -169,7 +169,7 @@ vXJKl3XNbGxUYGmHxWICJrk6y3EM1riX/lWqqNbEv6JnKuS1n2ZWXSUmqdU7sBwp71rIEjHBDQyG
             echo "</li>\n"; //traza;
         }
         echo "</ol>";
-        
+
         // Si existe datos exportados de la excepción, los mostramos
         if ( isset ( $E->__EXPORTED_DATA ) && $E->__EXPORTED_DATA ):
 ?>

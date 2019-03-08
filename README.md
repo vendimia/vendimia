@@ -4,7 +4,7 @@
 
 **Vendimia** is a PHP framework for fast developing web applications using the MVC design pattern.
 
-Vendimia doesn't requiere root privileges for installing it, so a Vendimia application runs smoothly on a shared server like Cpanel. You can even have several Vendimia applications in separated directories, each one with its own Vendimia version.
+Vendimia doesn't requiere root privileges for installing it, so a Vendimia application runs smoothly on a shared server like cPanel. You can even have several Vendimia applications in separated directories, each one with its own Vendimia installation.
 
 **WARNING**: Vendimia is in a **very-very-alpha** stage of development. Many parts are incomplete, and the API can change in any moment. For now, it's not suitable for production environments. Use it at your own risk.
 
@@ -47,7 +47,7 @@ export PATH=$PATH:/path/to/vendimia/bin
 vendimia init myapp
 ```
 
-This will create a `myapp` directory with a basic project structure.
+This will create a `myapp` directory with a basic project directory structure.
 
 * Launch a development server:
 
@@ -64,11 +64,11 @@ Please visit http://docs.vendimia.in/. It's work-in-progress, too. You can also 
 
 # About the author
 
-My name is [Oliver Etchebarne](http://drmad.org), from [Ica](https://en.wikipedia.org/wiki/Ica,_Peru), [Perú](https://en.wikipedia.org/wiki/Peru). I started (indirectly) coding this framework in the year 2000, building several libraries for access the database, html forms render and validating, etc.
+My name is [Oliver Etchebarne](http://drmad.org), from [Ica](https://en.wikipedia.org/wiki/Ica,_Peru), [Perú](https://en.wikipedia.org/wiki/Peru). I started (indirectly) coding this framework in the year 2000, building several libraries for access the database, html forms rendering and validating, etc.
 
 *Circa* year 2012 I begun to find another language for creating web apps, disappointed about the *status quo* of PHP at that time. I tried Django and Rails, but neither really convinced me. Next year, I "discovered" that PHP was *[less ugly](https://drmad.org/blog/10-cosas-que-probablemente-no-sabias-de-php.html)*, so I gave it a new try, updating and integrating all my libraries (and creating new ones inspired on Django y Rails :grin:) in this framework base.
 
-Two years ago (2014), I decided to polish all the libraries for publishing the framework as an Open Source project, and begun to close the gaps in the integration of all, and gave its name "Vendimia". This year (2016) I gave it the last *overhauling* using the [PHP-FIG](http://www.php-fig.org/) guidelines, and updating the objects and classes for more loose-coupling between then, and implementing some other new coding paradigm.
+Two years ago (2014), I decided to polish all the libraries for publishing the framework as an Open Source project, and begun to close the gaps in the integration of every library, and gave its name "Vendimia". This year (2016) I gave it the last *overhauling* using the [PHP-FIG](http://www.php-fig.org/) guidelines, and updating the objects and classes for more loose-coupling between them, and implementing some other new coding paradigm.
 
 And on September 17, 2016, to celebrate the [Software Freedom Day](http://www.softwarefreedomday.org/), I finally published it to GitHub :smiley: .
 

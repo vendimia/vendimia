@@ -7,6 +7,7 @@ namespace Vendimia\Logger\Formatter;
 class OneLiner implements FormatterInterface
 {
     private $date_format = 'Y-m-d H:i:s';
+    private $prefix;
 
     /**
      * Sets or disables the date format in the log line
@@ -14,6 +15,14 @@ class OneLiner implements FormatterInterface
     public function setDateFormat($date_format)
     {
         $this->date_format = $date_format;
+    }
+
+    /**
+     * Sets the line prefix.
+     */
+    public function setPrefix($prefix)
+    {
+        $this->prefix = $prefix;
     }
 
     public function format($message, array $context = [])
@@ -33,7 +42,7 @@ class OneLiner implements FormatterInterface
         }
 
         $parts[] = $logname;
-        $parts[] = $message;
+        $parts[] = $this->prefix . $message;
 
 
         // Si hay un null, lo removemso
