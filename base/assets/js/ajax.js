@@ -9,8 +9,7 @@ V.Ajax = function(target) {
 
         // Si payload no es un FormData, lo convertimos. Asumiermos que es un
         // objecto
-        payload = this.payload
-        if (!payload instanceof FormData && this.method != 'GET') {
+        if (!(this.payload instanceof FormData) && this.method != 'GET') {
             // Convertimos el payload en un string
             var res = new FormData()
             for (var v in this.payload) {
@@ -23,7 +22,7 @@ V.Ajax = function(target) {
                     res.append(v, this.payload[v]);
                 }
             }
-            var payload = res
+            this.payload = res
         }
 
         var target = this.target
