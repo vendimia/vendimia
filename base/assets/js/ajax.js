@@ -1,5 +1,5 @@
 V.Ajax = function(target) {
-    this.payload = {}
+    this.payload = new FormData()
     this.target = target || window.location.href
     this.method = 'POST'
     this.contentType = 'application/x-www-form-urlencoded'
@@ -7,27 +7,10 @@ V.Ajax = function(target) {
     this.execute = function(method) {
         var XHR = new XMLHttpRequest()
 
-        // Si payload no es un FormData, lo convertimos. Asumiermos que es un
-        // objecto
-        if (!(this.payload instanceof FormData) && this.method != 'GET') {
-            // Convertimos el payload en un string
-            var res = new FormData()
-            for (var v in this.payload) {
-                // Los arrays lo tratamos distinto
-                if (this.payload[v] instanceof Array) {
-                    for (d in this.payload[v]) {
-                        res.append(v + '[]', this.payload[v][d]);
-                    }
-                } else {
-                    res.append(v, this.payload[v]);
-                }
-            }
-            this.payload = res
-        }
-
         var target = this.target
         if (this.method == 'GET') {
-            target += '?' + payload
+            target += '?' + new URLSearchParams(this.payload).toString()
+            this.payload = null
         }
 
         // Nos fijamos si necesitamos añadir el URLBASE
@@ -68,27 +51,31 @@ V.Ajax = function(target) {
      */
     this.fromForm = function(formName)
     {
-        /*elements = V.id(formName).elements
-        for (i = 0; i < elements.length; i++) {
-            element = elements[i]
-
-            // Usamos .checked de los checkboxes
-            if (element.type.toLowerCase() == 'checkbox') {
-                value = element.checked ? "1" : ""
-            } else {
-                value = element.value
-            }
-
-            this.payload[element.name] = value
-        }*/
         this.payload = new FormData(V.id(formName))
-
         return this
+    }
+
+    /**
+     * Adds an object payload
+     */
+    this.appendPayload = function(payload)
+    {
+        for (var v in payload) {
+            // Los arrays lo tratamos distinto
+            if (payload[v] instanceof Array) {
+                for (d in payload[v]) {
+                    this.payload.append(v + '[]', payload[v][d]);
+                }
+            } else {
+                this.payload.append(v, payload[v]);
+            }
+        }
+
     }
 
     this.post = function(payload)
     {
-        this.payload = payload
+        this.appendPayload(payload)
         return this.execute('POST')
     }
 }
