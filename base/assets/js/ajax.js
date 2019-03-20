@@ -60,17 +60,18 @@ V.Ajax = function(target) {
      */
     this.appendPayload = function(payload)
     {
-        for (var v in payload) {
+        for (var [name, value] of payload) {
+
             // Los arrays lo tratamos distinto
-            if (payload[v] instanceof Array) {
-                for (d in payload[v]) {
-                    this.payload.append(v + '[]', payload[v][d]);
+            if (payload[name] instanceof Array) {
+                for (d in payload[name]) {
+                    this.payload.append(name + '[]', payload[name][d]);
                 }
             } else {
-                this.payload.append(v, payload[v]);
+                this.payload.append(name, value);
             }
         }
-
+        return this
     }
 
     this.post = function(payload)
