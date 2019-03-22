@@ -56,19 +56,35 @@ V.Ajax = function(target) {
     }
 
     /**
-     * Adds an object payload
+     * Appends an element to the payload, changing the arrays to the PHP
+     * accepted format.
+     */
+    this.appendPayloadElement = function(name, value)
+    {
+        // Los arrays lo tratamos distinto
+        if (value instanceof Array) {
+            for (d in value) {
+                this.payload.append(name + '[]', value[d]);
+            }
+        } else {
+            this.payload.append(name, value);
+        }
+    }
+
+    /**
+     * Adds an object or iterator to the payload
      */
     this.appendPayload = function(payload)
     {
-        for (var [name, value] of payload) {
-
-            // Los arrays lo tratamos distinto
-            if (payload[name] instanceof Array) {
-                for (d in payload[name]) {
-                    this.payload.append(name + '[]', payload[name][d]);
-                }
-            } else {
-                this.payload.append(name, value);
+        // Iteramos los iterables
+        if (typeof payload[Symbol.iterator] === 'function') {
+            for (var [name, value] of payload) {
+                this.appendPayloadElement(name, value)
+            }
+        } else {
+            // Recorremos los no iterables
+            for (var name in payload) {
+                this.appendPayloadElement(name, payload[name])
             }
         }
         return this
