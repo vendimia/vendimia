@@ -92,7 +92,9 @@ V.Ajax = function(target) {
 
     this.post = function(payload)
     {
-        this.appendPayload(payload)
+        if (payload) {
+            this.appendPayload(payload)
+        }
         return this.execute('POST')
     }
 }
