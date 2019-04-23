@@ -13,12 +13,14 @@ class Time extends DateTime
     {
         parent::__construct($source);
 
-        // Eliminamos la fecha
-        $this->year = 0;
-        $this->month = 0;
-        $this->day = 0;
+        if (!is_null($source)) {
+            // Eliminamos la fecha
+            $this->year = 0;
+            $this->month = 0;
+            $this->day = 0;
 
-        $this->buildTimestampFromParts();
+            $this->buildTimestampFromParts();
+        }
     }
 
     public function format($format = 'H:i:s')

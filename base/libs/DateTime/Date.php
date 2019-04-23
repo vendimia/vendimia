@@ -12,12 +12,14 @@ class Date extends DateTime
     {
         parent::__construct($source);
 
-        // Eliminamos la hora
-        $this->hour = 0;
-        $this->minute = 0;
-        $this->second = 0;
+        if (!is_null($source)) {
+            // Eliminamos la hora
+            $this->hour = 0;
+            $this->minute = 0;
+            $this->second = 0;
 
-        $this->buildTimestampFromParts();
+            $this->buildTimestampFromParts();
+        }
     }
 
     public function format($format = 'Y-m-d')

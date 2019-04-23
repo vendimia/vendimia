@@ -160,6 +160,22 @@ class DateTime extends DatePartsAbstract implements ValueInterface
     }
 
     /**
+     * Returns true when this DateTime instance have no value.
+     */
+    public function isNull()
+    {
+        return is_null($this->timestamp);
+    }
+
+    /**
+     * Syntax sugar for !self::isNull()
+     */
+    public function notNull()
+    {
+        return !$this->isNull();
+    }
+
+    /**
      * Returns the most common date-time value for databases
      */
      public function getDatabaseValue(ConnectorInterface $connector)
