@@ -45,26 +45,9 @@ class FileSearch
      */
     public function __construct($file = null, $type = '', $ext = 'php')
     {
-        // Si $file es un array, entonces colocamos todo su contenido
-        // en las propiedades
-        /*if (is_array($file)) {
-            foreach ($file as $var=>$val) {
-                $this->$var = $val;
-            }
-        } else {*/
-            $this->file = $file;
-            $this->type = $type;
-            $this->ext = $ext;
-        //}
-
-        // Expandimos $this-file si tiene un ':', indicando un fichero
-        // en otra aplicación
-        $colon = strpos($this->file, ':');
-
-        if ($colon !== false ) {
-            $this->search_app = substr($file, 0, $colon);
-            $this->file = substr($file, $colon + 1);
-        }
+        $this->file = $file;
+        $this->type = $type;
+        $this->ext = $ext;
     }
 
     /**
@@ -119,24 +102,33 @@ class FileSearch
     private function search()
     {
         // Añadimos la extensión, si existe
-        if ( $this->ext ) {
+        if ($this->ext) {
             $this->file .= '.' . $this->ext;
         }
 
-        // Si hay un :, entonces estamos buscando el fichero dentro de otra
-        // aplicación. No buscamos en base
-        $colon = strpos ( $this->file, ':' );
+        $app = false;
 
-        if ( $colon !== false ) {
-            $this->search_app = substr($this->file, 0, $colon);
-            $this->file = substr($this->file, $colon + 1);
+        // Si el fichero empieza con '::', entonces sólo buscamos en la base
+        if (substr($this->file, 0, 2) == '::') {
+            $this->file = substr($this->file, 2);
+            $this->search_base = true;
+        } else {
+            // Si hay un :, entonces estamos buscando el fichero dentro de otra
+            // aplicación. No buscamos en base
+            $colon = strpos ( $this->file, ':' );
 
-            $this->search_base = false;
+            if ( $colon !== false ) {
+                $this->search_app = substr($this->file, 0, $colon);
+                $this->file = substr($this->file, $colon + 1);
+
+                $this->search_base = false;
+            }
+
+
+            // La app donde buscar.
+            $app = $this->search_app ? $this->search_app : Vendimia::$application;
+
         }
-
-
-        // La app donde buscar.
-        $app = $this->search_app ? $this->search_app : Vendimia::$application;
 
         // Armamos las rutas de búsqueda
         if ($app) {

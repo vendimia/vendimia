@@ -2,7 +2,7 @@
 namespace Vendimia\ORM\Parser;
 
 use Generator;
-use Vendimia\Json;
+use Vendimia\LooseJson\LooseJson;
 
 class AnnotationParser
 {
@@ -17,10 +17,10 @@ class AnnotationParser
      * There are two kinds: Field clases and properties. Properties
      * had an '=' sign just after the tag name.
      */
-    private function parseTag($tag) 
+    private function parseTag($tag)
     {
         $tag = trim($tag);
-        
+
         // SOLO nos importa los tags que empiezan con '@V:'
         if (substr($tag, 0, 3) !== '@V:') {
             return false;
@@ -35,12 +35,12 @@ class AnnotationParser
         if (isset($parts[1])) {
             $is_class = trim($parts[1]) != '=';
             $tagvalue = strtr($parts[2], "\n", ',');
-        } 
+        }
 
         $properties = [];
         if ($is_class) {
             if ($tagvalue != '') {
-                $properties = (new Json($tagvalue))->decode();
+                $properties = (new LooseJson($tagvalue))->decode();
             } else {
                 $properties = [];
             }
@@ -98,13 +98,13 @@ class AnnotationParser
             if ($state == 'summary') {
                 if (substr($l, -1) == '.' || (
                     $this->summary != '' && $l == '')) {
- 
+
                      $this->setSummary($datachunk);
 
                     $datachunk = '';
                     $state = 'description';
                 }
-            } 
+            }
         }
 
         // Lo que quede, lo guardamos
