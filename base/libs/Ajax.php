@@ -19,10 +19,10 @@ class Ajax
      */
     public static function verify()
     {
-        if (Vendimia::$request->getHeaderLine('X-Vendimia-Requested-With') 
-            == 'XmlHttpRequest' 
-            && 
-            Vendimia::$request->getHeaderLine('X-Vendimia-Security-Token') 
+        if (Vendimia::$request->getHeaderLine('X-Requested-With')
+            == 'XMLHttpRequest'
+            &&
+            Vendimia::$request->getHeaderLine('X-Csrf-Token')
             == Vendimia::$csrf->getToken()){
 
             return true;
@@ -45,7 +45,7 @@ class Ajax
     /**
      * Return a system messagve
      */
-    public static function message($message, $title = '') 
+    public static function message($message, $title = '')
     {
         self::send(self::MESSAGE, [
             '__MESSAGE' => $message,
@@ -66,7 +66,7 @@ class Ajax
 
         // Si el callbackn no es callable, fallamos.
         if (!is_callable($callback)) {
-            throw new ExtendedException ( 'Callable callback missing.');
+            throw new ExtendedException('Callable callback missing.');
         }
 
         Vendimia::$execution_type = 'ajax';
@@ -86,7 +86,7 @@ class Ajax
                 $return = $return->asArray();
             }
 
-            // Si existe un elemento con indice '0' en return, lo 
+            // Si existe un elemento con indice '0' en return, lo
             // convertimos en un código de retorno, en el campo __CODE
             $return_code = self::OK;
             if (!empty ($return[0])) {

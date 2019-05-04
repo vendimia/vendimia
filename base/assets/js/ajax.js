@@ -21,8 +21,8 @@ V.Ajax = function(target) {
         return new Promise((resolve, reject) => {
 
             XHR.open(this.method, target)
-            XHR.setRequestHeader('X-Vendimia-Requested-With', 'XmlHttpRequest');
-            XHR.setRequestHeader('X-Vendimia-Security-Token',
+            XHR.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            XHR.setRequestHeader('X-Csrf-Token',
                 V.e("meta[name=vendimia-security-token]").content);
             //XHR.setRequestHeader('Content-Type', this.contentType);
 
