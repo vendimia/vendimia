@@ -11,7 +11,7 @@ class Compiler
 
     private $fileinfo;
 
-    public function __construct($class, $name) 
+    public function __construct($class, $name)
     {
         $this->class = $class;
         $this->name = $name;
@@ -35,7 +35,7 @@ class Compiler
         $data->full = $data->path . $data->real;
 
         // Ruta completa del fichero de referencia.
-        $data->fullref = $data->path . $data->ref;        
+        $data->fullref = $data->path . $data->ref;
 
         $this->fileinfo = $data;
     }
@@ -85,7 +85,7 @@ class Compiler
             return Vendimia::$settings['static_url'] . "assets/{$this->class}/{$fn}";
         }
         else {
-            return "assets/{$this->class}/{$this->name}";
+            return "assets/{$this->class}?source={$this->name}";
         }
     }
 }

@@ -114,6 +114,42 @@ if (PHP_SAPI == 'cli-server') {
     Vendimia::$debug = true;
 }
 
+$routing_rules = require Vendimia\PROJECT_PATH . '/config/routes.php';
+$route_matching = new Vendimia\Routing\Match($routing_rules);
+$rule = $route_matching->against(Vendimia::$request);
+
+$target_found = false;
+
+if ($rule) {
+    // Una ruta hizo match.
+
+    if ($rule['callable']) {
+
+    } else {
+        // Es un array [app, controller]
+        list($application, $controller) = $rule['target'];
+
+        $cfile = new Vendimia\Path\FileSearch($controller, 'controllers');
+        $cfile->search_app = $application;
+
+        if ($cfile->found()) {
+            $target_found = true;
+        }
+    }
+}
+
+if ($target_found) {
+    Vendimia::$application = $application;
+    Vendimia::$controller = $controller;
+
+    if ($rule['args'] ?? false) {
+        Vendimia::$args->append($rule['args']);
+    }
+} else {
+    Vendimia\Http\Response::notFound();
+}
+
+/*
 // Procesamos el request targett contra las rutas
 $routes = include Vendimia\PROJECT_PATH . '/config/routes.php';
 $route_process = new Vendimia\Route\Process($routes);
@@ -212,7 +248,8 @@ if ($found) {
 } else {
     // 404 baby!
     Vendimia\Http\Response::notFound();
-}
+}*/
+
 
 // Antes de ejecutar el controlador, cargamos los ficheros 'initialize';
 $initialize_routes = [
@@ -227,7 +264,8 @@ foreach ($initialize_routes as $init) {
     }
 }
 
-if ($is_callable) {
+if ($rule['callable']) {
+    $callable = $rule['target'];
     $response = $callable();
     $appcontroller = $callable_name;
 } else {
