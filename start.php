@@ -119,12 +119,18 @@ $route_matching = new Vendimia\Routing\Match($routing_rules);
 $rule = $route_matching->against(Vendimia::$request);
 
 $target_found = false;
+$application = null;
+$controller = null;
 
 if ($rule) {
     // Una ruta hizo match.
 
     if ($rule['callable']) {
-
+        // $callable_name tendrá el nombre del callable, usado para mensajes
+        // de error, entre otras cosas.
+        if (is_callable($rule['target'], false, $callable_name)) {
+            $target_found = true;
+        }
     } else {
         // Es un array [app, controller]
         list($application, $controller) = $rule['target'];
@@ -136,6 +142,11 @@ if ($rule) {
             $target_found = true;
         }
     }
+} else {
+    if (Vendimia::$debug) {
+        throw new Exception("Not found");
+    }
+    Vendimia\Http\Response::notFound();
 }
 
 if ($target_found) {
