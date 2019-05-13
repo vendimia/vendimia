@@ -10,7 +10,7 @@ class S implements \ArrayAccess, \Iterator
 	/** The actual string */
 	private $string;
 
-    /** String encoding */
+    /** Original string encoding */
     private $encoding;
 
     /** Iterator index */
@@ -35,14 +35,15 @@ class S implements \ArrayAccess, \Iterator
 	 */
 	function __construct($string = '', $encoding = false)
     {
-        $this->string = (string)$string;
 
         if (!$encoding) {
             $this->encoding = mb_detect_encoding($string);
-        }
-        else {
+        } else {
             $this->encoding = $encoding;
         }
+
+        $this->string = (string)iconv($encoding, 'UTF-8', $string);
+
 	}
 
 	function __call($function, $args = [])
@@ -73,14 +74,9 @@ class S implements \ArrayAccess, \Iterator
         // Colocamos la cadena como primer paráemtro
         array_unshift($args, $this->string);
 
-        // Cambiamos la $encoding interna de las funciones mb_
-        if (!mb_internal_encoding($this->encoding)) {
-            throw new \RuntimeException("Error colocando la $encoding a {$this->encoding}");
-        }
-
         // Llamamos a la función
         $res = call_user_func_array($real_function, $args);
-        
+
         // Si lo que devuelve es un string, lo reencodeamos
         if (is_string($res)) {
             return new self($res);
@@ -113,7 +109,7 @@ class S implements \ArrayAccess, \Iterator
      * Insert a string in a position
      *
      * @param integer $position Character where to insert
-     * @param string $string String to insert 
+     * @param string $string String to insert
      */
     public function insert($position, $string)
     {
@@ -183,7 +179,7 @@ class S implements \ArrayAccess, \Iterator
     }
 
     /**
-     * Magic method to perform a substringargumentos
+     * Magic method to perform a substring
      */
     public function __invoke(...$args)
     {
@@ -216,20 +212,19 @@ class S implements \ArrayAccess, \Iterator
         // $value debe ser un string
         $value = (string)$value;
 
-        $this->string = 
-            mb_substr($this->string, 0, $offset ) .
+        $this->string =
+            mb_substr($this->string, 0, $offset) .
             $value .
             mb_substr($this->string, $offset + 1);
     }
 
     public function offsetUnset($offset)
     {
-        $this->string = 
-            mb_substr($this->string, 0, $offset ) .
+        $this->string =
+            mb_substr($this->string, 0, $offset) .
             mb_substr($this->string, $offset + 1);
-        
+
     }
-    
 
     public function current()
     {
