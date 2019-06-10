@@ -44,6 +44,23 @@ class Date extends DateTime
     }
 
     /**
+     * Returns a Date object with tomorrow date
+     */
+    public static function tomorrow()
+    {
+        return static::today()->add(Interval::day(1));
+    }
+
+    /**
+     * Returns a Date object with yesterday date
+     */
+    public static function yesterday()
+    {
+        return static::today()->sub(Interval::day(1));
+    }
+
+
+    /**
      * Returns the most common date-time value for databases
      */
      public function getDatabaseValue(ConnectorInterface $connector)

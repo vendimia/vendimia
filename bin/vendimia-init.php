@@ -217,8 +217,9 @@ EOF;
 if (!$bare) {
     $routes = <<<EOF
 <?php 
+// Routing rules definition file.
+   
 use Vendimia\\Route\\Rule; return [
-    // Routing rules definition file.
     
 ];
 EOF;

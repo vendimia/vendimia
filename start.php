@@ -28,6 +28,8 @@ require_once VENDIMIA\BASE_PATH . '/base/libs/Vendimia.php';
 
 // Venimos del servidor de pruebas?
 if (PHP_SAPI == 'cli-server') {
+    // Siempre activamos el modo debug
+    Vendimia::$debug = true;
 
     // Si pedimos algo con static/, entonces lo enviamos directo
     $request_uri = trim($_SERVER['REQUEST_URI'], '/');
@@ -109,108 +111,49 @@ if ( Vendimia::$execution_type == 'cli') {
     return;
 }
 
-// El servidor de pruebas de PHP /siempre/ activa el modo debug
-if (PHP_SAPI == 'cli-server') {
-    Vendimia::$debug = true;
-}
+$routing_rules = require Vendimia\PROJECT_PATH . '/config/routes.php';
+$route_matching = new Vendimia\Routing\Match($routing_rules);
+$rule = $route_matching->against(Vendimia::$request);
 
-// Procesamos el request targett contra las rutas
-$routes = include Vendimia\PROJECT_PATH . '/config/routes.php';
-$route_process = new Vendimia\Route\Process($routes);
-$route = $route_process->process(Vendimia::$request);
+$target_found = false;
+$application = null;
+$controller = null;
 
-// Encontramos el controlador?
-$found = false;
+if ($rule) {
+    // Una ruta hizo match.
 
-// Es un callable?
-$is_callable = false;
-
-// Si _si_ es un callable, aquí estará.
-$callable = null;
-
-// Nombre del callable
-$callable_name = null;
-
-if ($route) {
-    // Esta variable contiene la ruta del controlador ubicado.
-    $cfile = null;
-
-    $application = null;
-    $controller = null;
-
-    // El fichero o callable de la ruta fue encontrado?
-    foreach (['target', 'alt_target'] as $pt) {
-        if (!isset($route[$pt])){
-            continue;
+    if ($rule['callable']) {
+        // $callable_name tendrá el nombre del callable, usado para mensajes
+        // de error, entre otras cosas.
+        if (is_callable($rule['target'], false, $callable_name)) {
+            $target_found = true;
         }
+    } else {
+        // Es un array [app, controller]
+        list($application, $controller) = $rule['target'];
 
-        $target = $route[$pt];
+        $cfile = new Vendimia\Path\FileSearch($controller, 'controllers');
+        $cfile->search_app = $application;
 
-        // Es un callable?
-        if (isset($route['is_callable']) && $route['is_callable']) {
-            // No _debería_ exister un callable en alt_target...
-            if (is_callable($route['target'], false, $callable_name)) {
-                $found = true;
-                $is_callable = true;
-                $callable = $route['target'];
-                break;
-            } else {
-                // Si decimos que es un callable, y no existe, fallamos
-                throw new Vendimia\ControllerNotFound ("Callable '$callable_name' doesn't exists.");
-            }
+        if ($cfile->found()) {
+            $target_found = true;
         }
-        if (is_string($target) || is_array($target)) {
-            if (is_string($target)) {
-                $application = $target;
-                $controller = 'default';
-            } else {
-                $application = $target[0];
-                $controller = $target[1];
-            }
-
-            $cfile = new Vendimia\Path\FileSearch($controller, 'controllers');
-            $cfile->search_app = $application;
-
-            if ($cfile->found()) {
-                $found = true;
-                break;
-            } else {
-                // Si la regla de ruteo lo permite, probamos un controlador
-                // 'default'
-                if (isset($route['try_default_controller'])) {
-                    $controller = 'default';
-                    $cfile = new Vendimia\Path\FileSearch($controller, 'controllers');
-                    if ($cfile->found()) {
-                        $found = true;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-
-    // Si hay una ruta, y no encontró el controlador, BOOM!
-    if (!$found) {
-        // Quizas hemos probado el alt_target
-        if (isset($route['target'])) {
-            $target = $route['target'];
-        } else {
-            $target = $route['alt_target'];
-        }
-        $ac = $target[0] . ':' . $target[1];
-        throw new Vendimia\ControllerNotFound("Routing rule matched, but the controller '$ac' was not found.", $route_process->getMatchedRule());
-    }
-}
-
-if ($found) {
-    Vendimia::$application = $application;
-    Vendimia::$controller = $controller;
-    if (isset($route['args'])) {
-        Vendimia::$args->append($route['args']);
     }
 } else {
-    // 404 baby!
+    if (Vendimia::$debug) {
+        throw new Exception("Not found");
+    }
+    Vendimia\Http\Response::notFound();
+}
+
+if ($target_found) {
+    Vendimia::$application = $application;
+    Vendimia::$controller = $controller;
+
+    if ($rule['args'] ?? false) {
+        Vendimia::$args->append($rule['args']);
+    }
+} else {
     Vendimia\Http\Response::notFound();
 }
 
@@ -227,7 +170,8 @@ foreach ($initialize_routes as $init) {
     }
 }
 
-if ($is_callable) {
+if ($rule['callable']) {
+    $callable = $rule['target'];
     $response = $callable();
     $appcontroller = $callable_name;
 } else {

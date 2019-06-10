@@ -2,11 +2,12 @@
 namespace assets\services;
 
 use Vendimia;
+use Vendimia\Http\Response;
 
 /**
  * Static class for various assets utilities.
  */
-class Asset 
+class Asset
 {
     /**
      * Build a single file name for all the assets, plus the controller name.
@@ -20,7 +21,7 @@ class Asset
         }
 
         $uri .= join(',', $assets);
-        
+
         return $uri;
     }
 
@@ -31,12 +32,14 @@ class Asset
      */
     public static function getNamesFromArgs()
     {
-        if (!isset (Vendimia::$args[0]) || trim(Vendimia::$args[0]) == "") {
-            Http\Response::serverError("You must specify at least one Javascript asset filename.");
+        $arg = Vendimia::$request->get['source'];
+
+        if (!$arg) {
+            Http\Response::serverError("You must specify at least one CSS asset filename.");
         }
 
         $application = Vendimia::$application;
-        $names = explode (',', Vendimia::$args[0]);
+        $names = explode (',', $arg);
 
         $colon = strpos($names[0], '::');
         if ($colon !== false) {
@@ -44,6 +47,6 @@ class Asset
             $names[0] = substr($names[0], $colon + 2);
         }
 
-        return [$application, $names];
+        return [$application, $names, $arg];
     }
 }
