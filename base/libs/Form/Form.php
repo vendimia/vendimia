@@ -107,7 +107,7 @@ class Form implements AsArrayInterface
         ],
 
         /**
-         * Prefijo para el ID del tag del bloque de mensajes. 
+         * Prefijo para el ID del tag del bloque de mensajes.
          *
          * Se concatenará con el ID del control.
          */
@@ -128,9 +128,9 @@ class Form implements AsArrayInterface
     ];
 
     /**
-     * Constructor. 
+     * Constructor.
      */
-    public function __construct(CsrfInterface $csrf, $id = null) 
+    public function __construct(CsrfInterface $csrf, $id = null)
     {
         $this->csrf = $csrf;
         $this->id = $id;
@@ -150,7 +150,7 @@ class Form implements AsArrayInterface
                         throw new \RuntimeException( "Unknow '$control' property." );
                     }
                     $this->properties[$control] = array_replace_recursive(
-                        $this->properties[$control], 
+                        $this->properties[$control],
                         $value
                     );
                 } else {
@@ -175,15 +175,15 @@ class Form implements AsArrayInterface
             }
 
             // Creamos un nuevo objeto
-            $this->$control = new $class_name( 
-                $control, 
+            $this->$control = new $class_name(
+                $control,
                 $value,
-                $this 
+                $this
             );
             $this->controls[] = $control;
         }
     }
-    /*public function __construct(array $controls, $csrf_token, $id = null) 
+    /*public function __construct(array $controls, $csrf_token, $id = null)
     {
         $this->system_csrf = $csrf_token;
         $this->id = $id;
@@ -195,7 +195,7 @@ class Form implements AsArrayInterface
             }
 
             // Si $data es un string, lo convertimos a array. Esto es
-            // para un shortcut si quieres definir un field, pero sin 
+            // para un shortcut si quieres definir un field, pero sin
             // parámetros,
 
             if (is_string($fielddef)) {
@@ -216,10 +216,10 @@ class Form implements AsArrayInterface
             }
 
             // Creamos un nuevo objeto
-            $this->controls[$control] = new $class ( 
-                $control, 
+            $this->controls[$control] = new $class (
+                $control,
                 $fielddef,
-                $this 
+                $this
             );
         }
 
@@ -230,7 +230,7 @@ class Form implements AsArrayInterface
     /**
      * Sets values to all controls
      *
-     * @param array|Vendimia\AsArrayInterface $values Associative array with 
+     * @param array|Vendimia\AsArrayInterface $values Associative array with
      * the control's values.
      */
     public function setValues($values)
@@ -306,7 +306,7 @@ class Form implements AsArrayInterface
     public function draw(...$control_list)
     {
         $html = '';
-        
+
         // Si no especificamos qué controles dibujar, dibujamos todo
         // y activamos otros mecanismos
         if (!$control_list) {
@@ -373,7 +373,7 @@ class Form implements AsArrayInterface
                         ->get();
                 }
             }
-            
+
             $label_block = $label . $info;
             $widget_block = $widget . $messages;
 
@@ -422,7 +422,7 @@ class Form implements AsArrayInterface
         $this->properties['html']['control_block'] = ['tr'];
         $this->properties['html']['label_block'] = ['th'];
         $this->properties['html']['widget_block'] = ['td'];
-        
+
         return $this->draw(...$control_list);
     }
 
@@ -445,7 +445,7 @@ class Form implements AsArrayInterface
     /**
      * Draws the </FORM> tag
      */
-    public function end() 
+    public function end()
     {
         return "</form>\n";
     }
@@ -507,7 +507,7 @@ class Form implements AsArrayInterface
 
         // Validamos el CSRF
         if (!$this->getProperty('disable_csrf')) {
-            if (!isset($this->form_csrf) || 
+            if (!isset($this->form_csrf) ||
                 $this->form_csrf != $this->csrf->getToken()) {
 
                 return false;
@@ -520,7 +520,7 @@ class Form implements AsArrayInterface
 
         foreach ($this->controls as $cname) {
             $control = $this->$cname;
-            
+
             if (!$control->enabled) {
                 continue;
             }
@@ -559,7 +559,7 @@ class Form implements AsArrayInterface
 
         // Llamamos al validador global
         if ($form_valid) {
-            $callback_validator = $this->getProperty('validation_callback'); 
+            $callback_validator = $this->getProperty('validation_callback');
             if ($callback_validator) {
                 if (method_exists($this, $callback_validator)) {
                     $form_valid = $this->$callback_validator();
@@ -576,7 +576,7 @@ class Form implements AsArrayInterface
     /**
      * Adds a message to the global message list
      */
-    public function addMessage ($control, $message) 
+    public function addMessage ($control, $message)
     {
         $this->messages[$control][] = $message;
     }
@@ -584,9 +584,9 @@ class Form implements AsArrayInterface
     /**
      * Gets all the controls' messages
      *
-     * @return array 
+     * @return array
      */
-    public function getMessages() 
+    public function getMessages()
     {
         return $this->messages;
     }
