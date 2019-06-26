@@ -274,40 +274,37 @@ abstract class ControlAbstract implements ValueInterface
 
         $valid = true;
 
-        if (!$this->empty_allowed) {
-            // Añadimos un validador
-            array_unshift ($this->properties['validators'], [
-                Validator\IsEmpty::class, ['messages' =>
-                    ['empty' => $this->empty_message]
-                ]
-            ]);
-        }
-
-        foreach ($this->validators as $validator) {
-            $args = [];
+        /**
+         * Solo validamos un control si no permite vacíos, o si si permite, pero
+         * no está vacío.
+         */
+        if (!($this->empty_allowed && $this->isEmpty())) {
+            foreach ($this->validators as $validator) {
+                $args = [];
 
 
-            if (is_string($validator)) {
-                $class = $validator;
-            } else {
-                $class = array_shift($validator);
-                $args = $validator;
-            }
+                if (is_string($validator)) {
+                    $class = $validator;
+                } else {
+                    $class = array_shift($validator);
+                    $args = $validator;
+                }
 
-            // Existe la clase?
-            if (!(class_exists($class)
-                && is_subclass_of($class, 'Vendimia\Form\Validator\ValidatorAbstract'))) {
+                // Existe la clase?
+                if (!(class_exists($class)
+                    && is_subclass_of($class, 'Vendimia\Form\Validator\ValidatorAbstract'))) {
 
-                throw new \RuntimeException("'$class' is not a valid control validator class.");
-            }
+                    throw new \RuntimeException("'$class' is not a valid control validator class.");
+                }
 
-            $v = new $class($this, $args);
+                $v = new $class($this, $args);
 
-            if (!$v->validate())  {
-                $this->addMessage($v->getMessages());
+                if (!$v->validate())  {
+                    $this->addMessage($v->getMessages());
 
-                $valid = false;
-                break;
+                    $valid = false;
+                    break;
+                }
             }
         }
 
