@@ -93,6 +93,9 @@ class Match
         if (is_array($target)) {
             $nt = [];
             foreach ($target as $t) {
+                if (!is_string($t)) {
+                    continue;
+                }
                 if ($t{0} == ':') {
                     $var = substr($t, 1);
                     $nt[] = $variables[$var] ?? null;

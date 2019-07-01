@@ -181,12 +181,12 @@ class Rule
     /**
      * Use a [app, controller] array as this rule target.
      */
-    public function target($application, $controller = 'default')
+    public function target($application, $controller = 'default', $args = [])
     {
         if (is_array($application)) {
             $target = $application;
         } else {
-            $target = [$application, $controller];
+            $target = [$application, $controller, $args];
         }
 
         $this->rule['target'] = $target;
@@ -277,8 +277,9 @@ class Rule
      */
     public function getProcessedData(Rule $base_rule = null): array
     {
+        $rules = [];
         if ($this->included_rules) {
-            return $this->included_rules;
+            $rules = $this->included_rules;
         }
 
         $rule = $this->rule;
@@ -303,8 +304,7 @@ class Rule
 
         }
 
-        // Usamos los valores
-
-        return [$rule];
+        $rules[] = $rule;
+        return $rules;
     }
 }
