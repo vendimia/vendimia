@@ -80,7 +80,7 @@ class Comparison
     /**
      * Use the IN SQL keyword
      */
-    private function comparisonIn($params) 
+    private function comparisonIn($params)
     {
         $sql = ' ';
         if ($this->not) {
@@ -109,7 +109,7 @@ class Comparison
     }
 
     /**
-     * 
+     *
      */
 
 
@@ -131,6 +131,11 @@ class Comparison
         if (substr($method,0, 3) == 'not') {
             $not = true;
             $method = substr($method, 3);
+
+            if ($method == '') {
+                $not = false;
+                $method = 'ne';
+            }
         }
 
         return new self($method, $args, $not);
@@ -139,10 +144,10 @@ class Comparison
     /**
      * Returns the escaped value
      */
-    public function getValue(Database\ConnectorInterface $connector) 
+    public function getValue(Database\ConnectorInterface $connector)
     {
         if (array_key_exists($this->function, $this->comparisons)) {
-            return $this->comparisons[$this->function] . 
+            return $this->comparisons[$this->function] .
                 $this->connection->valueFromPHP($this->params[0]);
         } else {
             $method = 'comparison' . $this->function;
