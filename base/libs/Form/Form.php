@@ -460,6 +460,18 @@ class Form implements AsArrayInterface
         return Html\tag::button($extra, $content)->get();
     }
 
+    /** 
+     * Draws the complete HTML form
+     */
+    public function drawFull($submit_label = 'Submit form')
+    {
+        return $this->begin() 
+                . $this->draw() 
+                . $this->drawSubmit($submit_label) 
+                . $this->end();
+    }
+
+
     /**
      * Properties getter
      */
