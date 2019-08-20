@@ -274,11 +274,14 @@ abstract class ControlAbstract implements ValueInterface
 
         $valid = true;
 
-        /**
-         * Solo validamos un control si no permite vacíos, o si si permite, pero
-         * no está vacío.
-         */
-        if (!($this->empty_allowed && $this->isEmpty())) {
+        // Solo validamos si no es vacío. Si es vacío, y no se permite vacío,
+        // fallamos.
+        if ($this->isEmpty()) {
+            if (!$this->empty_allowed) {
+                $valid = false;
+                $this->addMessage($this->empty_message);
+            }
+        } else {
             foreach ($this->validators as $validator) {
                 $args = [];
 
