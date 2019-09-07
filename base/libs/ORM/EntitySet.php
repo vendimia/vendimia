@@ -103,6 +103,8 @@ class EntitySet implements \Iterator
             throw new \InvalidArgumentException("Can't add elements to this non-constrained EntitySet");
         }
         $entity->update($this->constrains);
+
+        return $entity;
     }
 
     /**
@@ -118,7 +120,7 @@ class EntitySet implements \Iterator
     /**
      * Returns this EntitySet as an array.
      *
-     * This method declaration is not compatible with "AsArrayInterface" 
+     * This method declaration is not compatible with "AsArrayInterface"
      * interface.
      *
      * @var string $key_field Field whose value will be used as the array
@@ -127,7 +129,7 @@ class EntitySet implements \Iterator
      *  value. Default is the entire entity as an array.
      * @return array Array representation of this EntitySet
      */
-    public function AsArray($key_field = null, $value_field = null)
+    public function asArray($key_field = null, $value_field = null)
     {
         $result = [];
         foreach ($this as $entity) {
