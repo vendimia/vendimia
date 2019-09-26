@@ -146,7 +146,7 @@ class DateTime extends DatePartsAbstract implements ValueInterface
     {
         // Si no hay información de la fecha/hora, retornamos una cadena vacía
         if (is_null($this->timestamp)) {
-            return '';
+            return null;
         }
 
         // Si hay un %, usamos strftime()
@@ -178,24 +178,24 @@ class DateTime extends DatePartsAbstract implements ValueInterface
     /**
      * Returns the most common date-time value for databases
      */
-     public function getDatabaseValue(ConnectorInterface $connector)
-     {
-         return $connector->escape($this->format('Y-m-d H:i:s'));
-     }
+    public function getDatabaseValue(ConnectorInterface $connector)
+    {
+        return $connector->escape($this->format('Y-m-d H:i:s'));
+    }
 
-     /**
-      * Creates a DateTime object with the actual date and time.
-      */
-      public static function now()
-      {
-          return new static(time());
-      }
+    /**
+     * Creates a DateTime object with the actual date and time.
+     */
+    public static function now()
+    {
+        return new static(time());
+    }
 
-      /**
-       * Converts this object to a string
-       */
-       public function __toString()
-       {
-           return $this->format();
-       }
+    /**
+     * Converts this object to a string
+     */
+    public function __toString()
+    {
+        return $this->format();
+    }
 }

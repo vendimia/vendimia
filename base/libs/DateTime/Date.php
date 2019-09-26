@@ -70,8 +70,8 @@ class Date extends DateTime
     /**
      * Returns the most common date-time value for databases
      */
-     public function getDatabaseValue(ConnectorInterface $connector)
-     {
-         return $connector->escape($this->format('Y-m-d'));
-     }
+    public function getDatabaseValue(ConnectorInterface $connector)
+    {
+        return $connector->escape($this->format('Y-m-d'));
+    }
 }
