@@ -165,7 +165,8 @@ class Match
                 // Retornamos el bienvenido por defecto de Vendimia
                 return [
                     'urlpath' => $urlpath,
-                    'target' => ['welcome', 'default'],
+                    'target' => ['welcome', 'default'], // Obsoleto, pero necesario.
+                    'fallback_target' => ['welcome', 'default'],
                     'callable' => false,
                 ];
             }
@@ -215,7 +216,7 @@ class Match
                     // regla solo acepta [$app, $controller]
                     $rule['callable'] = false;
                 } else {
-                    // Solo puede haber dos targets: [app, controller] y callable
+                    // Solo puede haber dos tipos de target: array y string.
                     $rule['target'] = $this->replaceVariables($rule['target'], $args);
                 }
                 $rule['urlpath'] = $urlpath;
@@ -225,14 +226,19 @@ class Match
             }
         }
 
+
         // Si no hay una regla, y no forzamos las reglas, usamos los 2 1ros
         // componentes de la URL como [app, controller]
         if (!$matched_rule && !$this->data->properties['enforce_rules']) {
             $parts = array_filter(explode('/', $urlpath));
 
+            $controller_class = ["{$parts[0]}\Controller", $parts[1] ?? 'default'];
+
             $matched_rule = [
                 'urlpath' => $urlpath,
-                'target' => [array_shift($parts), array_shift($parts) ?? 'default'],
+                'target' => $controller_class,
+                'application' => $parts[0],
+                'fallback_target' => [$parts[0], $parts[1] ?? 'default'],
                 'callable' => false,
                 'args' => [],
             ];
