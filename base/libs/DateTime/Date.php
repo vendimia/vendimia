@@ -66,12 +66,4 @@ class Date extends DateTime
     {
         return intval(date('w', $this->timestamp));
     }
-
-    /**
-     * Returns the most common date-time value for databases
-     */
-    public function getDatabaseValue(ConnectorInterface $connector)
-    {
-        return $connector->escape($this->format('Y-m-d'));
-    }
 }
