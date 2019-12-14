@@ -108,6 +108,14 @@ class EntitySet implements \Iterator
     }
 
     /**
+     * Update all the entities in this EntitySet using the database
+     */
+    public function update($values)
+    {
+        // TODO
+    }
+
+    /**
      * Deletes all the Entities in this recordset
      */
     public function delete()
