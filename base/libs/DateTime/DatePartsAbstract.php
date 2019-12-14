@@ -3,7 +3,7 @@ namespace Vendimia\DateTime;
 
 abstract class DatePartsAbstract
 {
-    const PARTS = ['year', 'month', 'day', 'hour', 'minute', 'second'];
+    const PARTS = ['year', 'month', 'day', 'hour', 'minute', 'second', 'timestamp'];
 
     protected $year = 0;
     protected $month = 0;
@@ -242,5 +242,10 @@ abstract class DatePartsAbstract
     {
         $this->setPart('second', $second);
         return $this;
+    }
+
+    public function getYearDays()
+    {
+        return $this->yearday;
     }
 }
