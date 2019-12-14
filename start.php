@@ -1,20 +1,19 @@
 <?php
 
 // Directorio base del framework
-defined ('VENDIMIA\\BASE_PATH') || define ('VENDIMIA\\BASE_PATH', __DIR__);
+defined ('Vendimia\\BASE_PATH') || define('Vendimia\\BASE_PATH', __DIR__);
 
 // Directorio del proyecto
-defined('VENDIMIA\\PROJECT_PATH') || define ('VENDIMIA\\PROJECT_PATH', getcwd());
+defined('Vendimia\\PROJECT_PATH') || define('Vendimia\\PROJECT_PATH', getcwd());
 
 // Ambiente de trabajo. Por defecto, es production.
-defined('VENDIMIA\\ENVIRONMENT') || define ('VENDIMIA\\ENVIRONMENT', 'production');
+defined('Vendimia\\ENVIRONMENT') || define('Vendimia\\ENVIRONMENT', 'production');
 
-// Cargamos las funciones base, y los helpers
-require_once VENDIMIA\BASE_PATH . '/base/libs/helpers.php';
-require_once VENDIMIA\BASE_PATH . '/base/libs/base.php';
-require_once VENDIMIA\BASE_PATH . '/base/libs/Path.php';
-require_once VENDIMIA\BASE_PATH . '/base/libs/Path/FileSearch.php';
-require_once VENDIMIA\BASE_PATH . '/base/libs/Autoloader.php';
+// Cargamos las funciones base, y los helpers. Son necesarios para el autoloader.
+require_once Vendimia\BASE_PATH . '/base/libs/helpers.php';
+require_once Vendimia\BASE_PATH . '/base/libs/Path.php';
+require_once Vendimia\BASE_PATH . '/base/libs/Path/FileSearch.php';
+require_once Vendimia\BASE_PATH . '/base/libs/Autoloader.php';
 
 // Registramos el auto-cargador de clases
 Vendimia\Autoloader::register();
@@ -22,9 +21,9 @@ Vendimia\Autoloader::register();
 // Forzamos la carga de excepciones, ya que hay varias dentro del mismo fichero
 class_exists('Vendimia\Exception');
 
-// La clase Vendimia va en el namespace raiz. El autocargador no podrá
+// La clase Vendimia está en el namespace raiz. El autocargador no podrá
 // ubicarla, asi que la cargamos a mano.
-require_once VENDIMIA\BASE_PATH . '/base/libs/Vendimia.php';
+require_once Vendimia\BASE_PATH . '/base/libs/Vendimia.php';
 
 // Venimos del servidor de pruebas?
 if (PHP_SAPI == 'cli-server') {
@@ -39,10 +38,10 @@ if (PHP_SAPI == 'cli-server') {
     }
 
     // Cambiamos el PATH de la sesion al directorio tmp
-    if (!is_dir ('tmp')) {
-        mkdir ('tmp');
+    if (!is_dir('tmp')) {
+        mkdir('tmp');
     }
-    session_save_path ('tmp');
+    session_save_path('tmp');
 }
 
 // Inicializamos las variables de la aplicación
@@ -50,50 +49,6 @@ Vendimia::init();
 
 // Registramos el atrapador de excepciones sueltas.
 Vendimia\ExceptionHandler::register();
-
-// Cargamos las librerías en Vendimia::SETTINGS['autoload']
-if (isset(Vendimia::$settings['autoload'])) {
-    foreach (Vendimia::$settings['autoload'] as $pl) {
-        load_lib ($pl);
-    }
-}
-
-// Registramos las aplicaciones solicitadas, ejecutando el fichero
-// app/register
-if (isset(Vendimia::$settings['register'])) {
-    foreach (Vendimia::$settings['register'] as $id => $app) {
-
-        // Si $id NO es numérico, entonces la app es $id, y $app son algunos
-        // parámetros que le pasaremos. De lo contrario, sólo registramos $app
-        // sin parámetros.
-
-        $parameters = [];
-
-        if (!is_numeric($id)) {
-            $parameters = $app;
-            $app = $id ;
-        }
-
-        $fp = new Vendimia\Path\FileSearch("register");
-        $fp->search_app = $app;
-
-        if ( $fp->found() ) {
-            require_once $fp->get();
-
-            // Ejecutamos la funcion {$app}\__register()
-            $fn = "$app\\__register";
-            if ( is_callable($fn) ) {
-                $fn( $parameters );
-            }
-            else {
-                throw new Vendimia\AppRegisterException("Error registering application '$app': Function '$fn()' not found in $fp.");
-            }
-        }
-        else {
-            throw new Vendimia\AppRegisterException("Error registering application '$app': File 'register.php' not found.");
-        }
-    }
-}
 
 if (isset(Vendimia::$settings['databases'])) {
    // Cargamos las excepciones
@@ -103,10 +58,10 @@ if (isset(Vendimia::$settings['databases'])) {
 }
 
 // Si viene por la CLI, salimos.
-if ( Vendimia::$execution_type == 'cli') {
+if (Vendimia::$execution_type == 'cli') {
 
     // Habilitamos mostrar los errores
-    ini_set ('display_errors', '1');
+    ini_set('display_errors', '1');
 
     return;
 }
@@ -118,6 +73,7 @@ $rule = $route_matching->against(Vendimia::$request);
 $target_found = false;
 $application = null;
 $controller = null;
+$controller_object = null;
 
 if ($rule) {
     // Una ruta hizo match.
@@ -130,18 +86,54 @@ if ($rule) {
         }
     } else {
         // Es un array [app, controller]
-        list($application, $controller) = $rule['target'];
+        list($controller_class, $controller) = $rule['target'];
 
-        $cfile = new Vendimia\Path\FileSearch($controller, 'controllers');
-        $cfile->search_app = $application;
+        // Si la regla trae una aplicación, la usamos
+        $application = $controller_class;
 
-        if ($cfile->found()) {
+        // Buscamos una clase controller
+        if (class_exists($controller_class)) {
+            // Existe. Es una instancia de Vendimia\ControllerBase?
+            if (!is_subclass_of($controller_class, Vendimia\ControllerBase::class)) {
+                throw new Exception("Class '$controller_class' doesn't extends Vendimia\ControllerBase class.");
+            }
+
+            // Creamos la instancia
+            $controller_object = new $controller_class();
+
+            $application = substr($controller_class, 0, strrpos($controller_class, '\\'));
+
             $target_found = true;
         }
+
+        // Ahora buscamos la ruta tradicional
+        if (!$target_found) {
+            list($application, $controller) = $rule['target'];
+            if ($rule['fallback_target'] ?? false) {
+                list($application, $controller) = $rule['fallback_target'];
+            }
+
+            $cfile = new Vendimia\Path\FileSearch($controller, 'controllers');
+            $cfile->search_app = $application;
+
+            if ($cfile->found()) {
+                $target_found = true;
+            }
+        }
+
+        // Si forzamos una aplicación, lo usamos
+        if ($rule['application'] ?? false) {
+            $application = $rule['application'];
+        }
+
+        // Reintentamos con el alterno
+        /*if (!$target_found) {
+            list($application, $controller) = $rule['target'];
+        }*/
     }
 } else {
     if (Vendimia::$debug) {
-        throw new Exception("Not found");
+        throw new Exception("No rule matched this URL.");
     }
     Vendimia\Http\Response::notFound();
 }
@@ -154,6 +146,10 @@ if ($target_found) {
         Vendimia::$args->append($rule['args']);
     }
 } else {
+    if (Vendimia::$debug) {
+        throw new Exception("No routing rule matched requested URL.");
+    }
+
     Vendimia\Http\Response::notFound();
 }
 
@@ -170,7 +166,9 @@ foreach ($initialize_routes as $init) {
     }
 }
 
-if ($rule['callable']) {
+if ($controller_object) {
+    $response = $controller_object->$controller();
+} elseif ($rule['callable']) {
     $callable = $rule['target'];
     $response = $callable();
     $appcontroller = $callable_name;

@@ -59,12 +59,11 @@ class Date extends DateTime
         return static::today()->sub(Interval::day(1));
     }
 
-
     /**
-     * Returns the most common date-time value for databases
+     * Returns the day of the week as an integer value. 0 == sunday.
      */
-     public function getDatabaseValue(ConnectorInterface $connector)
-     {
-         return $connector->escape($this->format('Y-m-d'));
-     }
+    public function getWeekDay()
+    {
+        return intval(date('w', $this->timestamp));
+    }
 }

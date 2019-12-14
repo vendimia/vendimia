@@ -80,7 +80,7 @@ abstract class ControlAbstract implements ValueInterface
         'showmessage'   => true,
 
         //** true when this control is already validated */
-        'validated'     => false, 
+        'validated'     => false,
     ];
 
     /**
@@ -102,13 +102,13 @@ abstract class ControlAbstract implements ValueInterface
         }
 
         $this->name = $name;
-        
+
         // Mezclamos las propiedades con las propiedades por defectos
         $this->properties = array_merge($this->properties, $properties);
 
         // Si no tiene un caption, le creamos uno
         if (is_null($this->caption)) {
-            $this->caption = ucfirst(strtolower( strtr($name, '_', ' ')));
+            $this->caption = ucfirst(strtolower(strtr($name, '_', ' ')));
         }
 
         $this->form = $form;
@@ -117,10 +117,10 @@ abstract class ControlAbstract implements ValueInterface
     /**
      * Vendimia\Html\Tag wrapper for adding this control's 'html_extra' properties
      */
-    public function htmlTag($tagname, $vars = [], $content = null, $options = []) 
+    public function htmlTag($tagname, $vars = [], $content = null, $options = [])
     {
         $vars = array_merge($this->html, $vars);
-        
+
         // Siempre evitamos que escape el contenido
         $options ['escapecontent'] = false;
         $options ['escapevariables'] = false;
@@ -131,7 +131,7 @@ abstract class ControlAbstract implements ValueInterface
     /**
      * Draws the label block
      */
-    public function drawLabel($add_sufix = true) 
+    public function drawLabel($add_sufix = true)
     {
         if (!$this->draw_label) {
             return '';
@@ -169,12 +169,12 @@ abstract class ControlAbstract implements ValueInterface
             if (is_string($tag)) {
                 $tag = [$tag];
             }
-            
+
             // Colocamos el contenido
             $tag[2] = $info;
 
             // Y lo usamos en vez del info
-            $info = Html\Tag::create($tag) 
+            $info = Html\Tag::create($tag)
                 ->noEscapeContent()
                 ->get();
         }
@@ -185,7 +185,7 @@ abstract class ControlAbstract implements ValueInterface
     /**
      * Returns the HTML for the messages block
      */
-    public function drawMessages() 
+    public function drawMessages()
     {
     	$html = '';
 
@@ -208,13 +208,13 @@ abstract class ControlAbstract implements ValueInterface
         if (!$tag) {
             return '';
         }
-    
+
         $tag['id'] = $this->form->getHtmlProperty('message_block_id_prefix') . $this->id();
         $tag[2] = $html;
 
         //$html = Html\Tag ( $tag, [], ['escape_content' => false] );
-        $html = Html\Tag::create($tag) 
-           ->closeTag() 
+        $html = Html\Tag::create($tag)
+           ->closeTag()
            ->noEscapeContent()
            ->get();
 
@@ -234,7 +234,7 @@ abstract class ControlAbstract implements ValueInterface
 
         foreach ( $messages as $message ) {
         	$this->messages[] = $message;
-     
+
             // Guardamos el mensaje en el formulario
             $this->form->addMessage($this->name, $message);
 
@@ -244,7 +244,7 @@ abstract class ControlAbstract implements ValueInterface
     /**
      * Returns if this control is empty.
      */
-    public function isEmpty() 
+    public function isEmpty()
     {
         return empty($this->value);
     }
@@ -274,40 +274,40 @@ abstract class ControlAbstract implements ValueInterface
 
         $valid = true;
 
-        if (!$this->empty_allowed) {
-            // Añadimos un validador
-            array_unshift ($this->properties['validators'], [
-                Validator\IsEmpty::class, ['messages' => 
-                    ['empty' => $this->empty_message]
-                ]
-            ]);
-        }
-
-        foreach ($this->validators as $validator) {
-            $args = [];
-
-
-            if (is_string($validator)) {
-                $class = $validator;
-            } else {
-                $class = array_shift($validator);
-                $args = $validator;
-            }
-
-            // Existe la clase?
-            if (!(class_exists($class) 
-                && is_subclass_of($class, 'Vendimia\Form\Validator\ValidatorAbstract'))) { 
-
-                throw new \RuntimeException("'$class' is not a valid control validator class.");
-            }
-            
-            $v = new $class($this, $args);
-
-            if (!$v->validate())  {
-                $this->addMessage($v->getMessages());
-
+        // Solo validamos si no es vacío. Si es vacío, y no se permite vacío,
+        // fallamos.
+        if ($this->isEmpty()) {
+            if (!$this->empty_allowed) {
                 $valid = false;
-                break;
+                $this->addMessage($this->empty_message);
+            }
+        } else {
+            foreach ($this->validators as $validator) {
+                $args = [];
+
+
+                if (is_string($validator)) {
+                    $class = $validator;
+                } else {
+                    $class = array_shift($validator);
+                    $args = $validator;
+                }
+
+                // Existe la clase?
+                if (!(class_exists($class)
+                    && is_subclass_of($class, 'Vendimia\Form\Validator\ValidatorAbstract'))) {
+
+                    throw new \RuntimeException("'$class' is not a valid control validator class.");
+                }
+
+                $v = new $class($this, $args);
+
+                if (!$v->validate())  {
+                    $this->addMessage($v->getMessages());
+
+                    $valid = false;
+                    break;
+                }
             }
         }
 
@@ -332,7 +332,7 @@ abstract class ControlAbstract implements ValueInterface
             }
 
             // La función no existe.
-            if (!is_callable($function)) { 
+            if (!is_callable($function)) {
                 throw new \RuntimeException("'$function' is not a valid field filter.");
             }
 
@@ -360,7 +360,7 @@ abstract class ControlAbstract implements ValueInterface
 
     /**
       * Returns this control's ID
-      */ 
+      */
     public function id()
     {
         return $this->form->getHtmlProperty('id_prefix') . $this->name;
@@ -409,7 +409,7 @@ abstract class ControlAbstract implements ValueInterface
 
     	return $this->properties [$prop];
     }
-    
+
     /**
      * PHP isset() magic function.
      */
@@ -421,7 +421,7 @@ abstract class ControlAbstract implements ValueInterface
     /**
      * Implementation of Vendimia\Database\ValueInterface
      */
-    public function getDatabaseValue(ConnectorInterface $connector) 
+    public function getDatabaseValue(ConnectorInterface $connector)
     {
         return $connector->escape($this->getValue());
     }

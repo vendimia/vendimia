@@ -178,24 +178,28 @@ class DateTime extends DatePartsAbstract implements ValueInterface
     /**
      * Returns the most common date-time value for databases
      */
-     public function getDatabaseValue(ConnectorInterface $connector)
-     {
-         return $connector->escape($this->format('Y-m-d H:i:s'));
-     }
+    public function getDatabaseValue(ConnectorInterface $connector)
+    {
+        if ($this->isNull()) {
+            return $connector->escape(null);
+        } else {
+            return $connector->escape($this->format());
+        }
+    }
 
-     /**
-      * Creates a DateTime object with the actual date and time.
-      */
-      public static function now()
-      {
-          return new static(time());
-      }
+    /**
+     * Creates a DateTime object with the actual date and time.
+     */
+    public static function now()
+    {
+        return new static(time());
+    }
 
-      /**
-       * Converts this object to a string
-       */
-       public function __toString()
-       {
-           return $this->format();
-       }
+    /**
+     * Converts this object to a string
+     */
+    public function __toString()
+    {
+        return $this->format();
+    }
 }

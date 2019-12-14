@@ -116,10 +116,39 @@ EOF;
 }
 
 /**
- * Creates a ORM entity
+ * Creates a ORM entity definition
  */
-function createORM ($base_path, $namespace, $classname)
+function createORM($base_path, $namespace, $classname, $fields = null)
 {
+    $str_fields = '';
+    if ($fields) {
+        $fields = explode(' ', $fields);
+        foreach ($fields as $field) {
+            if (str_pos(':', $fields) === false) {
+                Console::fail("Malformed arguement: '$field'");
+            }
+
+            $field = explode(':', $fields);
+
+            $name = array_shift($field);
+            $type = array_shift($field);
+            $args = array_shift($field) == '';
+
+            // $type debe ser una clase Field\$type
+            $classname = "Field\\$type";
+            if (!class_exists($classname)) {
+                Console::fail("'$type' is not a valid ORM field type.");
+            }
+
+            $str_fields .= <<<EOF
+    /**
+     * @V:Field\\$type $args
+     */
+    private $name;
+
+EOF;
+        }
+    }
     $file = <<<EOF
 <?php
 namespace $namespace\\orm;
@@ -130,6 +159,7 @@ use Vendimia\\ORM\\Field;
 
 class $classname extends Entity
 {
+{$str_fields}
 }
 EOF;
 

@@ -2,18 +2,31 @@
 namespace Vendimia\Form\Control;
 
 use Vendimia;
+use Vendimia\DateTime;
 
 /**
  * Campo de Hora. Dibuja un tag INPUT con type="time".
  */
-class Time extends ControlAbstract
+class Time extends Text
 {
-    function draw() {
+    public function draw($extra_props = [])
+    {
         return parent::draw([
             'type' => 'time',
-            'name' => $this->name,
-            'id' => $this->name,
-            'value' => $this->value,
         ]);
     }
+
+    /**
+     * This controls returns a Vendimia\Time object
+     */
+    public function getValue()
+    {
+        $value = parent::getValue();
+        if ($value) {
+            return new DateTime\Time($value);
+        } else {
+            return null;
+        }
+    }
+
 }

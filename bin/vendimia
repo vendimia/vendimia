@@ -1,30 +1,130 @@
 #!/usr/bin/env php
 <?php
 use Vendimia\Console;
-if (!defined ("VENDIMIA_BASE_INCLUDED")) {
-    
-    // Pre-sanity check
-    $base_path = 'vendimia/';
-    if (getenv('VENDIMIA_BASE_PATH')) {
-        $base_path = getenv('VENDIMIA_BASE_PATH') . '/';
-    }
 
-    $base_file = $base_path . 'bin/base.php';
-    if (stream_resolve_include_path($base_file) === false) {
-        exit("FATAL: Cannot find the Vendimia installation path. Check the 'include_path' setting in php.ini or the VENDIMIA_BASE_PATH environment variable.\n");
-    }
+const VENDIMIA_VERSION = "0.0.1";
 
-    require $base_file;
+// Pre-sanity check
+// Versión de PHP > 5.6
+if (version_compare(PHP_VERSION, '5.6.0', '<')) {
+    exit("FATAL: Vendimia requires PHP version at least 5.6.\n");
 }
 
+// Necesitamos mbstrings si o si
+if (!function_exists('mb_check_encoding')) {
+    exit("FATAL: Vendimia requires the 'mbstring' PHP extension properly installed.\n");
+}
+
+// Necesitamos el fileinfo
+if (!class_exists('\\finfo')) {
+    exit("FATAL: Vendimia requires the 'fileinfo' PHP extension properly installed.\n");
+}
+
+// La ruta de Vendimia es el padre de esta carpeta.
+$base_path = dirname(__DIR__);
+
+if (getenv('VENDIMIA_BASE_PATH')) {
+    $base_path = getenv('VENDIMIA_BASE_PATH') . '/';
+}
+
+define ('Vendimia\\BASE_PATH', realpath($base_path));
+
+// Cargamos algunas cosas necesarias
+
+require_once Vendimia\BASE_PATH . '/base/libs/helpers.php';
+require_once Vendimia\BASE_PATH . '/base/libs/Path.php';
+require_once Vendimia\BASE_PATH . '/base/libs/Path/FileSearch.php';
+require_once Vendimia\BASE_PATH . '/base/libs/Autoloader.php';
+
+// Registramos el auto-cargador de clases
+Vendimia\Autoloader::register();
+
+// Registramos el ExceptionHandler de la consola
+set_exception_handler ('Vendimia\\Console\\ExceptionHandler::handler');
+
+
+// Creamos objetos necesarios
+$console = new Vendimia\Cli\Console();
+$args = new Vendimia\Cli\ArgumentsManager($argv);
+
+// Ignoramos siempre el primero, es la ruta de este script
+$args->pop();
+
+// El siguiente argumento siempre debe ser el nombre del script
+$command_name = $args->pop();
+
+// Si el siguiente argumento es una ruta válida, la usamos como ruta del proyecto
+$project_path = $args->get();
+
+$project = Vendimia\Cli\ProjectManager::searchProjectPath($project_path);
+
+// Si el path del proyecto es el mismo que $project_path, entonces lo removemos
+// de la lista de Argumentos
+if ($project->getFullPath() == $project_path) {
+    $args->pop();
+}
+
+if (!$command_name) {
+    // Mostramos una ayuda general.
+    $console->writeHeader();
+    $console->write('Usage: vendimia <command> [<args>]' . PHP_EOL);
+    $console->write('Available commands:');
+
+    $console->writeDefinitions([
+        'init' => 'Create a new Vendimia project.',
+        'new' => 'Creates new elements for an existing Vendimia project, like apps.',
+        'server' => 'Run a stand-alone development server.',
+        'shell' => 'Starts a Vendimia evaluative PHP shell.',
+        'syncdb' => 'Syncronize database definitions from apps.'
+    ]);
+    echo PHP_EOL;
+    $console->write('Use "vendimia <command> --help" to get more information about a command.');
+
+    exit;
+}
+
+// Si existe el proyecto, cargamos su data.
+if ($project->isValid()) {
+    chdir ($project->getFullPath());
+    require 'index.php';
+}
+
+// Hack para el new
+$class_name = ucfirst($command_name);
+if ($command_name == 'new') {
+    $class_name = 'NewWrapper';
+}
+
+// Cargamos el comando
+$command_class = "\\Vendimia\\Cli\\Command\\{$class_name}";
+
+if (!class_exists($command_class)) {
+    $console->fail("Invaild command '$command_name'. Use 'vendimia' without arguments for more info.");
+}
+
+$command = new $command_class($project, $args, $console);
+
+if ($args->hasOption('help')) {
+    $command->writeHelp();
+    exit;
+}
+
+$command->run();
+
+
+
+exit;
+
+
+
 if (bin::$script_name) {
-    $script = bin::$script_name;
+    $script = bin::$script_explodename;
     $script_path = Vendimia\BASE_PATH . "/bin/vendimia-$script.php";
-    
+
     if (!file_exists($script_path)) {
         console::fail("Invalid '$script' module.");
     }
-    
+
     require $script_path;
 } else {
     $modules = [
@@ -32,7 +132,7 @@ if (bin::$script_name) {
         'new' => 'Creates new elements for an existing Vendimia project, like apps.',
         'server' => 'Run a stand-alone development server.',
         'shell' => 'Starts a Vendimia evaluative PHP shell.',
-        'syncdb' => 'Syncronize table definitions from apps with the database.'
+        'syncdb' => 'Syncronize database definitions from apps.'
     ];
 
     bin::writeHeader();

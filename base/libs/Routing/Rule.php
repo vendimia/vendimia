@@ -1,6 +1,8 @@
 <?php
 namespace Vendimia\Routing;
 
+use Vendimia\Path\FileSearch;
+
 /**
  * URL Routing rule definition.
  */
@@ -54,7 +56,7 @@ class Rule
     }
 
     /**
-     * Matches an URL against a app name. All its controller are allowed
+     * Matches an URL against a app name. All its controllers are allowed
      */
     public static function app($app)
     {
@@ -62,7 +64,7 @@ class Rule
     }
 
     /**
-     * Syntax sugar for new Rule
+     * Syntax sugar for new empty Rule
      */
     public static function add()
     {
@@ -181,17 +183,26 @@ class Rule
     /**
      * Use a [app, controller] array as this rule target.
      */
-    public function target($application, $controller = 'default')
+    public function target($application, $controller = 'default', $args = [])
     {
         if (is_array($application)) {
             $target = $application;
         } else {
-            $target = [$application, $controller];
+            $target = [$application, $controller, $args];
         }
 
         $this->rule['target'] = $target;
         $this->rule['callable'] = false;
 
+        return $this;
+    }
+
+    /**
+     *
+     */
+    public function setApplicationName($application)
+    {
+        $this->rule['application'] = $application;
         return $this;
     }
 
@@ -210,17 +221,19 @@ class Rule
      * Include a new set of rules
      *
      * @param string|array $rules Rules to include. If is a string, it should
-     *      be a Vendima Path for a rule file (it should return an array)
+     *      be a Vendimia Path for a rule file (a PHP file returning an array)
      */
     public function include($rules)
     {
-        if (is_array($rules)) {
-            foreach ($rules as $rule) {
-                $this->included_rules = array_merge(
-                    $this->included_rules,
-                    $rule->getProcessedData($this)
-                );
-            }
+        if (is_string($rules)) {
+            $rules = require (new FileSearch($rules))->get();
+        }
+
+        foreach ($rules as $rule) {
+            $this->included_rules = array_merge(
+                $this->included_rules,
+                $rule->getProcessedData($this)
+            );
         }
 
         return $this;
@@ -277,13 +290,22 @@ class Rule
      */
     public function getProcessedData(Rule $base_rule = null): array
     {
+        $rules = [];
         if ($this->included_rules) {
-            return $this->included_rules;
+            $rules = $this->included_rules;
         }
 
         $rule = $this->rule;
         if ($base_rule) {
             $br = $base_rule->getData();
+
+            // Las reglas 'default' se convierten en 'url' con la URL base
+            // de la regla base.
+            if (key_exists('default', $rule)) {
+                $rule['default'] = false;
+                $rule['type'] = 'simple';
+            }
+
 
             // Algunos elementos los copiamos del base si no existen en el actual
             foreach (['hostname', 'ajax', 'type', 'name', 'target', 'callable', 'method'] as $e) {
@@ -301,10 +323,10 @@ class Rule
                 $rule['args'] = array_merge($rule['args'], $br);
             }
 
+
         }
 
-        // Usamos los valores
-
-        return [$rule];
+        $rules[] = $rule;
+        return $rules;
     }
 }

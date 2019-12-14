@@ -15,7 +15,7 @@ class Text extends ControlAbstract
         /** Draws a multiline input tag */
         'multiline'     => false, // Para TextField, true dibuja un textarea
     ];
-    
+
     /**
      * Gemerate this control HTML.
      */
@@ -43,7 +43,7 @@ class Text extends ControlAbstract
                 'escapecontent' => false,
                 'closetag' => true,
             ];
-            $content = $this->value;                
+            $content = $this->value;
         } else {
             $tag = 'input';
             $props['value'] = $this->value;
@@ -55,13 +55,13 @@ class Text extends ControlAbstract
             }
         }
 
-        // Le añadimos las propiedades extras, que puede venir de un 
+        // Le añadimos las propiedades extras, que puede venir de un
         // control heredado
         $props = array_replace($props, $extra_props);
 
         return $this->htmltag($tag, $props, $content, $options);
     }
-	
+
     /**
 	 * Dibuja el HTML para este control.
 	 */

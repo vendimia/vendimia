@@ -10,7 +10,7 @@ class Autoloader
 {
     private static $namespaces = [
         'Vendimia\\' => [
-            [VENDIMIA\BASE_PATH, 'base/libs'],
+            [Vendimia\BASE_PATH, 'base/libs'],
         ],
     ];
 

@@ -35,7 +35,7 @@ class Asset
         $arg = Vendimia::$request->get['source'];
 
         if (!$arg) {
-            Http\Response::serverError("You must specify at least one CSS asset filename.");
+            Response::serverError("You must specify at least one CSS asset filename.");
         }
 
         $application = Vendimia::$application;

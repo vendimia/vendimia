@@ -1,7 +1,7 @@
 <?php
 namespace Vendimia\Console;
 
-use Vendimia\Console;
+use Vendimia;
 
 /**
  * Text-mode exception handler.
@@ -19,17 +19,20 @@ class ExceptionHandler
         $file = $exception->getFile();
         $line_width = 70;
 
-        $o = "Unhandled exception " . Console::green($class) . " raised on file ";
+        $console = new Vendimia\Cli\Console();
+
+
+        $o = "Unhandled exception " . $console->green($class) . " raised on file ";
 
         // Oh teh beauty...
         if (42 + strlen($file . $class) > 75 ) {
             $o .= "\n";
         }
-        $o .= Console::parse("{blue $file}, line {$exception->getLine()}\n\n");
+        $o .= $console->parse("{blue $file}, line {$exception->getLine()}\n\n");
 
         $message = $exception->getmessage();
         if ($message) {
-            $o .= Console::white($exception->getmessage()) . "\n\n";
+            $o .= $console->white($exception->getmessage()) . "\n\n";
         }
 
         // Hay más información?
@@ -63,7 +66,7 @@ class ExceptionHandler
 
             $o .= str_pad($c, 2, ' ', STR_PAD_LEFT);
 
-            $o .= '· ' . Console::yellow($data['file']) . ":{$data['line']}\n";
+            $o .= '· ' . $console->yellow($data['file']) . ":{$data['line']}\n";
 
             // Mostramos la línea de código
             if (file_exists($data['file'])) {
@@ -75,7 +78,7 @@ class ExceptionHandler
                     }
 
                     $o .= '    ';
-                    $o .= Console::green(str_pad ($l+1, 3, '0', STR_PAD_LEFT)) . ' ' ;
+                    $o .= $console->green(str_pad ($l+1, 3, '0', STR_PAD_LEFT)) . ' ' ;
 
                     $dotdotdot = '';
                     $fileline = trim($file[$l], "\n");
@@ -85,7 +88,7 @@ class ExceptionHandler
                     }
 
                     if (intval($l) == intval($line))  {
-                        $o .= Console::red($fileline) . $dotdotdot;
+                        $o .= $console->red($fileline) . $dotdotdot;
                     } else {
                         $o .= $fileline . $dotdotdot;
                     }
