@@ -8,10 +8,10 @@ use Psr\Http\Message\ServerRequest;
 class Request extends ServerRequest
 {
     /** Vendimia\Collection object to GET values */
-    public $get; 
+    public $get;
 
     /** Vendimia\Collection object to POST values */
-    public $post; 
+    public $post;
 
     /**
      * Returns if this request method is POST.
@@ -22,11 +22,27 @@ class Request extends ServerRequest
     }
 
     /**
+     * Syntax sugar for !$this->isGet()
+     */
+    public function notGet()
+    {
+        return $this->getMethod() != "GET";
+    }
+
+    /**
      * Returns if this request method is POST.
      */
     public function isPost()
     {
         return $this->getMethod() == "POST";
+    }
+
+    /**
+     * Syntax sugar for !$this->isPost()
+     */
+    public function notPost()
+    {
+        return $this->getMethod() != "POST";
     }
 
     /**
@@ -50,9 +66,9 @@ class Request extends ServerRequest
         // Si no hay ahi, REQUEST_URI
         } elseif ( isset ( $_SERVER['REQUEST_URI']) ) {
             $request_target = trim( $_SERVER['REQUEST_URI'], '/');
-        } 
+        }
 
-        // Si no hay ahi... 
+        // Si no hay ahi...
         // ...no tengo idea qué hacer...
 
         $request = (new static)
