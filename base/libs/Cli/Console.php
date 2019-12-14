@@ -1,5 +1,5 @@
 <?php
-namespace Vendimia;
+namespace Vendimia\Cli;
 
 /**
  * Class for write in console in ANSI colors if available.
@@ -29,7 +29,7 @@ class Console {
     ];
 
     /**
-     * These vars will be filled with \001 and \002 for hinting the readline 
+     * These vars will be filled with \001 and \002 for hinting the readline
      * functions.
      */
     private static $rl_on = '';
@@ -46,27 +46,27 @@ class Console {
     /**
      * Checks terminal capabilities
      */
-    public static function init()
+    public function __construct()
     {
         if (!posix_isatty(STDOUT)) {
-            self::$disable_colors = true;
+            $this->disable_colors = true;
         }
         else {
-            // TODO: cross-platform support 
+            // TODO: cross-platform support
         }
     }
 
     /**
      * Parse string with ANSI colors
      */
-    public static function parse($string)
+    public function parse($string)
     {
         $result = preg_replace_callback('/{(.+?) +(.+?)}/', function($matches) {
             list($dummy, $color, $text) = $matches;
 
             if ($color{0} == ':') {
                 $tipo = substr($color, 1);
-                if (array_key_exists($tipo, self::MODULES)) {
+                if (key_exists($tipo, self::MODULES)) {
                     $color = self::MODULES[$tipo];
 
                 } else {
@@ -74,7 +74,7 @@ class Console {
                 }
             }
 
-            return self::color($color, $text);
+            return $this->color($color, $text);
         }, $string);
 
         return $result;
@@ -83,8 +83,8 @@ class Console {
     /**
      * Returns a string with an ANSI color
      */
-    public static function color($color, $text)
-    { 
+    public function color($color, $text)
+    {
         $result = self::$rl_on;
         $result .= "\x1b[" . (30+self::COLORS[$color]) . ";1m";
         $result .= self::$rl_off;
@@ -97,17 +97,17 @@ class Console {
     /**
      * Writes to the console, parse the string first, and adds a \n afterwards
      */
-    public static function write($text) 
+    public function write($text)
     {
-        echo self::parse($text) . "\n";
+        echo $this->parse($text) . "\n";
     }
 
     /**
      * Fails with and error, and exit
      */
-    public static function fail($message, $exitcode = 1)
+    public function fail($message, $exitcode = 1)
     {
-        self::write("{red ERROR}: $message");
+        $this->write("{red ERROR}: $message");
         exit($exitcode);
     }
 
@@ -116,26 +116,26 @@ class Console {
      */
     public static function warning($message)
     {
-        self::write("{green Warning}: $message");
+        $this->write("{green Warning}: $message");
     }
 
     /**
      * Converts $status to ANSI-colored messages
      */
-    public static function fromStatus($command, $status, $extra)
+    public function fromStatus($command, $status, $extra)
     {
         switch ($status) {
             case 'overwrite':
-                self::write("{green OVERWRITE $command} $extra");
+                $this->write("{green OVERWRITE $command} $extra");
                 break;
             case 'fail':
-                self::write("{red FAIL $command} $extra");
+                $this->write("{red FAIL $command} $extra");
                 break;
             case 'omit':
-                self::write("{black OMITTING $command} $extra");
+                $this->write("{black OMITTING $command} $extra");
                 break;
             default;
-                self::write("{white $command} $extra");
+                $this->write("{white $command} $extra");
                 break;
         }
     }
@@ -143,7 +143,7 @@ class Console {
     /**
      * Activate the readline hinting
      */
-    public static function readline_on()
+    public function readline_on()
     {
         static::$rl_on = "\001";
         static::$rl_off = "\002";
@@ -152,16 +152,74 @@ class Console {
     /**
      * Deactivate the readline hinting
      */
-    public static function readline_off() 
+    public function readline_off()
     {
         static::$rl_on = '';
         static::$rl_off = '';
     }
 
     /**
+     * Writes definitions in a fancy way.
+     */
+    public function writeDefinitions($definitions)
+    {
+        // Primero, ubicamos el padding adecuado
+        $max_length = 0;
+        foreach (array_keys($definitions) as $def) {
+            $lenght = mb_strlen($def);
+            if ($lenght > $max_length) {
+                $max_length = $lenght;
+            }
+        }
+
+        $base_padding = 5;
+        $descr_padding = $max_length + 5;
+
+        foreach ($definitions as $def => $descr) {
+
+            $options = [];
+            if (is_array($descr)) {
+                $options = $descr;
+                $descr = $descr['description'];
+
+                if (isset($options['optional'])) {
+                    $descr = $descr . ' (optional)';
+                }
+            }
+
+            $var = $this->color('white', $def);
+
+            $values = explode('\n', $descr);
+
+            $line = str_repeat(' ', $base_padding) . $var;
+            $line .= str_repeat(' ', $descr_padding - mb_strlen($def));
+
+            $line .= array_shift($values);
+
+            $newline_padding = str_repeat(' ', $descr_padding + $base_padding);
+
+            while ($data = array_shift($values)) {
+                $line .= PHP_EOL . $newline_padding . $data;
+            }
+            $this->write($line);
+        }
+
+    }
+
+    /**
+     * Prints a common header for CLI commands.
+     */
+    public function writeHeader()
+    {
+        $this->write('{white Vendima Framework} administration utility script.');
+        $this->write('Version ' . VENDIMIA_VERSION);
+        echo PHP_EOL;
+    }
+
+    /**
      * Static magic method for return a ANSI-colored text
      */
-    public static function __callStatic($function, $args)
+    public function __call($function, $args)
     {
         return self::color($function, $args[0]);
     }
