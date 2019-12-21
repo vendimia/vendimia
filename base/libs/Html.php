@@ -73,10 +73,13 @@ class Html {
     /**
      * Add one or more external javascript
      */
-    public function addExternalScript(...$scripts)
+    public function addExternalScript($script_url, $extra_params = [])
     {
-        $this->external_scripts = array_merge(
+        /*$this->external_scripts = array_merge(
             $this->external_scripts, $scripts);
+        */
+        array_unshift($extra_params, $script_url);
+        $this->external_scripts[] = $extra_params;
     }
 
     /**
@@ -188,7 +191,7 @@ class Html {
     }
 
     /**
-     * Generates one SCRIPT tag for all the scripts
+     * Generates the SCRIPT tags for all the scripts
      */
     public function drawScripts()
     {
@@ -198,7 +201,7 @@ class Html {
         ];
 
         // Luego, añadimos los externos
-        $sources = array_merge($sources, $this->external_scripts);
+        //$sources = array_merge($sources, $this->external_scripts);
 
         // Ahora, creamos un SCRIPT tag por cada uno
         $html = '';
@@ -207,6 +210,22 @@ class Html {
                     'type' => 'application/javascript',
                     'src' => $source,
             ])->closeTag() . PHP_EOL;
+        }
+
+        // Incluimos los externos por separado, por que pueden tener
+        // parámetros
+        foreach ($this->external_scripts as $script) {
+            $source = array_shift($script);
+
+            $script['type'] = 'application/javascript';
+            $script['src'] = $source;
+
+            $html .= Html\Tag::script($script)->closeTag() . PHP_EOL;
+
+            /*$html .= Html\Tag::script([
+                    'type' => 'application/javascript',
+                    'src' => $source,
+            ])->closeTag() . PHP_EOL;*/
         }
 
         return $html;
