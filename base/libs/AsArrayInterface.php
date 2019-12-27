@@ -9,5 +9,5 @@ interface AsArrayInterface
     /**
      * Returns an array representation of this object
      */
-    public function asArray();
+    public function asArray(): array;
 }
