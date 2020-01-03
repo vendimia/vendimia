@@ -2,15 +2,16 @@
 namespace Vendimia\Routing;
 
 use Vendimia\Path\FileSearch;
+use Vendimia\ControllerBase;
 
 /**
  * URL Routing rule definition.
  */
 class Rule
 {
-    private $default_rule = [
+    private $rule = [
         // Allowed request methods. Default any.
-        'method' => [],
+        'methods' => [],
 
         // Request hostname. Default any.
         'hostname' => null,
@@ -18,8 +19,8 @@ class Rule
         // Should be an AJAX request? true = yes, false = no, null = don't care
         'ajax' => null,
 
-        // Mapping data. Could be an URL, an app name
-        'mapdata' => null,
+        // Mapping data to match against url path, according 'type'
+        'mapping_data' => [],
 
         // URL mapping method: simple, app, regexp, property (not a rule per se)
         'type' => 'simple',
@@ -27,11 +28,20 @@ class Rule
         // Name of the route.
         'name' => null,
 
-        // Target controller/callable
+        // Target controller
         'target' => null,
 
-        // True if 'taget' is a callable
-        'callable' => false,
+        // Target string description
+        'target_name' => '',
+
+        // Target type: view, callable, class or legacy
+        'target_type' => 'class',
+
+        // Target application
+        'target_app' => false,
+
+        // Target default resource names
+        'target_resources' => [],
 
         // True if this rule should be use in case URL is empty
         'default' => false,
@@ -40,39 +50,59 @@ class Rule
         'args' => [],
     ];
 
-    private $rule = [
-        'mapdata' => [],
-    ];
-
     // Include()d rules
     private $included_rules = [];
 
     /**
-     * Matches an URL using the 'simple' method
+     * Creates a HTTP GET rule
      */
-    public static function url($url)
+    public static function get($path = null)
     {
-        return (new self)->setMapping('simple', array_filter(explode('/', $url)));
+        return self::fromMethodAndPath('GET', $path);
     }
 
     /**
-     * Matches an URL against a app name. All its controllers are allowed
+     * Creates a HTTP POST rule
      */
-    public static function app($app)
+    public static function post($path = null)
     {
-        return (new self)->setMapping('app', $app);
+        return self::fromMethodAndPath('POST', $path);
     }
 
     /**
-     * Syntax sugar for new empty Rule
+     * Creates a HTTP PUT rule
      */
-    public static function add()
+    public static function put($path = null)
     {
-        return new self;
+        return self::fromMethodAndPath('PUT', $path);
     }
 
     /**
-     * Sets this rule as default, when URL is empty
+     * Creates a HTTP PATCH rule
+     */
+    public static function patch($path = null)
+    {
+        return self::fromMethodAndPath('PATCH', $path);
+    }
+
+    /**
+     * Creates a HTTP DELETE rule
+     */
+    public static function delete($path = null)
+    {
+        return self::fromMethodAndPath('DELETE', $path);
+    }
+
+    /**
+     * Creates a generic HTTP rule
+     */
+    public static function path($path)
+    {
+        return self::fromMethodAndPath(null, $path);
+    }
+
+    /**
+     * Creates a default rule
      */
     public static function default()
     {
@@ -80,60 +110,28 @@ class Rule
     }
 
     /**
-     * Enforce the project rule set, disabling default app routing
+     * Creates an empty rule
      */
-    public static function enforce()
+    public static function new()
     {
-        return (new self)->setProperty('enforce_rules', true);
+        return new self;
     }
 
     /**
-     * Matches HTTP GET method
+     * Sets the allowed HTTP methods for this rule
      */
-    public function get()
+    public function method(...$methods)
     {
-        $this->method('GET');
-
+        $this->rule['methods'] = $methods;
         return $this;
     }
 
     /**
-     * Matches HTTP POST method
+     * Alias of self::method
      */
-    public function post()
+    public function methods(...$methods)
     {
-        $this->method('POST');
-
-        return $this;
-    }
-
-    /**
-     * Matches HTTP PUT method
-     */
-    public function put()
-    {
-        $this->method('PUT');
-
-        return $this;
-    }
-
-    /**
-     * Matches HTTP DELETE method
-     */
-    public function delete()
-    {
-        $this->method('DELETE');
-
-        return $this;
-    }
-
-    /**
-     * Matches HTTP PATCH method
-     */
-    public function patch()
-    {
-        $this->method('PATCH');
-
+        $this->method(...$methods);
         return $this;
     }
 
@@ -148,88 +146,83 @@ class Rule
     }
 
     /**
-     * Matches a hostname
+     * Sets this rule name
      */
-    public function hostname($hostname)
+    public function name($name)
     {
-        $this->rule['hostname'] = $hostname;
-
+        $this->rule['name'] = $name;
         return $this;
     }
 
     /**
-     * Match the HTTP method
+     * Sets a target for this rule
      */
-    public function method(...$method)
+    public function run($class, $method = 'default')
     {
-        $this->rule['method'] = $method;
+        // Es una clase?
+        if (is_subclass_of($class, ControllerBase::class)) {
+            $this->rule['target_type'] = 'class';
+            $this->rule['target'] = [$class, $method];
+            $this->rule['target_name'] = "{$class}::{$method}";
+            $this->rule['target_resources'] = ["{$class}_{$method}", $method];
 
-        return $this;
-    }
+            // Si no hay definido una app para este target, usamos el 1er
+            // namespace
+            if (!$this->rule['target_app']) {
+                $this->rule['target_app'] = explode('\\', $class)[0];
+            }
 
-    /**
-     * Adds extra arguments to V::$ARGS
-     */
-    public function args(array $args) {
-        if (!key_exists('args', $this->rule)) {
-            $this->rule['args'] = [];
+            return $this;
         }
 
-        $this->rule['args'] = array_merge($this->rule['args'], $args);
-
-        return $this;
-    }
-
-    /**
-     * Use a [app, controller] array as this rule target.
-     */
-    public function target($application, $controller = 'default', $args = [])
-    {
-        if (is_array($application)) {
-            $target = $application;
-        } else {
-            $target = [$application, $controller, $args];
+        // Es un callable?
+        $callable_name = '';
+        if (is_callable($class, false, $callable_name)) {
+            $this->rule['target_type'] = 'callable';
+            $this->rule['target'] = $class;
+            $this->rule['target_name'] = 'callable:' . $callable_name;
+            $this->rule['target_resources'] = [$callable_name];
+            return $this;
         }
 
-        $this->rule['target'] = $target;
-        $this->rule['callable'] = false;
-
+        // Por defecto, es un controller legacy. $class es la app
+        $this->rule['target_type'] = 'legacy';
+        $this->rule['target'] = [$class, $method];
+        $this->rule['target_app'] = $class;
+        $this->rule['target_name'] = $class . ":" . $method;
+        $this->rule['target_resources'] = [$method];
         return $this;
     }
 
     /**
-     *
+     * Renders a view
      */
-    public function setApplicationName($application)
+    public function view($view_file)
     {
-        $this->rule['application'] = $application;
+        $this->rule['target_type'] = 'view';
+        $this->rule['target_name'] = $view_file;
+        $this->rule['target'] = $view_file;
         return $this;
     }
 
     /**
-     * Use a callable as this rule target.
+     * Enforce the project rule set, disabling default app routing
      */
-     public function callable($callable)
+    public static function enforce()
     {
-        $this->rule['target'] = $callable;
-        $this->rule['callable'] = true;
-
-        return $this;
+        return (new self)->setProperty('enforce_rules', true);
     }
 
     /**
-     * Include a new set of rules
-     *
-     * @param string|array $rules Rules to include. If is a string, it should
-     *      be a Vendimia Path for a rule file (a PHP file returning an array)
+     * Include another set of rules, with a precedenting path
      */
-    public function include($rules)
+    public function include($include_data)
     {
-        if (is_string($rules)) {
-            $rules = require (new FileSearch($rules))->get();
+        if (is_string($include_data)) {
+            $include_data = require (new FileSearch($include_data))->get();
         }
 
-        foreach ($rules as $rule) {
+        foreach ($include_data as $rule) {
             $this->included_rules = array_merge(
                 $this->included_rules,
                 $rule->getProcessedData($this)
@@ -239,25 +232,32 @@ class Rule
         return $this;
     }
 
-
     /**
-     * Sets this rule mapping
-     */
-    public function setMapping($type, $mapdata)
-    {
-        $this->rule['type'] = $type;
-        $this->rule['mapdata'] = $mapdata;
-
-        return $this;
-    }
-
-    /**
-     * Sets this rule as a defautl, if the URL is empty
+     * Sets this rule as a default, if the path is empty
      */
     public function setDefault()
     {
         $this->rule['default'] = true;
 
+        return $this;
+    }
+
+    /**
+     * Sets this rule to be a 'simple' URL map
+     */
+    public function setSimpleMapping($path)
+    {
+        $this->rule['type'] = 'simple';
+        $this->rule['mapping_data'] = array_filter(explode('/', $path));
+        return $this;
+    }
+
+    /**
+     * Force an application name for this rule
+     */
+    public function setApplication($app)
+    {
+        $this->rule['target_app'] = $app;
         return $this;
     }
 
@@ -268,13 +268,30 @@ class Rule
     {
         $this->rule['type'] = 'property';
 
-        if (!key_exists('mapdata', $this->rule) || !is_array($this->rule['mapdata'])) {
-            $this->rule['mapdata'] = [];
+        if (!is_array($this->rule['mapping_data'])) {
+            $this->rule['mapping_data'] = [];
         }
 
-        $this->rule['mapdata'][$property] = $value;
+        $this->rule['mapping_data'][$property] = $value;
 
         return $this;
+    }
+
+    /**
+     * Creates a rule with certain method and optional path
+     */
+    private static function fromMethodAndPath($method = null, $path = null)
+    {
+        $rule = new self;
+        if ($method) {
+            $rule->method($method);
+        }
+
+        if ($path) {
+            $rule->setSimpleMapping($path);
+        }
+
+        return $rule;
     }
 
     /**
@@ -290,12 +307,14 @@ class Rule
      */
     public function getProcessedData(Rule $base_rule = null): array
     {
-        $rules = [];
         if ($this->included_rules) {
-            $rules = $this->included_rules;
+            return $this->included_rules;
         }
 
         $rule = $this->rule;
+
+        $rules = [];
+
         if ($base_rule) {
             $br = $base_rule->getData();
 
@@ -308,21 +327,21 @@ class Rule
 
 
             // Algunos elementos los copiamos del base si no existen en el actual
-            foreach (['hostname', 'ajax', 'type', 'name', 'target', 'callable', 'method'] as $e) {
+            /*foreach (['hostname', 'ajax', 'type', 'name', 'target_type', 'target_name', 'target', 'callable', 'method'] as $e) {
                 if (!key_exists($e, $rule) && key_exists($e, $br)) {
                     $rule[$e] = $br[$e];
                 }
+            }*/
+
+            // El mapdata lo preponemos, si type == simple
+            if ($rule['type'] == 'simple') {
+                $rule['mapping_data'] = array_merge($br['mapping_data'], $rule['mapping_data']);
             }
 
-            // El mapdata lo añadimos, si type == simple
-            if (in_array($br['type'], ['simple'])) {
-                $rule['mapdata'] = array_merge($br['mapdata'], $rule['mapdata']);
-            }
-
-            if (key_exists('args', $br)) {
-                $rule['args'] = array_merge($rule['args'], $br);
-            }
-
+            // Añadimos los argumentos, de haber
+            //if (key_exists('args', $br)) {
+            $rule['args'] = array_merge($rule['args'], $br['args']);
+            //}
 
         }
 

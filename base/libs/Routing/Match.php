@@ -1,6 +1,8 @@
 <?php
 namespace Vendimia\Routing;
 
+use Vendimia\ControllerBase;
+
 /**
  * Matches a set of rules against a Request
  */
@@ -8,32 +10,9 @@ class Match
 {
     private $data = [];
 
-    public function __construct(array $rawrules)
+    public function __construct(Rules $rules)
     {
-        // TODO: Caching
-
-        $rules = [];
-        $default_route = [];
-        $properties = [
-            'enforce_rules' => false,
-        ];
-
-        foreach ($rawrules as $rawrule) {
-            foreach ($rawrule->getProcessedData() as $rule) {
-
-                if (key_exists('default', $rule) && $rule['default']) {
-                    $default_route = $rule;
-                    continue;
-                }
-                if ($rule['type'] == 'property') {
-                    $properties = array_merge($properties, $rule['mapdata']);
-                    continue;
-                }
-                $rules[] = $rule;
-            }
-        }
-
-        $this->data = (object)compact('rules', 'default_route', 'properties');
+        $this->data = $rules;
     }
 
     /**
@@ -91,20 +70,22 @@ class Match
     private function replaceVariables($target, $variables)
     {
         if (is_array($target)) {
-            $nt = [];
+
+            // Armamos una lista de variables para usar strtr
+            $tr = [];
+            foreach($variables as $var => $val) {
+                $tr['{' . $var . '}'] = $val;
+            }
+
+            $new_target = [];
             foreach ($target as $t) {
                 if (!is_string($t)) {
                     continue;
                 }
-                if ($t{0} == ':') {
-                    $var = substr($t, 1);
-                    $nt[] = $variables[$var] ?? null;
-                } else {
-                    $nt[] = $t;
-                }
-            }
+                $new_target[] = strtr($t, $tr);
 
-            $target = $nt;
+            }
+            $target = $new_target;
         }
 
         return $target;
@@ -146,7 +127,7 @@ class Match
     /**
      * Perform the rule match against the request
      */
-    public function against($request)
+    public function against($request): MatchedRule
     {
         // Primero, lo básico
         $httpmethod = $request->getMethod();
@@ -159,23 +140,43 @@ class Match
         // Si la URL es vacía, probamos el defecto.
         if (trim($urlpath, ' /') == "") {
             if ($this->data->default_route) {
-                return $this->data->default_route;
+                $rule = $this->data->default_route;
+
+                $matched_rule = new MatchedRule([
+                    'rule' => $rule,
+                    'args' => $rule['args'],
+                    'target' => $this->replaceVariables(
+                        $rule['target'], $rule['args']
+                    ),
+                ]);
+
+                foreach (['name', 'app', 'type', 'resources'] as $name) {
+                    $field = 'target_' . $name;
+                    $matched_rule->$field = $rule[$field];
+                }
+
+
+                // Reemplazamos las variables en el target
+                $matched_rule->target_type = $rule['target_type'];
+                $matched_rule->target = $this->replaceVariables(
+                    $rule['target'], $matched_rule->args
+                );
+                return $matched_rule;
+
             } else {
 
                 // Retornamos el bienvenido por defecto de Vendimia
-                return [
-                    'urlpath' => $urlpath,
-                    'target' => ['welcome', 'default'], // Obsoleto, pero necesario.
-                    'fallback_target' => ['welcome', 'default'],
-                    'callable' => false,
-                ];
+                return new MatchedRule([
+                    'target_name' => ['welcome', 'default', null],
+                    'target_type' => 'view',
+                    'target' => "welcome:default",
+                ]);
             }
         }
 
-        $matched_rule = [];
-
+        $matched_rule = new MatchedRule(['matched' => false]);
         foreach ($this->data->rules as $rule) {
-            if (($rule['method'] ?? false) && !in_array($httpmethod, $rule['method'])) {
+            if (($rule['methods'] ?? false) && !in_array($httpmethod, $rule['methods'])) {
                 continue;
             }
             if (($rule['ajax'] ?? false) && !$ajax) {
@@ -195,21 +196,39 @@ class Match
             // Usamos un método que corresponde al tipo de regla
             $method = 'urlMatch' . $rule['type'];
 
-            $status = $this->$method($rule['mapdata'], $urlpath);
+            $status = $this->$method($rule['mapping_data'], $urlpath);
 
             if ($status['match']) {
                 // Perfecto. Actualizamos ciertas cosas dentro de la regla.
+                $matched_rule = new MatchedRule([
+                    'rule' => $rule,
+                    'args' => $rule['args'] ?? [],
+                ]);
 
-                $args = [];
-                if ($rule['args'] ?? false) {
-                    $args = array_merge($args, $rule['args']);
-                }
+
                 // Le añadimos las variables del target
-                $args = array_merge($args, $status['variables']);
+                $matched_rule->args = array_merge(
+                    $matched_rule->args, $status['variables']
+                );
 
-                $rule['args'] = $args;
+                foreach (['name', 'app', 'type'] as $name) {
+                    $field = 'target_' . $name;
+                    $matched_rule->$field = $rule[$field];
+                }
 
-                if ($status['target'] ?? null) {
+                // Reemplazamos las variables en el target
+                $matched_rule->target = $this->replaceVariables(
+                    $rule['target'], $matched_rule->args
+                );
+
+                // Y en los target_resources, por si acaso
+                $matched_rule->target_resources = $this->replaceVariables(
+                    $rule['target_resources'], $matched_rule->args
+                );
+
+                //$rule['args'] = $args;
+
+                /*if ($status['target'] ?? null) {
                     $rule['target'] = $status['target'];
 
                     // Sólo modificamos el target en una regla tipo 'app'. Y esa
@@ -218,32 +237,43 @@ class Match
                 } else {
                     // Solo puede haber dos tipos de target: array y string.
                     $rule['target'] = $this->replaceVariables($rule['target'], $args);
-                }
-                $rule['urlpath'] = $urlpath;
+                }*/
 
-                $matched_rule = $rule;
+                //$rule['urlpath'] = $urlpath;
+
+                //$matched_rule = $rule;
                 break;
             }
         }
 
-
-        // Si no hay una regla, y no forzamos las reglas, usamos los 2 1ros
-        // componentes de la URL como [app, controller]
-        if (!$matched_rule && !$this->data->properties['enforce_rules']) {
+        // Si no hay una regla, y enforce_rules == false, usamos los dos primeros
+        // componentes de la URL para armar
+        if (!$matched_rule->matched && !$this->data->properties['enforce_rules']) {
             $parts = array_filter(explode('/', $urlpath));
 
-            $controller_class = ["{$parts[0]}\Controller", $parts[1] ?? 'default'];
+            $controller_class = "{$parts[0]}\Controller\DefaultController";
 
-            $matched_rule = [
-                'urlpath' => $urlpath,
-                'target' => $controller_class,
-                'application' => $parts[0],
-                'fallback_target' => [$parts[0], $parts[1] ?? 'default'],
-                'callable' => false,
-                'args' => [],
-            ];
+            if (is_subclass_of($controller_class, ControllerBase::class)) {
+                // El nombre del método, que será usado para sacar otros ficheros
+                // relacionados, como la vista o los ficheros CSS y JS, puede
+                // colisionar con el mismo método en otros controladores.
+
+                $method_name = $parts[1] ?? 'default';
+                $matched_rule = new MatchedRule([
+                    'target_name' => [$parts[0], 'DefaultController', $method_name],
+                    'target' => [$controller_class, $method_name],
+                    'target_type' => 'class'
+                ]);
+            } else {
+                $controller_name = $parts[1] ?? 'default';
+                $matched_rule = new MatchedRule([
+                    'target_name' => [$parts[0], $controller_name, null],
+                    'target' => [$parts[0], $controller_name, null],
+                    'target_type' => 'legacy',
+                ]);
+            }
+
         }
-
         return $matched_rule;
     }
 
