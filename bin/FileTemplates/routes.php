@@ -1,6 +1,5 @@
+use Vendimia\Routing\Rule; return [
 
 // Routing rules definition file.
-
-use Vendimia\Route\Rule; return [
 
 ];

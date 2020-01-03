@@ -1,12 +1,13 @@
 
-namespace <?=$app_name?>;
+namespace <?=$app_name?>\Controller;
 
 use Vendimia as V;
+use Vendimia\Http\Response;
 
 /**
- * Controller for '<?=$app_name?>' app.
+ * Defautt controller for '<?=$app_name?>' app.
  */
-class Controller extends V\ControllerBase
+class DefaultController extends V\ControllerBase
 {
     public function default()
     {
