@@ -36,6 +36,7 @@ class App extends CommandAbstract
         $template = new TemplateManager($this->console);
 
         $template->makeTree($this->project->getFullPath(), ['apps/' . $app_name => [
+            'Controller',
             'Model',
             'DataMapper',
             'Form',
@@ -53,7 +54,7 @@ class App extends CommandAbstract
 
         // Creamos un controlador base.
         $template->setTemplate('default-controller', compact('app_name'));
-        $template->build("{$app_path}/Controller.php");
+        $template->build("{$app_path}/Controller/DefaultController.php");
 
         // Y una vista por defecto.
         $controller_name = 'default';
