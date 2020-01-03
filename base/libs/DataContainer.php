@@ -13,7 +13,6 @@ use LogicException;
 abstract class DataContainer implements ArrayAccess, Iterator, AsArrayInterface
 {
     private $properties = [];
-    private $required = [];
 
     public function __construct(array $data = [])
     {
@@ -21,11 +20,9 @@ abstract class DataContainer implements ArrayAccess, Iterator, AsArrayInterface
 
         foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $r) {
             $this->properties[] = $r->name;
-
-            if (!strpos($r->getDocComment(), '@optional') !== false) {
-                $this->required[] = $r->name;
-            }
         }
+
+        $this->fill($data);
     }
 
     /**
@@ -43,7 +40,7 @@ abstract class DataContainer implements ArrayAccess, Iterator, AsArrayInterface
      */
     public function isComplete()
     {
-        foreach ($this->required as $field) {
+        foreach ($this->properties as $field) {
             if (is_null($this->$field)) {
                 return false;
             }
@@ -53,12 +50,20 @@ abstract class DataContainer implements ArrayAccess, Iterator, AsArrayInterface
     }
 
     /**
+     *  Syntax sugar for !self::isComplete()
+     */
+    public function notComplete()
+    {
+        return !$this->isComplete();
+    }
+
+    /**
      * Returns the required fields with null value.
      */
     public function missingFields()
     {
         $res = [];
-        foreach ($this->required as $field) {
+        foreach ($this->properties as $field) {
             if (is_null($this->$field)) {
                 $res[] = $field;
             }
@@ -137,7 +142,7 @@ abstract class DataContainer implements ArrayAccess, Iterator, AsArrayInterface
         return current($this->properties) !== false;
     }
 
-    public function asArray()
+    public function asArray(): array
     {
         $props = [];
         foreach ($this->properties as $prop) {
