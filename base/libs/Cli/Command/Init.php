@@ -28,11 +28,6 @@ class Init extends CommandAbstract
         $project = $this->project;
         $console = $this->console;
 
-        // No puede existir un proyecto en el path
-        if ($project->isValid()) {
-            $console->fail("Project {:project {$project->getName()}} already exists on {:path {$project->getFullPath()}}");
-        }
-
         $project_path = $this->args->pop();
 
         if (!$project_path) {
@@ -68,8 +63,13 @@ class Init extends CommandAbstract
         }
 
         // Recreamos $project
+        $project = new ProjectManager($project_path);
 
-        $project = new ProjectManager($project_path, true);
+        // No puede existir un proyecto en el path
+        if ($project->isValid()) {
+            $console->fail("Project {:project {$project->getName()}} already exists on {:path {$project->getFullPath()}}");
+        }
+
 
         $msg .="{:project {$project->getName()}} in {:path {$project->getBasePath()}}";
         $console->write($msg);
