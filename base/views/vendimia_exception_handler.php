@@ -171,11 +171,11 @@ vXJKl3XNbGxUYGmHxWICJrk6y3EM1riX/lWqqNbEv6JnKuS1n2ZWXSUmqdU7sBwp71rIEjHBDQyG
         echo "</ol>";
 
         // Si existe datos exportados de la excepción, los mostramos
-        if ( isset ( $E->__EXPORTED_DATA ) && $E->__EXPORTED_DATA ):
+        if (method_exists($E, 'getExportedData') && $exported_data = $E->getExportedData()):
 ?>
         <h3>Extra data:</h3>
         <table class="exportados">
-        <?php foreach ( $E->__EXPORTED_DATA as $variable => $value ): ?>
+        <?php foreach ($exported_data as $variable => $value): ?>
         <tr>
         <td class="variable"><?=$variable?>
         </td>
@@ -183,7 +183,10 @@ vXJKl3XNbGxUYGmHxWICJrk6y3EM1riX/lWqqNbEv6JnKuS1n2ZWXSUmqdU7sBwp71rIEjHBDQyG
 
 <?php
     $filter = function ($string) {
-        return strtr ( htmlentities ( $string ), [' ' => '&nbsp;']);
+        if (!is_string($string)) {
+            $string = var_export($string, true);
+        }
+        return strtr(htmlentities($string), [' ' => '&nbsp;']);
     };
 
     if (is_array($value)) {
