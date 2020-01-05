@@ -7,7 +7,7 @@ namespace Psr\Http\Message;
  * {@inheritDoc}
  * @author Oliver Etchebarne
  */
-class Message implements MessageInterface 
+class Message implements MessageInterface
 {
     protected $protocolVersion;
 
@@ -92,11 +92,14 @@ class Message implements MessageInterface
     /**
      * @see self::withHeader()
      */
-    protected function setHeader($name, $value) 
-    {        
+    public function setHeader($name, $value)
+    {
         if (!is_array($value)) {
             $value = [$value];
         }
+
+        // Evitamos duplicados
+        $this->unsetHeader($name);
 
         $this->headers[$name] = $value;
         $this->headersKeymap[strtolower($name)] = $name;
@@ -107,7 +110,7 @@ class Message implements MessageInterface
     /**
      * @see self::withAddedHeader();
      */
-    protected function setAddedHeader($name, $value)
+    public function setAddedHeader($name, $value)
     {
         if (!$this->hasHeader($name)) {
             $this->headers[$name] = [];
@@ -122,10 +125,10 @@ class Message implements MessageInterface
     /**
      * @see self::withoutHeader();
      */
-    protected function unsetHeader($name) {
+    public function unsetHeader($name) {
         if ($this->hasHeader($name)) {
             unset (
-                $this->headers[$this->headersKeymap(strtolower($name))]
+                $this->headers[$this->headersKeymap[strtolower($name)]]
             );
         }
         return $this;
@@ -134,7 +137,7 @@ class Message implements MessageInterface
     /**
      * @see self::withBody()
      */
-    protected function setBody(StreamInterface $body)
+    public function setBody(StreamInterface $body)
     {
         $this->body = $body;
         return $this;
