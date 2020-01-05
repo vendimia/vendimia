@@ -47,6 +47,12 @@ if (PHP_SAPI == 'cli-server') {
 // Inicializamos las variables de la aplicación
 Vendimia::init();
 
+// Esto tiene que suceder nuevamente.
+if (PHP_SAPI == 'cli-server') {
+    // Siempre activamos el modo debug
+    Vendimia::$debug = true;
+}
+
 // Registramos el atrapador de excepciones sueltas.
 Vendimia\ExceptionHandler::register();
 
@@ -66,94 +72,8 @@ if (Vendimia::$execution_type == 'cli') {
     return;
 }
 
-$routing_rules = require Vendimia\PROJECT_PATH . '/config/routes.php';
-$route_matching = new Vendimia\Routing\Match($routing_rules);
-$rule = $route_matching->against(Vendimia::$request);
-
-$target_found = false;
-$application = null;
-$controller = null;
-$controller_object = null;
-
-if ($rule) {
-    // Una ruta hizo match.
-
-    if ($rule['callable']) {
-        // $callable_name tendrá el nombre del callable, usado para mensajes
-        // de error, entre otras cosas.
-        if (is_callable($rule['target'], false, $callable_name)) {
-            $target_found = true;
-        }
-    } else {
-        // Es un array [app, controller]
-        list($controller_class, $controller) = $rule['target'];
-
-        // Si la regla trae una aplicación, la usamos
-        $application = $controller_class;
-
-        // Buscamos una clase controller
-        if (class_exists($controller_class)) {
-            // Existe. Es una instancia de Vendimia\ControllerBase?
-            if (!is_subclass_of($controller_class, Vendimia\ControllerBase::class)) {
-                throw new Exception("Class '$controller_class' doesn't extends Vendimia\ControllerBase class.");
-            }
-
-            // Creamos la instancia
-            $controller_object = new $controller_class();
-
-            $application = substr($controller_class, 0, strrpos($controller_class, '\\'));
-
-            $target_found = true;
-        }
-
-        // Ahora buscamos la ruta tradicional
-        if (!$target_found) {
-            list($application, $controller) = $rule['target'];
-            if ($rule['fallback_target'] ?? false) {
-                list($application, $controller) = $rule['fallback_target'];
-            }
-
-            $cfile = new Vendimia\Path\FileSearch($controller, 'controllers');
-            $cfile->search_app = $application;
-
-            if ($cfile->found()) {
-                $target_found = true;
-            }
-        }
-
-        // Si forzamos una aplicación, lo usamos
-        if ($rule['application'] ?? false) {
-            $application = $rule['application'];
-        }
-
-        // Reintentamos con el alterno
-        /*if (!$target_found) {
-            list($application, $controller) = $rule['target'];
-        }*/
-    }
-} else {
-    if (Vendimia::$debug) {
-        throw new Exception("No rule matched this URL.");
-    }
-    Vendimia\Http\Response::notFound();
-}
-
-if ($target_found) {
-    Vendimia::$application = $application;
-    Vendimia::$controller = $controller;
-
-    if ($rule['args'] ?? false) {
-        Vendimia::$args->append($rule['args']);
-    }
-} else {
-    if (Vendimia::$debug) {
-        throw new Exception("No routing rule matched requested URL.");
-    }
-
-    Vendimia\Http\Response::notFound();
-}
-
 // Antes de ejecutar el controlador, cargamos los ficheros 'initialize';
+// FIXME: OBSOLETO
 $initialize_routes = [
     'base/initialize.php',
     "apps/" . Vendimia::$application . "/initialize.php"
@@ -166,68 +86,128 @@ foreach ($initialize_routes as $init) {
     }
 }
 
-if ($controller_object) {
-    $response = $controller_object->$controller();
-} elseif ($rule['callable']) {
-    $callable = $rule['target'];
-    $response = $callable();
-    $appcontroller = $callable_name;
+
+
+
+// Procesamos las rutas
+$routing_rules = new Vendimia\Routing\Rules(
+    require Vendimia\PROJECT_PATH . '/config/routes.php'
+);
+$route_matching = new Vendimia\Routing\Match($routing_rules);
+$rule = $route_matching->against(Vendimia::$request);
+
+$returned_data = null;
+
+// En caso el controlador no retorne un Http\Response, creamos uno vacío, donde
+// añadiremos la vista luego.
+$response = new Vendimia\Http\Response();
+$response->setHeader('Content-Type', 'text/html');
+
+$view_variables = [];
+
+if ($rule->matched) {
+    // Una regla hizo match, directa o indirectamente
+    if ($rule->target_type == 'class') {
+        $controller_object = new $rule->target[0](Vendimia::$request, $response);
+
+        $returned_data = $controller_object->{$rule->target[1]}();
+
+    } elseif ($rule->target_type == 'callback') {
+        // TODO:
+    } elseif ($rule->target_type == 'legacy') {
+
+        // FIXME: Esto ya debería desaparecer
+        Vendimia::$application = $rule->target[0];
+        Vendimia::$controller = $rule->target[1];
+        Vendimia::$args->append($rule->args);
+
+        $cfile = new Vendimia\Path\FileSearch($rule->target[1], 'controllers');
+        $cfile->search_app = $rule->target[0];
+
+        if ($cfile->notFound()) {
+            throw new Vendimia\Exception("'Legacy' route matched, but controller file '{$rule->target[1]}' not found", [
+                'Matched rule' => $rule->asArray(),
+            ]);
+        }
+
+        $returned_data = require $cfile->get();
+
+    } elseif ($rule->target_type == 'view') {
+        (new Vendimia\View($rule->target))->renderToResponse()->send();
+    }
 } else {
-    // Cargamos el controlador
-    $response = require $cfile->get();
+    // 404!
+    if (Vendimia::$debug) {
+        throw new Vendimia\Exception("No routing rule matched requested URL", [
+            'Rules' => $routing_rules->getHumanList(),
+        ]);
+    }
 
-    // Nombre de la aplicación/controlador, por si tenemos que mostrar un
-    // mensaje de error
-    $appcontroller = Vendimia::$application . '/' . Vendimia::$controller;
+    Vendimia\Http\Response::notFound();
 
 }
 
-// Si el controlador retorna algo, debe ser un Vendimia\Http\Response, o un array con
-// variables para la vista por defecto
-$invalid_response = false;
-$view = new Vendimia\View;
-
-if ($response) {
-    if (is_array($response)) {
-        $view->addVariables($response);
-
-        $response = null;
-    } elseif (is_object($response)) {
-        // Sólo aceptamos objetos del tipo Vendimia\Http\Response
-        if (!$response instanceof Vendimia\Http\Response) {
-            $invalid_response = true;
+// Si el controlador retorna algo, solo puede ser un array con variables para
+// la vista, o un objecto de clase Vendimia\Http\Response
+$invalid_return = false;
+if ($returned_data) {
+    if (is_object($returned_data)) {
+        if ($returned_data instanceof Vendimia\Http\Response) {
+            $invalid_return = true;
         }
+
+        // La enviamos directo al cliente
+        $returned_data->send();
+    } elseif (is_array($returned_data)) {
+        $view_variables = array_merge($view_variables, $returned_data);
     } else {
-        // Ok, aceptamos un 1
-        if ( $response !== 1 ) {
-            $invalid_response = true;
-        } else {
-            $response = null;
+        // Aceptamos un 1
+        if ($returned_data !== 1) {
+            $invalid_return = true;
         }
     }
 }
-if ($invalid_response) {
-    throw new Vendimia\Exception ("Controller '$appcontroller' must return an array, a Vendimia\\Http\\Response instance, or false. Returned " . gettype($response) . " instead." );
+if ($invalid_return) {
+    throw new Vendimia\Exception(
+        "Controller for rule '{$rule->target_name}' must return an Array, a Vendimia\\Http\\Response instance, or null. Returned a " . gettype($returned_data) . " instead."
+    );
 }
 
-// Si en este punto no hay un response, es por que el controlador no
-// devolvió uno. Lo generamos de la vista por defecto
-if (!$response) {
+$view = new Vendimia\View();
+$view->setApplication($rule->target_app);
 
-    // Si la vista no tiene un fichero, le colocamos el nombre del controlador
-    if (!$view->getFile()) {
-        $view->setFile(Vendimia::$controller);
+foreach($rule->target_resources as $view_file) {
+    try {
+        $view->setFile($view_file);
+    } catch (Vendimia\Exception $e) {
+        continue;
     }
-
-    // Si no tiene un layout, buscamos uno.
-    if (!$view->getLayout()) {
-        // Siempre existe un default
-        $layoutFile = new Vendimia\Path\FileSearch('default', 'views/layouts');
-        $view->setLayout($layoutFile);
-    }
-
-    $response = $view->renderToResponse();
 }
 
-// Enviamos el Response al cliente
+// Si no hay fichero, fallamos
+if (!$view->getFile())  {
+    throw new Vendimia\Exception(
+        "View file cannot be found for controller {$rule->target_name}",
+    [
+        'Rule matched' => $rule->rule,
+        'Searched view names' => $rule->target_resources,
+    ]);
+}
+
+// Si no tiene un layout por defecto, buscamos uno.
+if (!$view->getLayout()) {
+    $view->setLayout('default');
+}
+
+
+// Insertamos la vista, con las variables, dentro del response.
+$view->addVariables($view_variables);
+
+$body = new Vendimia\Http\Stream('php://temp');
+$body->write($view->renderToString());
+$response->setBody($body);
+$size = $response->getBody()->getSize();
+if ($size) {
+    $response->setHeader('Content-Length', $size);
+}
 $response->send();
