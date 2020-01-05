@@ -4,7 +4,7 @@ namespace Vendimia;
 /**
  * Extended exception. Accepts an array for debugging purposes.
  */
-class Exception extends \Exception 
+class Exception extends \Exception
 {
     private $__EXPORTED_DATA = [];
 

@@ -12,7 +12,7 @@ class PHPAliasesParser
     private $aliases = [];
 
     /**
-     * Parse PHP code and yields only userful tokens
+     * Parse PHP code and yields only useful tokens
      * 
      * @param string $php_string Valid PHP code for parsing
      * @return Generator

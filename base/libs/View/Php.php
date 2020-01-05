@@ -46,7 +46,7 @@ class Php implements \ArrayAccess
      *
      * This will be overloaded by Vendimia for include the Vendimia\Path\FileSearch result;
      */
-    protected function getCanonicalFilePath($file, $type = 'view', 
+    protected function getCanonicalFilePath($file, $type = 'view',
         &$application = null)
     {
         return $file;
@@ -65,7 +65,7 @@ class Php implements \ArrayAccess
     /**
      * Returns the view file
      */
-    public function getFile() 
+    public function getFile()
     {
         return $this->file;
     }
@@ -90,7 +90,7 @@ class Php implements \ArrayAccess
     /**
      * Adds variables to this view
      */
-    public function addVariables(array $variables) 
+    public function addVariables(array $variables)
     {
         $this->variables = array_merge($this->variables, $variables);
     }
@@ -128,14 +128,14 @@ class Php implements \ArrayAccess
     /**
      * Process a view file. Returns a string with the processed HTML
      *
-     * @return string 
+     * @return string
      */
     public function processFile($view_file, array $variables = [])
     {
         if (!file_exists($view_file)) {
             throw new \RuntimeException("View file '$view_file' doesn't exist.");
         }
-        
+
         ob_start();
 
         extract($variables);
@@ -177,11 +177,11 @@ class Php implements \ArrayAccess
         return Vendimia\Url::parse(Vendimia::$settings['static_url'], $url);
     }
 
-    public function offsetExists($offset) 
+    public function offsetExists($offset)
     {
         return key_exists($offset, $this->variables);
     }
-    public function offsetGet($offset) 
+    public function offsetGet($offset)
     {
         if (key_exists($offset, $this->variables)) {
             return $this->variables[$offset];
@@ -189,7 +189,7 @@ class Php implements \ArrayAccess
             return null;
         }
     }
-    public function offsetSet($offset, $value) 
+    public function offsetSet($offset, $value)
     {
         $this->variables[$offset] = $value;
     }

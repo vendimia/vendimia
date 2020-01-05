@@ -5,7 +5,7 @@ use Vendimia as V;
 use Vendimia\Http\Response;
 
 /**
- * Defautt controller for '<?=$app_name?>' app.
+ * Default controller for '<?=$app_name?>' app.
  */
 class DefaultController extends V\ControllerBase
 {

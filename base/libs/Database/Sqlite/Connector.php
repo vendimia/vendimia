@@ -63,10 +63,10 @@ class Connector // implements Database\ConnectionInterface
         } elseif (is_null($string)) {
             return 'NULL';
         } else {
-            return $quotation . 
+            return $quotation .
                 $this->connection->escapeString($string) .
                 $quotation;
-        }        
+        }
     }
 
     public function escapeIdentifier($string)
@@ -86,7 +86,7 @@ class Connector // implements Database\ConnectionInterface
              if ($value instanceof ValueInterface) {
                 return $value->getDatabaseValue($this);
              } else {
-                throw new \RuntimeException("Object of type '" . 
+                throw new \RuntimeException("Object of type '" .
                     get_class($value) . "' can't be directly converted to a database value.") ;
              }
         } else {
@@ -243,7 +243,7 @@ class Connector // implements Database\ConnectionInterface
         return $this->connection->affected_rows;
     }
 
-    public function delete($table, $where) 
+    public function delete($table, $where)
     {
         $sql = "DELETE FROM " . $this->escapeIdentifier($table);
 

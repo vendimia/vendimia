@@ -17,14 +17,14 @@ trait Configure
     /** Is this object configured? */
     protected $configured = false;
 
-    /** Configurable table name for this object. Defaults to 
+    /** Configurable table name for this object. Defaults to
      *  {self::$namespace}_{self::$name}
      */
     protected static $database_table;
 
     /** Configurable database connector name */
     protected static $database_connection = 'default';
-    
+
     /** Database connector */
     protected static $database_connector;
 
@@ -60,7 +60,6 @@ trait Configure
         $database_connector = Database\Database::getConnector(static::$database_connection);
         static::$database_connector = &$database_connector;
 
-        
         $configuredStatic = true;
         static::$configuredStatic = &$configuredStatic;
 
@@ -111,7 +110,7 @@ trait Configure
     }
 
     /**
-     * Returns the FQCN builder 
+     * Returns the FQCN builder
      */
     public static function getFQCNBuilder()
     {

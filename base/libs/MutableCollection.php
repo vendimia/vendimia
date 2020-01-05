@@ -17,11 +17,11 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * Sets the array by reference. 
+     * Sets the array by reference.
      *
      * Useful for working with a pre-existent array.
      */
-    public function setArrayByRef(&$array) 
+    public function setArrayByRef(&$array)
     {
         $this->array = &$array;
     }
@@ -32,7 +32,7 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
      */
     public function &get($element, $default_value = null)
     {
-        if ($this->has($element)) {
+        if ($this->hasKey($element)) {
             return $this->array[$element];
         } else {
             return $default_value;
@@ -45,7 +45,7 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
     public function add($value, $key = null)
     {
         if (is_null($key)) {
-            $this->array[] = $value;   
+            $this->array[] = $value;
         } else {
             $this->array[$key] = $value;
         }
@@ -55,21 +55,30 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
 
 
     /**
-     * Returns whether this key exist in the collection
+     * Returns whether this element value exist in the collection
      */
-    public function has($key)
+    public function has($element)
     {
         if (is_null($this->array)) {
             return false;
         }
-        
+
+        return in_array($element, $this->array);
+    }
+
+    public function hasKey($key)
+    {
+        if (is_null($this->array)) {
+            return false;
+        }
+
         return key_exists($key, $this->array);
     }
 
     /**
      * Remove an element by its key
      */
-    public function remove($key) 
+    public function remove($key)
     {
         unset($this->array[$key]);
     }
@@ -85,14 +94,14 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
     /**
      * Remove and returns the first element, in format [key, value];
      */
-    public function shift_assoc()
+    public function shiftAssoc()
     {
         reset ($this->array);
         $key = key($this->array);
         if (is_null($key)) {
             return null;
         }
-        
+
         $value = $this->array[$key];
         unset($this->array[$key]);
         return [$key, $value];
@@ -117,7 +126,7 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
 
     /**
      * Creates a Collection from variadic arguments
-     */ 
+     */
     public static function fromArgs(...$args)
     {
         return new static($args);
@@ -139,7 +148,7 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
     /**
      * Magic function helper for serialize this Collection
      */
-    public function __sleep() 
+    public function __sleep()
     {
         return ["array"];
     }
@@ -178,7 +187,7 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
     public function offsetUnset($offset) {}
 
     // Iterator implementation
-    public function current() 
+    public function current()
     {
         return current($this->array);
     }
@@ -186,7 +195,7 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
     {
         return key($this->array);
     }
-    public function next() 
+    public function next()
     {
         next($this->array);
     }
@@ -200,7 +209,7 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
     }
 
     // Countable implementation
-    public function count() 
+    public function count()
     {
         return count($this->array);
     }

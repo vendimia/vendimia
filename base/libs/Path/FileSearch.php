@@ -3,6 +3,7 @@ namespace Vendimia\Path;
 
 use Vendimia;
 use Vendimia\Path;
+
 /**
  * Search for a file in several locations.
  *
@@ -20,7 +21,7 @@ class FileSearch
     public $search_base = true;
 
     // Busca el fichero dentro de la carpeta de Vendimia, apps y base
-    public $search_Vendimia = true;
+    public $search_vendimia = true;
 
     // Busca en otra aplicación que no sea la actual.
     public $search_app = null;
@@ -48,6 +49,15 @@ class FileSearch
         $this->file = $file;
         $this->type = $type;
         $this->ext = $ext;
+    }
+
+    /**
+     * Set the application where to find
+     */
+    public function setApplication($app_name)
+    {
+        $this->search_app = $app_name;
+        return $this;
     }
 
     /**
@@ -117,17 +127,16 @@ class FileSearch
             // aplicación. No buscamos en base
             $colon = strpos ( $this->file, ':' );
 
-            if ( $colon !== false ) {
+            if ($colon !== false ) {
                 $this->search_app = substr($this->file, 0, $colon);
                 $this->file = substr($this->file, $colon + 1);
 
                 $this->search_base = false;
             }
 
-
             // La app donde buscar.
+            // TODO: Eliminar esto
             $app = $this->search_app ? $this->search_app : Vendimia::$application;
-
         }
 
         // Armamos las rutas de búsqueda
@@ -141,22 +150,21 @@ class FileSearch
         if ($this->search_base) {
             $this->searched_paths[] =
                 Path::join(Vendimia\PROJECT_PATH , 'base', $this->type, $this->file);
-
         }
 
         // Buscamos en Vendimia?
-        if ($this->search_Vendimia) {
+        if ($this->search_vendimia) {
             if ($app) {
                 $this->searched_paths[] =
-                    Path::join(Vendimia\BASE_PATH, 'apps', $app, $this->type, $this->file );
+                    Path::join(Vendimia\BASE_PATH, 'apps', $app, $this->type, $this->file);
             }
 
             $this->searched_paths[] =
-                Path::join(Vendimia\BASE_PATH, 'base', $this->type, $this->file );
+                Path::join(Vendimia\BASE_PATH, 'base', $this->type, $this->file);
         }
 
         // Existe el fichero?
-        foreach ( $this->searched_paths as $f ) {
+        foreach ($this->searched_paths as $f) {
             if (file_exists($f)) {
                 $this->path = $f;
                 break;

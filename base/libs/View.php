@@ -47,7 +47,7 @@ class View extends View\Php
     /**
      * Overloaded constructor for creating a new security token
      */
-    public function __construct($file = null, $variables = null)  
+    public function __construct($file = null, $variables = null)
     {
         (new Csrf)->generateToken();
         parent::__construct($file, $variables);
@@ -106,7 +106,7 @@ class View extends View\Php
         $this->layoutFile = $file->get();
     }*/
 
-    /*public static function render($view_file, array $variables = []) 
+    /*public static function render($view_file, array $variables = [])
     {
         $file = new Path\FileSearch($view_file, 'views');
         if ($file->notFound())  {

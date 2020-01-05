@@ -48,7 +48,7 @@ class Manager //implements Database\ManagerInterface
         // Valor por defecto?
         if (isset($fielddef['default'])) {
             $fieldstr .= ' DEFAULT ' . $this->connection->valueFromPHP($fielddef['default']);
-        } 
+        }
         return $fieldstr;
     }
 
@@ -62,7 +62,7 @@ class Manager //implements Database\ManagerInterface
         }
 
         // Creamos los primary keys
-        $fields[] = 'PRIMARY KEY (' . 
+        $fields[] = 'PRIMARY KEY (' .
             join(',', $this->connection->escape($definition->primary_keys)) .
             ')';
 
@@ -101,7 +101,7 @@ class Manager //implements Database\ManagerInterface
     }
 
 
-    public function createIndex($tablename, $indexname, $indexdef) 
+    public function createIndex($tablename, $indexname, $indexdef)
     {
         $sql = 'ALTER TABLE ' . $this->connection->escapeIdentifier($tablename);
         $sql .= ' ADD ';
@@ -124,7 +124,7 @@ class Manager //implements Database\ManagerInterface
         return $this->connection->execute($sql);
     }
 
-    public function updateIndex($tablename, $indexname, $indexdef) 
+    public function updateIndex($tablename, $indexname, $indexdef)
     {
         // No existe alter index...
         $this->dropIndex($tablename, $indexname);
@@ -143,7 +143,7 @@ class Manager //implements Database\ManagerInterface
 
         // Procesamos el resultado
         try {
-            $result = $this->connection->execute('DESCRIBE ' . 
+            $result = $this->connection->execute('DESCRIBE ' .
                 $this->connection->escapeIdentifier($table));
         } catch (Database\QueryException $e){
             // Es MUY probable que la tabla no exista.
@@ -172,7 +172,7 @@ class Manager //implements Database\ManagerInterface
 
             // Solo nos importa la longitud de algunos campos
             if (in_array ($fieldtype, ['char', 'varchar', 'decimal', 'binary', 'varbinary'])) {
-    
+
                 $fielddef["length"] = $length;
             }
 
@@ -182,11 +182,11 @@ class Manager //implements Database\ManagerInterface
 
             // Default value
             if ($row['Default'] == "NULL") {
-                $default_value = null; 
+                $default_value = null;
             } else {
                 $default_value = $row['Default'];
             }
-            
+
             // Si default_value es numérico, le sacamos los 0s, ya que
             // MySQL padea con 0s los decimales de un "decimal"
             if (is_numeric($default_value)) {
@@ -204,7 +204,7 @@ class Manager //implements Database\ManagerInterface
         }
 
         // Ahora los índices
-        $result = $this->connection->execute('SHOW INDEXES FROM ' . 
+        $result = $this->connection->execute('SHOW INDEXES FROM ' .
             $this->connection->escapeIdentifier($table));
 
         foreach ($result as $row) {
@@ -222,7 +222,7 @@ class Manager //implements Database\ManagerInterface
                 continue;
             }
 
-            // Si ya está definiedo el índice, sólo le añadimos 
+            // Si ya está definiedo el índice, sólo le añadimos
             // el campo
             if (isset($indexes[$keyname])) {
                 $indexes[$keyname]['fields'][] = $fieldname;
@@ -254,7 +254,7 @@ class Manager //implements Database\ManagerInterface
 
         // Obtenemos la definicion de la tabla de la db
         $db_def = $this->getTableStructure($table);
-        
+
         // Si no existe la tabla
         if (is_null($db_def)) {
             $this->createTable($table, $ec);
@@ -291,7 +291,7 @@ class Manager //implements Database\ManagerInterface
                 if ($left_data !== $right_data) {
                     $update[] = $dbf_name;
                     continue;
-                }                
+                }
             } else {
                 // El campo no existe. Verificamos si lo hemos renombrado
                 if (key_exists($dbf_name, $ec->renamed_fields)) {
@@ -327,7 +327,7 @@ class Manager //implements Database\ManagerInterface
             );
             yield ['UPDATE COLUMN', 'ok', $field];
         }
-        
+
         foreach ($rename as $old => $field) {
             $this->changeColumn(
                 $table,
@@ -420,7 +420,7 @@ class Manager //implements Database\ManagerInterface
 
 
         // ***
-        // FIELDDEFS 
+        // FIELDDEFS
         // ***
 
         $dbfields = $dbdef['fields'];
@@ -458,7 +458,7 @@ class Manager //implements Database\ManagerInterface
             } else {
                 // Si no existe, quizas lo estemos renombrando
                 //var_dUMP($arraydef['renamed_fields']);
-                if ($renamedfields && 
+                if ($renamedfields &&
                     isset($renamedfields[$dbfieldname])) {
 
                     $new_name = $renamedfields[$dbfieldname];
@@ -481,7 +481,7 @@ class Manager //implements Database\ManagerInterface
         foreach ($new as $field) {
             $this->addColumn(
                 $tabledef->getTableName(),
-                $field, 
+                $field,
                 $tabledef->getTableDef($field)
             );
             yield ['ADD COLUMN', 'ok', $field];
@@ -491,7 +491,7 @@ class Manager //implements Database\ManagerInterface
             $this->changeColumn(
                 $tabledef->getTableName(),
                 $old,
-                $field, 
+                $field,
                 $tabledef->getTableDef($field)
             );
             yield ['RENAME COLUMN', 'ok', $field];
@@ -500,7 +500,7 @@ class Manager //implements Database\ManagerInterface
             $this->changeColumn(
                 $tabledef->getTableName(),
                 $field,
-                $field, 
+                $field,
                 $tabledef->getTableDef($field)
             );
             yield ['UPDATE COLUMN', 'ok', $field];
@@ -550,7 +550,7 @@ class Manager //implements Database\ManagerInterface
         foreach ($new as $index) {
             $this->createIndex(
                 $tabledef->getTableName(),
-                $index, 
+                $index,
                 $tabledef->getIndexes($index)
             );
             yield ['ADD INDEX', 'ok', $index];
@@ -559,13 +559,13 @@ class Manager //implements Database\ManagerInterface
         foreach ($update as $index) {
             $this->updateIndex(
                 $tabledef->getTableName(),
-                $index, 
+                $index,
                 $tabledef->getIndexes($index)
             );
             yield ['UPDATE INDEX', 'ok', $index];
 
         }
-        
+
         foreach ($delete as $index) {
             $this->dropIndex(
                 $tabledef->getTableName(),

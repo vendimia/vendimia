@@ -11,7 +11,7 @@ trait FunctionsTrait {
      */
     function css_contrast($node, $params)
     {
-        extract($this->get_params($params, 'color', 'percent') );
+        extract($this->getParams($params, 'color', 'percent') );
 
         // Convertimos los datos en valores procesables
         $color = $this->from_color($color );
@@ -58,7 +58,7 @@ trait FunctionsTrait {
         //$server_name = $_SERVER['SERVER_NAME']?$_SERVER['SERVER_NAME']:$_SERVER['HTTP_HOST'];
 
         $pu = Vendimia::$settings['static_url'];
-        if(substr($pu, 0, 2)!= "//" || 
+        if (substr($pu, 0, 2) != "//" ||
             strpos($pu, '://') !== false) {
 
             // Añadimos la raiz de la web
@@ -68,7 +68,7 @@ trait FunctionsTrait {
         $url = $pu . $params;
         return "url('$url')";
     }
-    
+
     function at_media($node)
     {
         $node->can_haz_children = true;
