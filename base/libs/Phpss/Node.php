@@ -208,12 +208,12 @@ class Node implements \Iterator, \Countable
             throw new \RuntimeException ( "\$node is not a child of this node.i");
         }
 
-        $node->dettach ();
+        $node->detach();
 
         // Adios
-        unset ( $node );
+        unset ($node);
 
-        return $node;
+        return null;
     }
 
     /**

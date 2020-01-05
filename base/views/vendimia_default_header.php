@@ -1,6 +1,6 @@
 <?php use Vendimia\view, Vendimia\html;
 
-// Si no hay un título, creamos uno por defecto 
+// Si no hay un título, creamos uno por defecto
 if (!$this['_vendimia_page_title']) {
 
     // Ignoramos el controller si es 'default'
@@ -28,7 +28,7 @@ $this->html->addMeta(['vendimia-security-token' => Vendimia::$csrf->getToken()])
 // Assets por defecto
 $this->html->addDefaultAssets($this->name);
 
-// Y añadimos el CSS del Vendimia AL INICIO 
+// Y añadimos el CSS del Vendimia AL INICIO
 $this->html->prependCss ('vendimia');
 
 // También un javascript al inicio

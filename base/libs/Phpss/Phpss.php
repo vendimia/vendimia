@@ -19,7 +19,7 @@ class phpss {
 	private $files_includes = [];
 
     /**
-     * El nodo raiz 
+     * El nodo raiz
      */
     private $root = null;
 
@@ -36,38 +36,37 @@ class phpss {
     /**
      * Obtiene parámetros con nombres, o por orden.
      */
-    function getParams () 
+    public function getParams()
     {
         $result = [];
 
         $variables = func_get_args();
 
         // Sacamos el 1er elemento, que es un string con las variables
-        $str_params = trim ( array_shift ( $variables ) );
+        $str_params = trim(array_shift($variables));
         $result = [];
 
         // Procesamos
-        $id = 0; 
-        foreach ( explode(',', $str_params ) as $p ) {
-            $p = trim ( $p );
+        $id = 0;
+        foreach (explode(',', $str_params) as $p) {
+            $p = trim($p);
             // Buscamos un ":", que es el separador
-            $parts = explode (':', $p, 2);
+            $parts = explode(':', $p, 2);
 
-            if ( isset ( $parts[1] )) {
+            if (isset($parts[1])) {
                 // Es un valor con nombre:
                 $index = $parts[0];
                 $value = $parts[1];
-            }
-            else {
+            } else {
                 $index = ifset ( $variables[$id], $id );
                 $value = $parts[0];
             }
 
             // Solo guardamos los índices que existan en $variables
-            if ( in_array ( $index, $variables ) )
+            if (in_array($index, $variables))
                 $result [ $index ] = $value;
 
-            $id++;                
+            $id++;
         }
         return  $result;
     }
@@ -76,7 +75,8 @@ class phpss {
     /**
      * Obtiene un número decimal desde un porcentaje
      */
-    function from_percent($percent) {
+    public function from_percent($percent)
+    {
 
         $int = intval($percent);
 
@@ -91,17 +91,18 @@ class phpss {
     }
 
 
-    function at_import ( $node ) {
+    public function at_import ($node)
+    {
 
         // Importamos un fichero
         $file = $node->value;
 
         // Removemos la función "url()", si existe, y comillas de los lados
         $file = trim ( preg_replace ( '/url\((.+)\)/', '$1', $file ), '"\'' );
-        
+
         // Ubicamos el fichero
         $path = new Vendimia\Path\FileSearch($file, "assets/css", 'css');
-        
+
         // Si no existe, explotamos.
         if ($path->notFound()) {
             Http\Response::notFound("CSS asset file '$file' not found", [
@@ -128,7 +129,8 @@ class phpss {
         }
     }
 
-    function resolve_variables ( $string ) {
+    public function resolve_variables($string)
+    {
 
         $regexp = '/(\$([a-zA-Z0-9\-\_]+)|\[\$([a-zA-Z0-9\-\_]+)\])/';
 
@@ -151,29 +153,31 @@ class phpss {
             $string = strtr ( $string, $replace );
         }
 
-        return $string;        
+        return $string;
     }
     /**
      * Busca variables y funciones.
      */
-    function resolve_functions ( $string, $node ) {
+    function resolve_functions($string, $node)
+    {
 
         $regexp = '/([a-zA-Z][a-zA-Z0-9\_]*?)\((.*?)\)/';
         $c = preg_match_all ( $regexp, $string, $matches, PREG_SET_ORDER );
 
-        if ( $c ) {
-            foreach ( $matches as $m ) {
+        if ($c) {
+            foreach ($matches as $m) {
 
                 $origin = $m[0];
                 $function_name = 'css_' . $m[1];
                 $parameters = $m[2];
 
                 // Existe la funcion?
-                if ( method_exists ( $this, $function_name ) ) {
-                    $res = $this->$function_name ( $node, $parameters );
+                if (method_exists($this, $function_name)) {
+
+                    $res = $this->$function_name($node, $parameters);
                     // Y reemplazamos
 
-                    $string = str_replace ( $origin, $res, $string );
+                    $string = str_replace($origin, $res, $string);
                 }
             }
         }
@@ -181,10 +185,11 @@ class phpss {
         return $string;
     }
 
-    /** 
+    /**
      * Analiza los nodos hijos de $parent, ejecutando funciones
      */
-    function parse( $parent ) {
+    public function parse($parent)
+    {
 
         $node = $parent->first;
 
@@ -196,7 +201,7 @@ class phpss {
         }
         var_dump ( "START $parent({$parent->parent}):" . join(',', $ids) ); /**/
 
-        while ( $node ) { 
+        while($node) {
             // Al final del bucle, movemos a $node ->next si
             // $next_node es null
             $next_node = false;
@@ -216,7 +221,7 @@ class phpss {
                 $next_node = $node->next;
 
                 // Borramos el nodo
-                $parent->delete_child ( $node );
+                $parent->deleteChild($node);
 
                 // Avanzamos al siguiente,
                 $node = $next_node;
@@ -224,7 +229,7 @@ class phpss {
             }
 
             // Comandos at
-            if ( $start_char == "@") {
+            if ($start_char == "@") {
 
                 // Si existe un método con este nombre, lo ejecutamos
                 $method_name = 'at_' . substr ( $node->name, 1 );
@@ -243,21 +248,21 @@ class phpss {
             }
 
             // Si tiene hijos, los parseamos
-            if ( $node->hasChildren() ) {
+            if ($node->hasChildren()) {
                 // En este punto, ya no deben existir bloques válidos de CSS.
                 // Asi que todos los demás, estarán namespaceados
 
-                // El último nodo procesado, para los namespace.. Los nuevos 
+                // El último nodo procesado, para los namespace.. Los nuevos
                 // nodos se añadirán al lado de este.
-                if ( !isset ( $last )) {
+                if (!isset($last)) {
                     $last = $parent;
                 }
 
-                // Si este nodo tiene hijos, y su padre no es root, es un contenedor. 
-                // Lo movemos a la raiz, y le activamos el namespace, salvo que 
+                // Si este nodo tiene hijos, y su padre no es root, es un contenedor.
+                // Lo movemos a la raiz, y le activamos el namespace, salvo que
                 // indiquemos que puede tener hijos.
 
-                if ( $parent && !$parent->is_root && !$parent->can_haz_children ) {
+                if ($parent && !$parent->is_root && !$parent->can_haz_children) {
 
 
 
@@ -267,7 +272,7 @@ class phpss {
                     // el siguiente nodo antes de moverlo
                     $next_node = $node->next;
 
-                    /*if ( !is_null ( $next_node ) ) 
+                    /*if ( !is_null ( $next_node ) )
                         var_dump ( " -- new Next: $next_node->id");
                     else
                         var_dump ( " -- new Next: NULL");
@@ -276,15 +281,15 @@ class phpss {
 
 
                     $node->setNamespaces($parent->getNamespacedSegments());
-                    $node->moveNextTo ( $last );
+                    $node->moveNextTo($last);
 
                     $last = $node;
 
 
                 }
                 //else {
-                
-                $this->parse ( $node );
+
+                $this->parse($node);
 //                }
             }
             /*else {
@@ -292,7 +297,7 @@ class phpss {
             }/**/
 
 
-            if ( $next_node === false ) {
+            if ($next_node === false) {
                 $next_node = $node->next;
             }
 
@@ -306,7 +311,8 @@ class phpss {
     /**
      * Constructor. Recibe varios ficheros CSS
      */
-    function __construct () {
+    public function __construct()
+    {
         $files = func_get_args();
 
         // Si el 1er parámetro es un array, entonces lo usamos
@@ -315,10 +321,10 @@ class phpss {
         }
 
         // Creamos la raiz de todos los males. Digo, de todos los nodos
-        $this->root = new Node( true );
+        $this->root = new Node(true);
 
         // Analizamos cada fichero
-        foreach ( $files as $f ) {
+        foreach($files as $f) {
 
             $path = new Vendimia\Path\FileSearch($f, "assets/css" );
             $path->ext = 'css';
@@ -342,7 +348,8 @@ class phpss {
 
     }
 
-    function getCss() {
+    public function getCss()
+    {
 
         $css = '';
         foreach ( $this->root as $n ) {
