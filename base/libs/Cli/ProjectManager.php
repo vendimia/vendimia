@@ -38,19 +38,25 @@ class ProjectManager
         do {
             $probe_path = join(DIRECTORY_SEPARATOR, $path_parts);
 
+            // Si existe un fichero 'config/settings.php', es un proyecto vendimia
             if (file_exists($probe_path . '/config/settings.php')) {
                 $project_found = true;
                 break;
             }
         } while (array_pop($path_parts));
 
-        // Si existe un fichero 'config/settings.php', es un proyecto vendimia
-        if ($force || $project_found)
-        {
+        if ($force || $project_found) {
             $this->project_exists = true;
-            $this->project_path = realpath($probe_path);
-            $this->project_name = basename($this->project_path);
         }
+
+        // Solo sacamos el nombre si existe
+        if ($project_found) {
+            $this->project_path = realpath($probe_path);
+        } else {
+            // Si no existe, lo simulamos
+            $this->project_path = realpath($project_raw_path);
+        }
+        $this->project_name = basename($this->project_path);
     }
 
     /**
@@ -85,39 +91,6 @@ class ProjectManager
     public function getName()
     {
         return $this->project_name;
-    }
-
-    /**
-     * Search for a valid path project. Returns a self instance.
-     */
-    public static function searchProjectPath($base_path)
-    {
-        if ($base_path) {
-            if (self::isVendimiaProject($base_path)) {
-                // Perfecto
-                return new self($base_path);
-            }
-        }
-
-        // Usamos el directorio actual, y buscamos hacia arriba
-        $path = getcwd();
-
-        $parts = array_filter(explode('/', $path));
-        while ($parts) {
-            // Empezamos por la raiz siempre
-            $test_path = '/' . Vendimia\Path::join( $parts );
-
-            if (self::isVendimiaProject($test_path)) {
-                // Perfecto
-                return new self($path);
-            }
-
-            // Sacamos el último elemento.
-            array_pop($parts);
-        }
-
-        // weird... igual retornamos un self con el base_path
-        return new self($base_path);
     }
 
     /**
