@@ -260,16 +260,20 @@ class Match
 
                 $method_name = $parts[1] ?? 'default';
                 $matched_rule = new MatchedRule([
-                    'target_name' => [$parts[0], 'DefaultController', $method_name],
+                    'target_name' => $parts[0] . '\\DefaultController::' . $method_name,
                     'target' => [$controller_class, $method_name],
-                    'target_type' => 'class'
+                    'target_app' => $parts[0],
+                    'target_type' => 'class',
+                    'target_resources' => ['DefaultController_' . $method_name, $method_name],
                 ]);
             } else {
                 $controller_name = $parts[1] ?? 'default';
                 $matched_rule = new MatchedRule([
-                    'target_name' => [$parts[0], $controller_name, null],
+                    'target_name' => $parts[0] . ':' . $controller_name,
                     'target' => [$parts[0], $controller_name, null],
+                    'target_app' => $parts[0],
                     'target_type' => 'legacy',
+                    'target_resources' => [$controller_name],
                 ]);
             }
 
