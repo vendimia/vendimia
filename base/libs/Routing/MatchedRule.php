@@ -39,7 +39,7 @@ class MatchedRule extends DataContainer
     /**
      * Arguments from matched rule and URL
      */
-    public $args;
+    public $args = [];
 
     /**
      * Matched rule
