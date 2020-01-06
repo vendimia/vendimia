@@ -110,6 +110,9 @@ if ($rule->matched) {
     if ($rule->target_type == 'class') {
         $controller_object = new $rule->target[0](Vendimia::$request, $response);
 
+        // FIXME: Esto ya debería desaparecer
+        Vendimia::$application = $rule->target_app;
+
         $returned_data = $controller_object->{$rule->target[1]}();
 
     } elseif ($rule->target_type == 'callback') {
