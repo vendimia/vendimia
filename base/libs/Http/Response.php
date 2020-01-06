@@ -3,6 +3,7 @@ namespace Vendimia\Http;
 
 use Vendimia;
 use Vendimia\View;
+use Vendimia\AsArrayInterface;
 use Psr\Http\Message\Response as PsrResponse;
 
 /**
@@ -31,6 +32,27 @@ class Response extends PsrResponse
     }
 
     /**
+     * Creates a response from a string
+     */
+    static public function fromString($data, $content_type = 'text/plain')
+    {
+        $response = new static;
+
+        $stream = new Stream('php://temp');
+        $stream->write($data);
+
+        $response->setBody($stream);
+
+        $size = $stream->getSize();
+        if ($size) {
+            $response->setHeader('Content-Length', $size);
+        }
+        $response->setHeader('Content-Type', $contentType);
+
+        return $response;
+    }
+
+    /**
      * Creates a response from a file
      */
     static public function fromFile($file, $mime = null)
@@ -42,12 +64,26 @@ class Response extends PsrResponse
         $last_modified = filemtime($file);
         $stream = new Stream($file, 'r');
 
-        return (new static) 
+        return (new static)
             ->setBody($stream)
             ->setHeader('Content-Type', $mime)
             ->setHeader('Content-Length', $size)
             ->setHeader('Last-Modified',  gmdate('r', $last_modified))
         ;
+    }
+
+    /**
+     *  Creates a JSON response
+     */
+    public static function json($payload): self
+    {
+        if ($payload instanceof AsArrayInterface) {
+            $payload = $payload->asArray();
+        }
+        if (!is_array($payload)) {
+            throw new InvalidArgumentException('Argument must be an array or a object implementing Vendimia\\AsArrayInterface.');
+        }
+        return new self(json_encode($payload), 'application/json');
     }
 
     /**
@@ -81,7 +117,7 @@ class Response extends PsrResponse
             ->send();
     }
 
-    /** 
+    /**
      * Creates a 302 Redirect
      */
     public static function redirect(...$url_parts)
@@ -93,7 +129,7 @@ class Response extends PsrResponse
             ->setHeader('Location', $url->get())
             ->send();
     }
-    
+
     /**
      * Sends this response to the browser
      */
@@ -107,7 +143,7 @@ class Response extends PsrResponse
             $value = join(', ', $value);
             header("$name: $value");
         }
-        
+
         // Si estamos en modo debug, logueamos algunas cosas
         /*if (Vendimia::$debug) {
             Vendimia\Logger::info(Vendimia::$request->getMethod());
