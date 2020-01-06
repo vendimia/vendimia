@@ -50,19 +50,19 @@ $args = new Vendimia\Cli\ArgumentsManager($argv);
 // Ignoramos siempre el primero, es la ruta de este script
 $args->pop();
 
+// Si el siguiente argumento es una ruta válida, la usamos como ruta del proyecto
+$project_path = is_dir($args->get()) ? $args->pop() : getcwd();
+
 // El siguiente argumento siempre debe ser el nombre del script
 $command_name = $args->pop();
 
-// Si el siguiente argumento es una ruta válida, la usamos como ruta del proyecto
-$project_path = $args->get();
-
-$project = Vendimia\Cli\ProjectManager::searchProjectPath($project_path);
+$project = new Vendimia\Cli\ProjectManager($project_path);
 
 // Si el path del proyecto es el mismo que $project_path, entonces lo removemos
 // de la lista de Argumentos
-if ($project->getFullPath() == $project_path) {
+/*if ($project->getFullPath() == $project_path) {
     $args->pop();
-}
+}*/
 
 if (!$command_name) {
     // Mostramos una ayuda general.
