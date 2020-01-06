@@ -9,7 +9,9 @@ use Vendimia\Http;
  */
 class View extends View\Php
 {
-    protected function getCanonicalFilePath($file, $type = 'view', 
+    private $app;
+
+    protected function getCanonicalFilePath($file, $type = 'view',
         &$application = null)
     {
 
@@ -19,12 +21,12 @@ class View extends View\Php
             $type = 'views/layouts';
         }
 
-        if ($file instanceof Vendimia\Path\FileSearch) {
+        if ($file instanceof Path\FileSearch) {
             $path = $file;
+        } else {
+            $path = new Path\FileSearch($file, $type);
         }
-        else {
-            $path = new Path\FileSearch($file, $type);  
-        }
+        $path->setApplication($this->app);
 
         if ($path->found()) {
             return $path->get();
@@ -32,8 +34,16 @@ class View extends View\Php
             throw new Vendimia\Exception("View file '$file' not found.", [
                 'Searched path' => $path->searched_paths,
             ]);
-
         }
+    }
+
+    /**
+     * Set application for resource searching
+     */
+    public function setApplication($app)
+    {
+        $this->app = $app;
+        return $this;
     }
 
     /**
