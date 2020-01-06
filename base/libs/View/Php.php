@@ -57,7 +57,13 @@ class Php implements \ArrayAccess
      */
     public function setFile($file)
     {
-        $this->file = $this->getCanonicalFilePath($file);
+        $file = $this->getCanonicalFilePath($file);
+
+        if (!file_exists($file)) {
+            throw new \RuntimeException("View file '{$this->file}' not found.");
+        }
+
+        $this->file = $file;
         $this->name = basename($this->file, '.php');
         return $this;
     }
@@ -103,13 +109,9 @@ class Php implements \ArrayAccess
     public function renderToString()
     {
 
-        if (!file_exists($this->file)) {
-            throw new \RuntimeException("View file '{$this->file}' not found.");
-        }
-
         // Esta vista la guardamos en el bloque por defecto
-        $this->blocks['__MAIN_BLOCK'] = $this->processFile( 
-            $this->file, 
+        $this->blocks['__MAIN_BLOCK'] = $this->processFile(
+            $this->file,
             $this->variables
         );
 
