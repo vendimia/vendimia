@@ -15,4 +15,20 @@ class ControllerBase
         $this->request = $request;
         $this->response = $response;
     }
+
+    /**
+     * Forces the usage of a specific view file
+     */
+    protected function setView($view_name)
+    {
+        $this->view_name = $view_name;
+    }
+
+    /**
+     * Returns the view name
+     */
+    public function getView()
+    {
+        return $this->view_name;
+    }
 }
