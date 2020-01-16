@@ -34,6 +34,7 @@ class Match
             $extract_function = 'array_pop';
         }
 
+
         while (true) {
             $rule_seg = $extract_function($rule);
             $target_seg = $extract_function($target);
@@ -45,14 +46,29 @@ class Match
             }
 
             // Si la regla es una variable, la grabamos
-            if ($rule_seg{0} == ':') {
-                $varname = substr($rule_seg, 1);
-                if (is_null($target_seg)) {
+            if ($rule_seg[0] == '{' || $rule_seg[0] == ':') {
+                $varname = trim($rule_seg, ':{}');
+
+                $optional = false;
+
+                // Si empieza con un asterisco, es opcional
+                if ($varname[0] == '*') {
+                    $optional = true;
+                    $varname = substr($varname, 1);
+                }
+
+                // Si empieza con dos asteriscos, es un catch-all
+                if ($varname[0] ?? '' == '*') {
+                    $match = true;
+                    $varname = substr($varname, 1);
+                    $variables[$varname] = $target_seg . '/' . join('/', $target);
                     break;
                 }
-                if ($varname == '*') {
-                    continue;
+
+                if (!$optional && is_null($target_seg)) {
+                    break;
                 }
+
                 $variables[$varname] = $target_seg;
             } else {
                 if ($rule_seg != $target_seg) {
@@ -60,7 +76,6 @@ class Match
                 }
             }
         }
-
         return compact('match', 'variables');
     }
 
