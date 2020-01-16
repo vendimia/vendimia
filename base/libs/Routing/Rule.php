@@ -161,10 +161,16 @@ class Rule
     {
         // Es una clase?
         if (is_subclass_of($class, ControllerBase::class)) {
+
+            // Esto es para el recurso, solo usamos el nombre de la clase, sin
+            // namespace.
+            $class_name_parts = explode('\\', $class);
+            $class_name = end($class_name_parts);
+
             $this->rule['target_type'] = 'class';
             $this->rule['target'] = [$class, $method];
             $this->rule['target_name'] = "{$class}::{$method}";
-            $this->rule['target_resources'] = ["{$class}_{$method}", $method];
+            $this->rule['target_resources'] = ["{$class_name}_{$method}", $method];
 
             // Si no hay definido una app para este target, usamos el 1er
             // namespace
