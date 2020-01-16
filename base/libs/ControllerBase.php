@@ -6,8 +6,9 @@ use Vendimia\Http\Response;
 
 class ControllerBase
 {
-    private $response;
-    private $request;
+    protected $response;
+    protected $request;
+    protected $view_name = null;
 
     public function __construct(Request $request, Response $response)
     {
