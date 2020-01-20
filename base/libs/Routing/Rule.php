@@ -2,7 +2,7 @@
 namespace Vendimia\Routing;
 
 use Vendimia\Path\FileSearch;
-use Vendimia\ControllerBase;
+use Vendimia\Controller\ControllerAbstract;
 
 /**
  * URL Routing rule definition.
@@ -160,7 +160,7 @@ class Rule
     public function run($class, $method = 'default')
     {
         // Es una clase?
-        if (is_subclass_of($class, ControllerBase::class)) {
+        if (is_subclass_of($class, ControllerAbstract::class)) {
 
             // Esto es para el recurso, solo usamos el nombre de la clase, sin
             // namespace.

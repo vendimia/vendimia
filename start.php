@@ -108,12 +108,20 @@ $view_variables = [];
 if ($rule->matched) {
     // Una regla hizo match, directa o indirectamente
     if ($rule->target_type == 'class') {
-        $controller_object = new $rule->target[0](Vendimia::$request, $response);
+        $controller_object = new $rule->target[0](
+            Vendimia::$request,
+            $response,
+            $rule
+        );
 
         // FIXME: Esto ya debería desaparecer
         Vendimia::$application = $rule->target_app;
 
-        $returned_data = $controller_object->{$rule->target[1]}();
+        // Ejecutamos el método
+        $returned_data = $controller_object->executeMethod($rule->target[1]);
+
+
+        //$returned_data = $controller_object->{$rule->target[1]}();
 
     } elseif ($rule->target_type == 'callback') {
         // TODO:
@@ -156,11 +164,11 @@ $invalid_return = false;
 if ($returned_data) {
     if (is_object($returned_data)) {
         if ($returned_data instanceof Vendimia\Http\Response) {
-            $invalid_return = true;
+            // La enviamos directo al cliente
+            $returned_data->send();
         }
 
-        // La enviamos directo al cliente
-        $returned_data->send();
+        $invalid_return = true;
     } elseif (is_array($returned_data)) {
         $view_variables = array_merge($view_variables, $returned_data);
     } else {
