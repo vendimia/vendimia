@@ -58,7 +58,7 @@ class Match
                 }
 
                 // Si empieza con dos asteriscos, es un catch-all
-                if ($varname[0] ?? '' == '*') {
+                if (($varname[0] ?? '') == '*') {
                     $match = true;
                     $varname = substr($varname, 1);
                     $variables[$varname] = $target_seg . '/' . join('/', $target);
