@@ -80,6 +80,11 @@ class Connector implements Database\ConnectorInterface
             }, $string);
 
             return $string;
+        } elseif (is_numeric($string)) {
+            // Los números no requieren ser escapados.
+            return $string;
+        } elseif (is_null($string)) {
+            return 'NULL';
         } elseif (is_string($string)) {
             return $quotation .
                 $this->connection->real_escape_string($string) .
