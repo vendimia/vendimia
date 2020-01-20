@@ -184,7 +184,7 @@ class Match
                 return new MatchedRule([
                     'target_name' => ['welcome', 'default', null],
                     'target_type' => 'view',
-                    'target' => "welcome:default",
+                    'target' => "::welcome",
                 ]);
             }
         }
