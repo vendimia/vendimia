@@ -1,7 +1,7 @@
 <?php
 namespace Vendimia\Routing;
 
-use Vendimia\ControllerBase;
+use Vendimia\Controller\ControllerAbstract;
 
 /**
  * Matches a set of rules against a Request
@@ -267,8 +267,7 @@ class Match
             $parts = array_filter(explode('/', $urlpath));
 
             $controller_class = "{$parts[0]}\Controller\DefaultController";
-
-            if (is_subclass_of($controller_class, ControllerBase::class)) {
+            if (is_subclass_of($controller_class, ControllerAbstract::class)) {
                 // El nombre del método, que será usado para sacar otros ficheros
                 // relacionados, como la vista o los ficheros CSS y JS, puede
                 // colisionar con el mismo método en otros controladores.
