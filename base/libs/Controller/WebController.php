@@ -25,15 +25,9 @@ class WebController extends ControllerAbstract
         return $this->view_name;
     }
 
-    public function executeMethod($method_name): Response
+    public function parseReturn($return): Response
     {
-        $return = $this->$method_name();
         $view_variables = [];
-
-        if ($return instanceof Response) {
-            return $return;
-        }
-
         if (is_array($return)) {
             $view_variables = $return;
         }
@@ -52,7 +46,7 @@ class WebController extends ControllerAbstract
         // Si no hay fichero, fallamos
         if (!$view->getFile())  {
             throw new Vendimia\Exception(
-                "View file cannot be found for controller {$rule->target_name}",
+                "View file cannot be found for controller {$this->routing_rule->target_name}",
             [
                 'Rule matched' => $this->routing_rule->rule,
                 'Searched view names' => $this->routing_rule->target_resources,

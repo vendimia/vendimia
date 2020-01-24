@@ -10,14 +10,8 @@ use Vendimia\Http\Stream;
  */
 class JsonController extends ControllerAbstract
 {
-    public function executeMethod($method_name): Response
+    public function parseReturn($return): Response
     {
-        $return = $this->$method_name();
-
-        if ($return instanceof Response) {
-            return $return;
-        }
-
         if (!is_array($return)) {
             throw new \UnexpectedValueException('A JsonController method must return an Vendimia\Http\Response object, or an array. Got ' . gettype($return) . ' instead.');
         }
@@ -32,7 +26,7 @@ class JsonController extends ControllerAbstract
         if ($size) {
            $this->response->setHeader('Content-Length', $size);
         }
-        
+
         return $this->response;
     }
 }
