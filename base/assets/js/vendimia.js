@@ -222,4 +222,17 @@ V = {
 
         return [r['left'] + window.pageXOffset, r['top'] + window.pageYOffset]
     },
+
+    /**
+     * Wrapper to fetch() method to include AJAX headers
+     */
+    fetch: function(resource, init = {}) {
+        if (!init.headers) {
+            init.headers = new Headers();
+        }
+        init.headers.set('X-Requested-With', 'ajax')
+        init.headers.set('X-Csrf-Token', V.e("meta[name=vendimia-security-token]").content)
+
+        return fetch(resource, init)
+    },
 }
