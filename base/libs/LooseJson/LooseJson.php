@@ -7,13 +7,13 @@ namespace Vendimia\LooseJson;
  * This decoder always parse the JSON as if it is an object, and always returns
  * an array.
  *
- * Elements are separated by comma, variable and value are separated  by colon.
+ * Elements are separated by comma, variable and value are separated by a colon.
  * CR, LF characters are ingnored.
 
  * {} and [] are the same, and they always return an array. As in PHP arrays,
  * elements with and without index can be mixed.
  *
- * Bare words are allowed, and they're trim()ed.  'null', 'true' and 'false'
+ * Barewords are allowed, and they're trim()ed. 'null', 'true' and 'false'
  * barewords are replaced by its PHP constant equivalent.
  *
  */
@@ -157,7 +157,6 @@ class LooseJson
 
                     // Añadimos la coma como token
                     $this->addToken(self::T_COMMA, $char);
-
 
                 } elseif ($char == ':') {
                     // Lo que queda debe ser un bare string
