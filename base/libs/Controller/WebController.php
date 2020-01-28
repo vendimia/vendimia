@@ -35,11 +35,15 @@ class WebController extends ControllerAbstract
         $view = new Vendimia\View();
         $view->setApplication($this->routing_rule->target_app);
 
-        foreach($this->routing_rule->target_resources as $view_file) {
-            try {
-                $view->setFile($view_file);
-            } catch (Vendimia\Exception $e) {
-                continue;
+        if ($this->view_name) {
+            $view->setFile($this->view_name);
+        } else {
+            foreach($this->routing_rule->target_resources as $view_file) {
+                try {
+                    $view->setFile($view_file);
+                } catch (Vendimia\Exception $e) {
+                    continue;
+                }
             }
         }
 
