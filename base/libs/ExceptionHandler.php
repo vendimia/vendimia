@@ -36,11 +36,16 @@ class ExceptionHandler
      */
     public static function register()
     {
-        // No registramos en CLI, por que eso se registra antes, 
+        // No registramos en CLI, por que eso se registra antes,
         // y en otro momento
         if (Vendimia::$execution_type != 'cli') {
-            set_exception_handler ([__CLASS__, 'handler']);        
+            set_exception_handler ([__CLASS__, 'handler']);
         }
+
+        // Los warnings y demás también serán una excepcion.
+        set_error_handler(function($errno, $errstr, $errfile, $errline, $errcontext) : bool {
+            throw new \ErrorException($errstr, $errno, $errno, $errfile, $errline);
+        }, E_ALL);
     }
 
     /**
