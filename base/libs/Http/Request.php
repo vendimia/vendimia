@@ -78,11 +78,16 @@ class Request extends ServerRequest
             -> setRequestTarget($request_target)
         ;
 
-        // Colocamos sólo las cabeceras reales, en su formato original
+        // Colocamos las cabeceras HTTP en su formato original. El resto
+        // las guardamos en $server
+        $request->server = new Collection();
+
         foreach($_SERVER as $var => $val) {
             if (substr($var, 0, 5) == 'HTTP_') {
                 $var = strtr(strtolower(substr($var, 5)), '_', '-');
                 $request -> setHeader($var, $val);
+            } else {
+                $request->server->add($val, strtolower($var));
             }
         }
 
