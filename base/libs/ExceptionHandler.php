@@ -50,7 +50,7 @@ class ExceptionHandler
     {
 
         // Borramos cualquier salida, solo mostramos la excepción
-        if (ob_get_length()) { 
+        if (ob_get_length()) {
             ob_clean();
         }
 
@@ -89,7 +89,7 @@ class ExceptionHandler
 
             Ajax::send(Ajax::EXCEPTION, [
                 'name' => get_class($exception),
-                'message' => $exception->getMessage(), 
+                'message' => $exception->getMessage(),
                 'file' => $exception->getFile(),
                 'line' => $exception->getLine(),
                 'trace' => $ajax_trace,

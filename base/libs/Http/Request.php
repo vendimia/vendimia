@@ -55,16 +55,16 @@ class Request extends ServerRequest
         // Determinamos el request target
 
         // Si hay q, entonces obtenemos la info de ahi.
-        if ( isset ( $_GET['q'] ) ) {
+        if (isset($_GET['q'])) {
             $request_target = trim( $_GET['q'], '/');
             unset ($_GET['q']);
 
         // Si no hay ahi, buscamos el PATH_INFO
-        } elseif ( isset ( $_SERVER['PATH_INFO']) ) {
+        } elseif (isset($_SERVER['PATH_INFO'])) {
             $request_target = trim( $_SERVER['PATH_INFO'], '/');
 
         // Si no hay ahi, REQUEST_URI
-        } elseif ( isset ( $_SERVER['REQUEST_URI']) ) {
+        } elseif (isset($_SERVER['REQUEST_URI'])) {
             $request_target = trim( $_SERVER['REQUEST_URI'], '/');
         }
 
@@ -72,10 +72,10 @@ class Request extends ServerRequest
         // ...no tengo idea qué hacer...
 
         $request = (new static)
-            -> setMethod($_SERVER['REQUEST_METHOD'])
-            -> setQueryParams($_GET)
-            -> setParsedBody($_POST)
-            -> setRequestTarget($request_target)
+            ->setMethod($_SERVER['REQUEST_METHOD'])
+            ->setQueryParams($_GET)
+            ->setParsedBody($_POST)
+            ->setRequestTarget($request_target)
         ;
 
         // Colocamos las cabeceras HTTP en su formato original. El resto
@@ -91,6 +91,7 @@ class Request extends ServerRequest
             }
         }
 
+        // Repetimos esto, solo por flexibilidad.
         $request->get = new Collection($_GET);
         $request->post = new Collection($_POST);
 

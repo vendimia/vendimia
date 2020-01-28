@@ -28,12 +28,12 @@ class EntityParser
 
         // Obtenemos el namespace y el alias
         $aliases = new PHPAliasesParser(
-            $reflection->getFileName(), 
+            $reflection->getFileName(),
             $reflection->getStartLine() - 1
         );
 
         $this->fqcn = new FQCNBuilder(
-            $reflection->getNamespaceName(), 
+            $reflection->getNamespaceName(),
             $aliases->asArray()
         );
 
@@ -72,7 +72,7 @@ class EntityParser
             ];
         }
 
-        // Si no existe el campo definido en static::$primary_key, 
+        // Si no existe el campo definido en static::$primary_key,
         // Lo creamos.
         if (!$primary_key_defined) {
             $fields[$entity::getPrimaryKeyField()] = [
@@ -196,7 +196,7 @@ class EntityParser
 
                 // Mezcamos la definición
                 $indexes[$indexname] = array_replace(
-                    $indexes[$indexname], 
+                    $indexes[$indexname],
                     $indexdef
                 );
             }
