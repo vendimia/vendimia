@@ -213,13 +213,13 @@ class Match
 
             $status = $this->$method($rule['mapping_data'], $urlpath);
 
+
             if ($status['match']) {
                 // Perfecto. Actualizamos ciertas cosas dentro de la regla.
                 $matched_rule = new MatchedRule([
                     'rule' => $rule,
                     'args' => $rule['args'] ?? [],
                 ]);
-
 
                 // Le añadimos las variables del target
                 $matched_rule->args = array_merge(
@@ -241,22 +241,6 @@ class Match
                     $rule['target_resources'], $matched_rule->args
                 );
 
-                //$rule['args'] = $args;
-
-                /*if ($status['target'] ?? null) {
-                    $rule['target'] = $status['target'];
-
-                    // Sólo modificamos el target en una regla tipo 'app'. Y esa
-                    // regla solo acepta [$app, $controller]
-                    $rule['callable'] = false;
-                } else {
-                    // Solo puede haber dos tipos de target: array y string.
-                    $rule['target'] = $this->replaceVariables($rule['target'], $args);
-                }*/
-
-                //$rule['urlpath'] = $urlpath;
-
-                //$matched_rule = $rule;
                 break;
             }
         }
