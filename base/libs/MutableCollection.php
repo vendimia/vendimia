@@ -4,7 +4,7 @@ namespace Vendimia;
 /**
  * Mutable collection. Every method modifies the array in-place.
  */
-class MutableCollection implements \ArrayAccess, \Iterator, \Countable
+class MutableCollection implements \ArrayAccess, \Iterator, \Countable, AsArrayInterface
 {
     private $array = [];
 
@@ -52,7 +52,6 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
 
         return $this;
     }
-
 
     /**
      * Returns whether this element value exist in the collection
@@ -119,7 +118,7 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable
     }
 
 
-    public function asArray()
+    public function asArray(): array
     {
         return $this->array;
     }
