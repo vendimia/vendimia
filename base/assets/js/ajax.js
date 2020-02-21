@@ -8,7 +8,7 @@ V.Ajax = function(target) {
         var XHR = new XMLHttpRequest()
 
         var target = this.target
-        if (this.method == 'GET') {
+        if (method == 'GET') {
             target += '?' + new URLSearchParams(this.payload).toString()
             this.payload = null
         }
@@ -20,7 +20,7 @@ V.Ajax = function(target) {
 
         return new Promise((resolve, reject) => {
 
-            XHR.open(this.method, target)
+            XHR.open(method, target)
             XHR.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
             XHR.setRequestHeader('X-Csrf-Token',
                 V.e("meta[name=vendimia-security-token]").content);
@@ -97,4 +97,13 @@ V.Ajax = function(target) {
         }
         return this.execute('POST')
     }
+
+    this.get = function(payload)
+    {
+        if (payload) {
+            this.appendPayload(payload)
+        }
+        return this.execute('GET')
+    }
+
 }
