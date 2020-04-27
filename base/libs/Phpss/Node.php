@@ -369,7 +369,7 @@ class Node implements \Iterator, \Countable
             $css .= $this->getName();
 
             // los comandos @ no usan : para el valor
-            if ( $this->name {0} == '@') {
+            if ($this->name[0] == '@') {
 
 
 

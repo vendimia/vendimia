@@ -74,7 +74,7 @@ class AnnotationParser
             $l = trim($l, '/* ');
 
             // Verificamos si ha cambiado de estado
-            if ($l && $l{0} == '@') {
+            if ($l && $l[0] == '@') {
                 if ($state == 'tags') {
                     // Si hay una @ en state == tags, es un nuevo tag.
                     $this->parseTag($datachunk);

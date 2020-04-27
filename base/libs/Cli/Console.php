@@ -64,7 +64,7 @@ class Console {
         $result = preg_replace_callback('/{(.+?) +(.+?)}/', function($matches) {
             list($dummy, $color, $text) = $matches;
 
-            if ($color{0} == ':') {
+            if ($color[0] == ':') {
                 $tipo = substr($color, 1);
                 if (key_exists($tipo, self::MODULES)) {
                     $color = self::MODULES[$tipo];

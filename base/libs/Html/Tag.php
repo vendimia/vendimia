@@ -7,7 +7,7 @@ use Vendimia\assets;
 /**
  * Class to create HTML tags
  */
-class Tag implements \ArrayAccess 
+class Tag implements \ArrayAccess
 {
     private $options = [
         /**
@@ -38,9 +38,9 @@ class Tag implements \ArrayAccess
     private $html;
 
     // El construct es con todas las opcions
-    public function __construct ($tagname, 
-        array $variables = [], 
-        $content = null, 
+    public function __construct ($tagname,
+        array $variables = [],
+        $content = null,
         array $options = []
     ) {
         $this->tagname = $tagname;
@@ -65,10 +65,10 @@ class Tag implements \ArrayAccess
             foreach ( $this->variables as $name => $value ) {
 
                 // Si empieza con '@', es una configuración
-                if ( $name{0} == '@' ) {
+                if ( $name[0] == '@' ) {
 
                     $var = substr ($name, 1);
-                    
+
                     // Solo modificamos la configuración si existe
                     if ( isset ( $this->options [$var] ) ) {
                         $this->options [$var] = $value;
@@ -99,7 +99,7 @@ class Tag implements \ArrayAccess
             // Solo queremos el opentag?
             if (!$this->options['onlyopentag']) {
 
-                
+
                 // Si no hay contenido, y si forzamos un closetag, lo ... forzamos
                 if ($this->options['closetag']) {
                     $tag .= '></' . $this->tagname;
@@ -120,7 +120,7 @@ class Tag implements \ArrayAccess
      * Builds a Tag object with $data values.
      *
      * Numeric index belongs to $tagname, $variables and $content,
-     * respectively. Any associative parameter will be added to 
+     * respectively. Any associative parameter will be added to
      * $variables
      */
     public static function create (array $data)
@@ -163,7 +163,7 @@ class Tag implements \ArrayAccess
      * <pre>Tag::button("Submit")</pre>
      * creates the HTML Tag
      * <pre>&lt;button&gt;Submit&lt;/button&gt;</pre>
-     * 
+     *
      * <pre>Tag::input_type_date(['class' => 'fancy_input'])</pre>
      * creates the HTML Tag
      * <pre>&lt;input type="date" class="fancy_input" /&gt;
@@ -208,7 +208,7 @@ class Tag implements \ArrayAccess
      * Fancy options setter.
      *
      * Calling a method sets to 'true' its $option entry. Prepending
-     * the 'no' word sets to 'false'. The method name is case 
+     * the 'no' word sets to 'false'. The method name is case
      * insensitive.
      *
      * <pre>Tag::select()->closeTag()</pre>

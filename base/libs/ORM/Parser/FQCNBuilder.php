@@ -12,7 +12,7 @@ class FQCNBuilder
     /** Target class aliases */
     public $aliases;
 
-    public function __construct($namespace, $aliases) 
+    public function __construct($namespace, $aliases)
     {
         $this->namespace = $namespace;
         $this->aliases = $aliases;
@@ -21,7 +21,7 @@ class FQCNBuilder
     public function get($classname)
     {
         // Si empieza con un \, no hacemos nada
-        if ($classname{0} == '\\') {
+        if ($classname[0] == '\\') {
             return $classname;
         }
 

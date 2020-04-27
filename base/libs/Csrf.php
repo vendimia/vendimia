@@ -13,10 +13,10 @@ class Csrf implements CsrfInterface
         $letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' .
             'abcdefghijklmnopqrstuvwxyz' .
             '0123456789';
-        $lc = strlen($letters) - 1; 
+        $lc = strlen($letters) - 1;
         $token = '';
-        for ($i = 0; $i < 48; $i++) { 
-            $token .= $letters{rand(0, $lc)};
+        for ($i = 0; $i < 48; $i++) {
+            $token .= $letters[rand(0, $lc)];
         }
 
         return $token;
@@ -40,7 +40,7 @@ class Csrf implements CsrfInterface
         return false;
     }
 
-    public function __construct() 
+    public function __construct()
     {
         if (is_null(Vendimia::$session->security_token)) {
             $this->token = $this->generateToken();

@@ -190,7 +190,7 @@ class Form implements AsArrayInterface
 
         foreach ($controls as $control => $fielddef) {
             // Si empieza con @, es una propiedad.
-            if ($control{0} == '@') {
+            if ($control[0] == '@') {
                 $property_name = $substr($control, 1);
             }
 

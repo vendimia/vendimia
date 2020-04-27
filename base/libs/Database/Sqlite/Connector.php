@@ -151,7 +151,7 @@ class Connector // implements Database\ConnectionInterface
             $order = [];
             foreach ($query['order'] as $o) {
                 $desc = '';
-                if ($o{0} == '-') {
+                if ($o[0] == '-') {
                     $desc = ' DESC';
                     $o = substr($o, 1);
                 }

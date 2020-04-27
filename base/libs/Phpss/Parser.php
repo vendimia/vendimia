@@ -15,7 +15,7 @@ class Parser
     /**
      * Los espacios en blanco
      */
-    const SPACES = " \t\n\r"; 
+    const SPACES = " \t\n\r";
 
     /**
      * El CSS original
@@ -29,7 +29,7 @@ class Parser
     public $root;
 
     /**
-     * Analiza una línea. Usualmente es la declaración de un selector o 
+     * Analiza una línea. Usualmente es la declaración de un selector o
      * propiedad.
      *
      * @param string $char      Último caracter analizado.
@@ -39,18 +39,18 @@ class Parser
      */
     private function processLine($char, $mark)
     {
-        
+
         // Obtenemos la línea a procesar
         $line = trim ( strtr ( mb_substr (
             $this->raw,
-            $mark, 
+            $mark,
             $this->raw_ptr - $mark - 1
         ), ["\n" => ""] ));
 
         // Creamos un nodo vacío
         $node = new node();
 
-        // Si el caracter es un {, entonces analizamos este nuevo bloque 
+        // Si el caracter es un {, entonces analizamos este nuevo bloque
         if ($char == "{") {
             $node->setName ( $line);
 
@@ -59,7 +59,7 @@ class Parser
         else {
             // Dividimos la línea por el :
             $colon = strpos ( $line, ':');
-            
+
             if ($colon !== false) {
                 $sname = trim(substr ( $line, 0, $colon ));
                 $svalue = trim(substr ( $line, $colon + 1 ));
@@ -74,7 +74,7 @@ class Parser
         }
 
         // Si la línea empieza con @, entonces reajustamos el nombre y el valor
-        if ($line{0} == "@") {
+        if ($line[0] == "@") {
             $parts = explode ( ' ', $line, 2);
 
             $node->setName ( $parts[0]);
@@ -84,11 +84,11 @@ class Parser
         }
         return $node;
     }
-       
+
     /**
      * Analiza un bloque CSS.
      *
-     * El análisis empieza en la posición actual de $this->raw, y acaba 
+     * El análisis empieza en la posición actual de $this->raw, y acaba
      * en una llave, o en el fin del fichero.
      *
      * @param object $parent Nodo padre de todos los nodos de este bloque
@@ -125,7 +125,7 @@ class Parser
             }
 
             if ($at_comment) {
-                continue;                
+                continue;
             }
 
             // Si encontramos un { o un ;, entonces procesamos la línea
@@ -146,13 +146,13 @@ class Parser
                 $state = 'nothing';
             }
             elseif ($char == '}') {
-                // Acabó el bloque. Hay algo por procesar?         
+                // Acabó el bloque. Hay algo por procesar?
                 if ($state != 'nothing') {
                     $node = $this->processLine($char, $mark);
-                    
+
                     // Añadimos el nodo al padre
                     $parent->addChild($node);
-                }       
+                }
                 return;
             }
             // Si no es un espacio

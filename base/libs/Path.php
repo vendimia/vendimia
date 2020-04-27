@@ -30,7 +30,7 @@ class Path
 
             // Si el primer elemento empieza con $sep, entonces toda la ruta
             // es absoluta, debe empezar con $sep
-            if ($first_part && $path && $path{0} == $sep) {
+            if ($first_part && $path && $path[0] == $sep) {
                 $absolute = $sep;
             }
             $first_part = false;
