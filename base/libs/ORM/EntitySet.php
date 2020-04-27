@@ -35,13 +35,6 @@ class EntitySet implements \Iterator
     private $constrains = [];
 
     /**
-     * Dummy function. It's not needed here, but trait QueryManager does.
-     */
-    private static function configureStatic()
-    {
-    }
-
-    /**
      * Sets up a new Query EntitySet
      */
     public function __construct($base_class, $db_table, $db_connector)
@@ -120,8 +113,7 @@ class EntitySet implements \Iterator
      */
     public function delete()
     {
-        $where = $this->whereBuilder->from($this->constrains)->build();
-
+        $where = $this->query['where'];
         return $this->db_connector->delete($this->db_table, $where);
     }
 

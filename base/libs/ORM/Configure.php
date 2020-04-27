@@ -9,7 +9,7 @@ use Vendimia\Database;
 trait Configure
 {
     /** Is this class configured? */
-    protected static $configuredStatic = false;
+    //protected static $configuredStatic = false;
 
     /** Field objects and properties */
     protected static $field_data = [];
@@ -17,53 +17,11 @@ trait Configure
     /** Is this object configured? */
     protected $configured = false;
 
-    /** Configurable table name for this object. Defaults to
-     *  {self::$namespace}_{self::$name}
-     */
-    protected static $database_table;
-
-    /** Configurable database connector name */
-    protected static $database_connection = 'default';
-
-    /** Database connector */
-    protected static $database_connector;
-
     /** Primary key field */
     protected static $primary_key = 'id';
 
     /** FQCN Builder */
     protected static $fqcn;
-
-    /**
-     * Sets default parameters for the class
-     */
-    private static function configureStatic()
-    {
-        if (static::$configuredStatic) {
-            return;
-        }
-
-        if (!static::$database_table) {
-            // Armamos el nombre de tabla, si no está definida
-            $parts = explode('\\', strtolower(static::class));
-
-            // Hack: removemos el segmento 'orm' del nombre
-            $parts = array_filter($parts, function($v) {
-                if ($v !== 'orm') {
-                    return true;
-                }
-            });
-            $database_table = join('_', $parts);
-            static::$database_table = &$database_table;
-        }
-
-        $database_connector = Database\Database::getConnector(static::$database_connection);
-        static::$database_connector = &$database_connector;
-
-        $configuredStatic = true;
-        static::$configuredStatic = &$configuredStatic;
-
-    }
 
     /**
      * Creates the field objects
@@ -73,7 +31,6 @@ trait Configure
         if ($this->configured) {
             return;
         }
-        static::configureStatic();
 
         $ep = new Parser\EntityParser($this);
         static::$field_data = $ep->getFields();
@@ -87,8 +44,9 @@ trait Configure
      */
     public static function getDatabaseConnector()
     {
-        static::configureStatic();
-        return static::$database_connector;
+        return Database\Database::getConnector(
+            static::$database_connection ?? 'default'
+        );
     }
 
     /**
@@ -96,8 +54,14 @@ trait Configure
       */
     public static function getDatabaseTable()
     {
-        static::configureStatic();
-        return static::$database_table;
+        if (isset(static::$database_table)) {
+            return static::$database_table;
+        }
+
+        $parts = array_filter(explode('\\', strtolower(static::class)),
+            fn($e) => $e !== 'orm' && $e !== 'Entity');
+
+        return join('_', $parts);
     }
 
     /**
@@ -105,7 +69,6 @@ trait Configure
      */
     public static function getPrimaryKeyField()
     {
-        static::configureStatic();
         return static::$primary_key;
     }
 

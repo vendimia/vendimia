@@ -49,11 +49,10 @@ abstract class Entity implements AsArrayInterface, ValueInterface
         static::configure();
 
         $this->base_class = static::class;
-        $this->db_table = static::$database_table;
-        $this->db_connector = static::$database_connector;
+        $this->db_table = static::getDatabaseTable();
+        $this->db_connector = static::getDatabaseConnector();
 
         // Construimos los objetos de esta entidad
-
         foreach (static::$field_data as $field_name => $data) {
             $class = $data[0];
             if (!class_exists($class)) {
@@ -215,10 +214,10 @@ abstract class Entity implements AsArrayInterface, ValueInterface
 
                 break;
             } else {
-                $where = static::$database_connector->fieldValue(static::$primary_key, $id);
+                $where = $this->db_connector->fieldValue(static::$primary_key, $id);
 
-                $affected = static::$database_connector->update(
-                    static::$database_table,
+                $affected = $this->db_connector->update(
+                    $this->db_table,
                     $data,
                     $where
                 );
@@ -389,7 +388,7 @@ abstract class Entity implements AsArrayInterface, ValueInterface
         }
 
         $c = $this->executeQuery();
-        $data = static::$database_connector->fetchOne($c);
+        $data = $this->db_connector->fetchOne($c);
 
         $this->record_retrieved = true;
 

@@ -35,8 +35,6 @@ trait QueryManager
      */
     public static function get($where = null)
     {
-        static::configureStatic();
-
         $object = new static;
         $object->setQueryMode($where);
         return $object;
@@ -47,11 +45,10 @@ trait QueryManager
      */
     public static function find($where = null)
     {
-        static::configureStatic();
         $object = new EntitySet(
-            static::class, 
-            static::$database_table, 
-            static::$database_connector
+            static::class,
+            static::getDatabaseTable(),
+            static::getDatabaseConnector()
         );
 
         if ($where) {
@@ -114,7 +111,7 @@ trait QueryManager
     /**
      * Adds a raw WHERE block.
      *
-     * @param string $where Where string, with variable inside braces {} 
+     * @param string $where Where string, with variable inside braces {}
      * @param mixed $args Arguments to the where variables
      */
     public function rawWhere($where, ...$args)
@@ -126,15 +123,15 @@ trait QueryManager
         }
 
         $this->addWhere($where);
-        
+
         return $this;
     }
 
     /**
-     * Syntax sugar for where 
+     * Syntax sugar for where
      *
      * @see static::where()
-     */ 
+     */
     public function and($where = null)
     {
         if ($where) {
@@ -149,7 +146,7 @@ trait QueryManager
     public function or($where = null)
     {
         $this->query_boolean_join ='OR';
-        if ($where) { 
+        if ($where) {
             return $this->where($where);
         }
         return $this;
@@ -164,7 +161,7 @@ trait QueryManager
             return $this->where($where);
         }
         return $this;
-    }  
+    }
 
     /**
      * Sets the query order
@@ -209,13 +206,11 @@ trait QueryManager
      */
     private function executeQuery()
     {
-        static::configureStatic();
-
         if (!$this->query['table']) {
             $this->query['table'] = $this->db_table;
         }
 
         return $this->db_connector->buildAndExecuteQuery($this->query);
     }
-    
+
 }
