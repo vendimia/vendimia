@@ -59,7 +59,7 @@ trait Configure
         }
 
         $parts = array_filter(explode('\\', strtolower(static::class)),
-            fn($e) => $e !== 'orm' && $e !== 'Entity');
+            function($e) { return $e !== 'orm' && $e !== 'Entity'; });
 
         return join('_', $parts);
     }
