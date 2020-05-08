@@ -2,6 +2,7 @@
 namespace Vendimia\Routing;
 
 use Vendimia\Controller\ControllerAbstract;
+use Vendimia\Http\Request;
 
 /**
  * Matches a set of rules against a Request
@@ -46,7 +47,7 @@ class Match
             }
 
             // Si la regla es una variable, la grabamos
-            if ($rule_seg[0] == '{' || $rule_seg[0] == ':') {
+            if ($rule_seg && ($rule_seg[0] == '{' || $rule_seg[0] == ':')) {
                 $varname = trim($rule_seg, ':{}');
 
                 $optional = false;
@@ -61,7 +62,8 @@ class Match
                 if (($varname[0] ?? '') == '*') {
                     $match = true;
                     $varname = substr($varname, 1);
-                    $variables[$varname] = $target_seg . '/' . join('/', $target);
+                    $variables[$varname] = join('/', array_filter([$target_seg, join('/', $target)]));
+
                     break;
                 }
 
@@ -142,7 +144,7 @@ class Match
     /**
      * Perform the rule match against the request
      */
-    public function against($request): MatchedRule
+    public function against(Request $request): MatchedRule
     {
         // Primero, lo básico
         $httpmethod = $request->getMethod();
@@ -190,6 +192,7 @@ class Match
         }
 
         $matched_rule = new MatchedRule(['matched' => false]);
+
         foreach ($this->data->rules as $rule) {
             if (($rule['methods'] ?? false) && !in_array($httpmethod, $rule['methods'])) {
                 continue;
