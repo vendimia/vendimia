@@ -206,8 +206,8 @@ abstract class Entity implements AsArrayInterface, ValueInterface
 
         while (true) {
             if ($action == 'INSERT') {
-                $id = static::$database_connector->insert(
-                    static::$database_table,
+                $id = $this->db_connector->insert(
+                    $this->db_table,
                     $data
                 );
                 $this->pk($id);
