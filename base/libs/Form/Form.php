@@ -144,18 +144,7 @@ class Form implements AsArrayInterface
 
             // Las propiedades son las propiedades estáticas
             if ($prop->isStatic()) {
-
-                if (is_array($value)) {
-                    if (!isset($this->properties[$control])) {
-                        throw new \RuntimeException( "Unknow '$control' property." );
-                    }
-                    $this->properties[$control] = array_replace_recursive(
-                        $this->properties[$control],
-                        $value
-                    );
-                } else {
-                    $this->properties[$control] = $value;
-                }
+                $this->setProperty($control, $value);
                 continue;
             }
 
@@ -183,6 +172,25 @@ class Form implements AsArrayInterface
             $this->controls[] = $control;
         }
     }
+
+    /**
+     * Sets a form property.
+     */
+    public function setProperty($name, $value)
+    {
+        if (is_array($value)) {
+            if (!isset($this->properties[$name])) {
+                throw new \RuntimeException("Unknow '$name' property." );
+            }
+            $this->properties[$name] = array_replace_recursive(
+                $this->properties[$name],
+                $value
+            );
+        } else {
+            $this->properties[$name] = $value;
+        }
+    }
+
     /*public function __construct(array $controls, $csrf_token, $id = null)
     {
         $this->system_csrf = $csrf_token;
