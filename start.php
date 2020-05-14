@@ -87,14 +87,13 @@ foreach ($initialize_routes as $init) {
 }
 
 
-
-
 // Procesamos las rutas
 $routing_rules = new Vendimia\Routing\Rules(
     require Vendimia\PROJECT_PATH . '/config/routes.php'
 );
 $route_matching = new Vendimia\Routing\Match($routing_rules);
 $rule = $route_matching->against(Vendimia::$request);
+
 
 $returned_data = null;
 
@@ -104,7 +103,6 @@ $response = new Vendimia\Http\Response();
 $response->setHeader('Content-Type', 'text/html');
 
 $view_variables = [];
-
 if ($rule->matched) {
     // Una regla hizo match, directa o indirectamente
     if ($rule->target_type == 'class') {
@@ -136,9 +134,13 @@ if ($rule->matched) {
         $cfile->search_app = $rule->target[0];
 
         if ($cfile->notFound()) {
-            throw new Vendimia\Exception("'Legacy' route matched, but controller file '{$rule->target[1]}' not found", [
-                'Matched rule' => $rule->asArray(),
-            ]);
+            if (Vendimia::$debug) {
+                throw new Vendimia\Exception("'Legacy' route matched, but controller file '{$rule->target[1]}' not found", [
+                    'Matched rule' => $rule->asArray(),
+                ]);
+            } else {
+                Vendimia\Http\Response::notFound();
+            }
         }
 
         $returned_data = require $cfile->get();
