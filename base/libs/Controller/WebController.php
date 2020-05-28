@@ -41,6 +41,7 @@ class WebController extends ControllerAbstract
             foreach($this->routing_rule->target_resources as $view_file) {
                 try {
                     $view->setFile($view_file);
+                    break;
                 } catch (Vendimia\Exception $e) {
                     continue;
                 }
