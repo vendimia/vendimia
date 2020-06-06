@@ -277,12 +277,12 @@ abstract class Entity implements AsArrayInterface, ValueInterface
             }
         }
 
-        $where = static::$database_connector->fieldValue(
+        $where = $this->db_connector->fieldValue(
             static::$primary_key, $this->pk()
         );
 
-        return static::$database_connector->delete(
-            static::$database_table,
+        return $this->db_connector->delete(
+            $this->db_table,
             $where
         );
     }
