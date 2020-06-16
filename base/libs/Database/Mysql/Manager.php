@@ -63,7 +63,7 @@ class Manager //implements Database\ManagerInterface
 
         // Creamos los primary keys
         $fields[] = 'PRIMARY KEY (' .
-            join(',', $this->connection->escape($definition->primary_keys)) .
+            join(',', $this->connection->escapeIdentifier($definition->primary_keys)) .
             ')';
 
         $sql .= join(",\n", $fields) . "\n)";
@@ -110,7 +110,7 @@ class Manager //implements Database\ManagerInterface
         }
         $sql .= 'INDEX ' . $this->connection->escapeIdentifier($indexname);
 
-        $sql .= ' (' . join(', ', $this->connection->escape($indexdef['fields']));
+        $sql .= ' (' . join(', ', $this->connection->escapeIdentifier($indexdef['fields']));
         $sql .= ')';
 
         return $this->connection->execute($sql);
