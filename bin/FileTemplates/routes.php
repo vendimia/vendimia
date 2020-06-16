@@ -1,5 +1,7 @@
-use Vendimia\Routing\Rule; return [
+<?=$namespace ?? ''?>use Vendimia\Routing\Rule; return [
+    // <?=$routing_comment ?? "Main routing rules file."?>
+    
 
-// Routing rules definition file.
+    <?=$default_route ?? ''?>
 
 ];

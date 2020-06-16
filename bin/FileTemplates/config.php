@@ -8,7 +8,7 @@ return [
 <?php endif?>
 // Set this to 'true' for entering in debug mode. Exception are shown in
 // detail, Vendimia\Email\send sends every email to the administrators, cache is
-// disable
+// disabled.
 'debug_mode' => false,
 
 // Administrator's email. On development mode, any email sent with
@@ -38,6 +38,14 @@ return [
     'default' => ['sqlite',
         'host' => 'database.sqlite',
     ],
+],
+
+// Session cookie extra parameters, sent to session_start(). Refer to
+// https://www.php.net/manual/en/function.session-start.php for more info.
+'session_cookie_parameters' => [
+<?php if (version_compare(PHP_VERSION, '7.3.0', '>=')):?>
+    'cookie_samesite' => 'Strict',  // Default with PHP >= 7.3
+<?php endif?>
 ],
 
 // Default logger

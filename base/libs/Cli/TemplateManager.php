@@ -57,7 +57,7 @@ class TemplateManager
     public function makeTree($base_path, array $tree)
     {
         foreach (Path::makeTree($base_path, $tree) as $status) {
-            $this->console->fromStatus('MKDIR', $status[0], $status[1]);
+            $this->console->fromStatus('MKDIR', $status[1], $status[0]);
         }
     }
 }

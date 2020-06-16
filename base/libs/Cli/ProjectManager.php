@@ -100,4 +100,12 @@ class ProjectManager
     {
         return file_exists($this->project_path . '/apps/' . $app);
     }
+
+    /**
+     * Returns an app full path
+     */
+    public function getAppPath($app_name)
+    {
+        return $this->project_path . '/apps/' . $app_name;
+    }
 }

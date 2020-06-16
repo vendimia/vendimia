@@ -107,22 +107,27 @@ class Console {
      */
     public function fail($message, $exitcode = 1)
     {
-        $this->write("{red ERROR}: $message");
+        $this->error($message);
         exit($exitcode);
+    }
+
+    public function error($message, $error_label = 'ERROR')
+    {
+        $this->write("{red $error_label}: $message");
     }
 
     /**
      * Shows a warning
      */
-    public static function warning($message)
+    public static function warning($message, $warning_label = 'Warning')
     {
-        $this->write("{green Warning}: $message");
+        $this->write("{green $warning_label}: $message");
     }
 
     /**
      * Converts $status to ANSI-colored messages
      */
-    public function fromStatus($command, $status, $extra)
+    public function fromStatus($command, $extra, $status = '')
     {
         switch ($status) {
             case 'overwrite':

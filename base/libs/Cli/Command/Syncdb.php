@@ -53,8 +53,8 @@ class Syncdb extends CommandAbstract
                 continue;
             }
 
-            $namespace = 'DataMapper';
-            // Por cada app verificamos si existe la carpeta DataMapper o la
+            $namespace = 'Entity';
+            // Por cada app verificamos si existe la carpeta Entity o la
             // obsoleta 'orm'
             if (is_dir($base_path . '/orm')) {
                 $namespace = 'orm';

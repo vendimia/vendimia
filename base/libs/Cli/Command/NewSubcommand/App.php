@@ -38,7 +38,7 @@ class App extends CommandAbstract
         $template->makeTree($this->project->getFullPath(), ['apps/' . $app_name => [
             'Controller',
             'Model',
-            'DataMapper',
+            'Entity',
             'Form',
             'assets' => [
                 'css', 'js',
@@ -51,15 +51,26 @@ class App extends CommandAbstract
         $app_path = $this->project->getFullPath() . '/apps/' . $app_name;
         $project_name = $this->project->getName();
 
-
         // Creamos un controlador base.
         $template->setTemplate('default-controller', compact('app_name'));
         $template->build("{$app_path}/Controller/DefaultController.php");
 
-        // Y una vista por defecto.
+        // Creamos una vista por defecto.
         $controller_name = 'default';
         $template->setTemplate('default-view', compact('project_name', 'app_name', 'controller_name'));
         $template->build("{$app_path}/views/default.php");
+
+        // Y un fichero de rutas
+        $template->setTemplate('routes', [
+            'routing_comment' => 'Subroutes for "' . strtolower($app_name) . '/" URL path.',
+            'namespace' => "namespace {$app_name}; ",
+            'default_route' => 'Rule::default()->run(Controller\DefaultController::class),',
+        ]);
+        $template->build("{$app_path}/routes.php");
+
+
+        // Añadimos una ruta a esta aplicación
+
 
     }
 }
