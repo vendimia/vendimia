@@ -170,7 +170,7 @@ class Rule
             $this->rule['target_type'] = 'class';
             $this->rule['target'] = [$class, $method];
             $this->rule['target_name'] = "{$class}::{$method}";
-            $this->rule['target_resources'] = ["{$class_name}_{$method}", $method];
+            $this->rule['target_resources'] = ["{$class_name}/{$method}", $method];
 
             // Si no hay definido una app para este target, usamos el 1er
             // namespace
