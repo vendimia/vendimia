@@ -54,7 +54,7 @@ class Vendimia
         // Cargamos la configuración de la aplicación
         self::$settings = require Vendimia\PROJECT_PATH . '/config/settings.php';
 
-        // Cargamos la configuración seguín este ambiente de trabajo
+        // Cargamos la configuración según este ambiente de trabajo
         $target = Vendimia\PROJECT_PATH . '/config/settings.' . Vendimia\ENVIRONMENT . '.php';
 
         if (file_exists($target)) {
@@ -94,12 +94,6 @@ class Vendimia
             self::$request = Vendimia\Http\Request::fromSuperGlobals();
         }
 
-        // Sesión
-        self::$session = new Vendimia\Session;
-
-        // Protección contra csrf
-        self::$csrf = new Vendimia\Csrf;
-
         // ServiceLocator
         self::$service = new Vendimia\ServiceContainer;
 
@@ -117,5 +111,12 @@ class Vendimia
         $base_url .= (substr($base_url, -1) != '/'?'/':'');
 
         self::$base_url = $base_url;
+
+        // Sesión
+        self::$session = new Vendimia\Session($base_url);
+
+        // Protección contra csrf
+        self::$csrf = new Vendimia\Csrf;
+
     }
 }
