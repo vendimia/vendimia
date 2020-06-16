@@ -101,7 +101,10 @@ class Response extends PsrResponse
         if (is_null($message)) {
             $message = "<p>The page <tt>/".Vendimia::$request->getRequestTarget()."</tt> doesn't exists.</p>";
         }
-        $extra['message'] = $message;
+        $extra = [
+            'message' => $message,
+            'url' => Vendimia::$request->getRequestTarget(),
+        ];
         View::render('http_404', $extra)
             ->setStatus(404, 'Resource not found')
             ->send();
