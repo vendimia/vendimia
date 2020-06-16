@@ -75,7 +75,7 @@ class Connector implements Database\ConnectorInterface
     {
         if (is_array($string)) {
             $that = $this;
-            array_map(function($str) use ($that, $quotation){
+            $string = array_map(function($str) use ($that, $quotation){
                 return $that->escape($str, $quotation);
             }, $string);
 
