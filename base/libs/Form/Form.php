@@ -471,9 +471,9 @@ class Form implements AsArrayInterface
     /**
      * Draws the complete HTML form
      */
-    public function drawFull($submit_label = 'Submit form')
+    public function drawFull($submit_label = 'Submit form', $form_options = [])
     {
-        return $this->begin()
+        return $this->begin($form_options)
                 . $this->draw()
                 . $this->drawSubmit($submit_label)
                 . $this->end();
