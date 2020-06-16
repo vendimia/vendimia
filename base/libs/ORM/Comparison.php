@@ -87,7 +87,7 @@ class Comparison
             $sql .= 'NOT ';
         }
 
-        $sql .= 'IN (' . join(', ', $this->connection->valueFromPHP($params)) . ')';
+        $sql .= 'IN (' . join(', ', $this->connection->escape($params)) . ')';
 
         return $sql;
     }
