@@ -50,7 +50,7 @@ class Connector implements Database\ConnectorInterface
         $this->connection = mysqli_init();
 
         @$connected = $this->connection->real_connect(
-            'p:' . $host, // Conexión persistente por defecto.
+            $host,
             $username,
             $password,
             $database,
