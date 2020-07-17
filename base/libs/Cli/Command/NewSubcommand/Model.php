@@ -10,8 +10,13 @@ use InvalidArgumentException;
 class Model extends CommandAbstract
 {
     public const DESCRIPTION = 'Creates a new base model for this app.';
-    public const CLI_ARGS = '<model_name>';
+    public const CLI_ARGS = '[for] <app_name> <model_name>';
     public const HELP_OPTIONS = [
+        'for' => [
+            'optional' => true,
+            'description' => 'Syntactic-sugar word'
+        ],
+        'app_name' => 'Name of the app where the model will be created.',
         'model_name' => 'Name of the new model.'
     ];
 

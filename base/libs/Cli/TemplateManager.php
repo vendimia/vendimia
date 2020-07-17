@@ -47,8 +47,10 @@ class TemplateManager
             $data = '<?php ' . $data;
         }
 
-
         file_put_contents($target_filename, $data);
+
+        $this->console->fromStatus('CREATE', $target_filename);
+
     }
 
     /**

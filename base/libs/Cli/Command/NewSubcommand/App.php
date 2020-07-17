@@ -4,6 +4,7 @@ namespace Vendimia\Cli\Command\NewSubcommand;
 use Vendimia\Cli\Command\CommandAbstract;
 use Vendimia\Cli\ProjectManager;
 use Vendimia\Cli\TemplateManager;
+use Vendimia\Cli\ConfigManager;
 
 use InvalidArgumentException;
 
@@ -70,7 +71,15 @@ class App extends CommandAbstract
 
 
         // Añadimos una ruta a esta aplicación
+        $config_file = $this->project->getFullPath() . '/config/routes.php';
+        $config = new ConfigManager($this->console, $config_file);
 
-
+        $path = strtolower($app_name);
+        $config->addLines(
+            "    // Use routes from apps\\{$app_name}\\routes.php file",
+            "    Rule::path('{$path}')->include('{$app_name}:routes'),",
+            "    "
+        );
+        $config->save();
     }
 }
