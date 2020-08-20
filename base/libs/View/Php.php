@@ -173,6 +173,14 @@ class Php implements \ArrayAccess
     }
 
     /**
+     * Sets the page title
+     */
+    public function setTitle($title)
+    {
+        $this['_vendimia_page_title'] = $title;
+    }
+
+    /**
      * Returns an URL relative to the static URL
      */
     public function staticUrl($url) {
