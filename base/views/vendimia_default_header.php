@@ -25,6 +25,11 @@ $this->html->addMeta('charset', 'utf-8');
 // Token de seguridad
 $this->html->addMeta(['vendimia-security-token' => Vendimia::$csrf->getToken()]);
 
+// Un meta de debug, si estamos en debug
+if (Vendimia::$debug) {
+    $this->html->addMeta(['vendimia-debug' => 'true']);
+}
+
 // Assets por defecto
 $this->html->addDefaultAssets($this->name);
 
