@@ -140,7 +140,7 @@ class EntityParser
 
             $data = [
                 'type' => $class::getDatabaseFieldType(),
-                'null' => static::ifKey($properties, 'null', false),
+                'null' => static::ifKey($properties, 'null', true),
                 'default' => static::ifKey($properties, 'default', null),
             ];
 
