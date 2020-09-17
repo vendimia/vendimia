@@ -10,7 +10,7 @@ class Callback extends ValidatorAbstract
         'callback' => null,
         'messages' => [
             'error' => "Error executing callback for '%control%'.",
-            'fail' => "Callback for '%control%' failed: %rawmessage%",
+            'fail' => "%rawmessage%",
         ]
     ];
 
