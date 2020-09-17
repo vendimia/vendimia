@@ -68,7 +68,7 @@ class Html implements FormatterInterface
 
         foreach ($t_trace as $t) {
             if (!isset($t['file'])) {
-                $args = join(', ', $t['args']);
+                $args = join(', ', $t['args'] ?? []);
                 $html .= "<li><tt>{$t['class']}{$t['type']}{$t['function']}({$args})</tt></li>\n";
             } else {
                 $html .= "<li><tt>{$t['file']}:{$t['line']}</tt></li>\n";
