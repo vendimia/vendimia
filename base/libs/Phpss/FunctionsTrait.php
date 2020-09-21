@@ -73,4 +73,9 @@ trait FunctionsTrait {
     {
         $node->can_haz_children = true;
     }
+
+    function at_keyframes($node)
+    {
+        $node->can_haz_children = true;
+    }
 }
