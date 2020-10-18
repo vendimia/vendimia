@@ -79,7 +79,9 @@ V = {
             }
         }
 
-        if (content) {
+        if (content instanceof HTMLElement) {
+            el.append(content)
+        } else if (content) {
             el.innerHTML = content
         }
 
