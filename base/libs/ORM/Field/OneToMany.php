@@ -45,16 +45,16 @@ class OneToMany extends FieldBase
 
 
         if ($entity)  {
-            if (!isset($properties['foreing_key'])) {
-                $properties['foreing_key'] = $entity->getClass(true) . '_id';
+            if (!isset($properties['foreign_key'])) {
+                $properties['foreign_key'] = $entity->getClass(true) . '_id';
             }
         }
-        
+
         return $properties;
     }
     public function setValue($value)
     {
-        throw new \UnexpectedValueException("Can't assing a value to this field.");
+        throw new \UnexpectedValueException("Can't assing a value to this field '{$this->field_name}'.");
     }
 
     public function isDependant()
@@ -73,8 +73,8 @@ class OneToMany extends FieldBase
             }
 
             $this->entity_set = $class::newConstrained([
-                $this->properties['foreing_key'] => $this->entity->pk()
-            ]);        
+                $this->properties['foreign_key'] => $this->entity->pk()
+            ]);
         }
         return $this->entity_set;
     }
