@@ -45,7 +45,11 @@ class ManyToOne extends FieldBase
         } else {
             $this->fk_value = $value;
             $class = $this->fk_class;
-            $this->value = $class::get($value);
+            if (is_null($value)) {
+                $this->value = new $class;
+            } else {
+                $this->value = $class::get($value);
+            }
         }
     }
 
