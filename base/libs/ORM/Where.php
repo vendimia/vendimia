@@ -171,7 +171,7 @@ class Where
      */
     public function buildRawAssoc(array $args)
     {
-        $where = $this->base;
+        $where = $this->source_data;
         $parsed_args = [];
         foreach ($args as $key => $arg) {
             $parsed_args['{' . $this->connector->valueFromPHP($key, '') . '}'] =
