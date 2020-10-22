@@ -95,9 +95,10 @@ class Ajax
             }
 
             self::send($return_code, $return);
+
+            // Aquí finaliza la ejecución
+            exit;
         }
 
-        // Aquí finaliza la ejecución
-        exit;
     }
 }
