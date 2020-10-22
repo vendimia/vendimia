@@ -15,6 +15,11 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable, AsArrayI
     {
         $this->array = $array;
     }
+    
+    public static function new(array $array = [])
+    {
+        return new static($array);
+    }
 
     /**
      * Sets the array by reference.
@@ -115,6 +120,19 @@ class MutableCollection implements \ArrayAccess, \Iterator, \Countable, AsArrayI
     public function join($glue = '')
     {
         return implode($glue, $this->array);
+    }
+
+    /**
+     * Retrives a group of elements by its keys
+     */
+    public function extract(...$keys): array
+    {
+        $result = [];
+        foreach ($keys as $key) {
+            $result[$key] = $this->array[$key] ?? null;
+        }
+
+        return $result;
     }
 
 
